@@ -1,24 +1,94 @@
 import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Plus, Activity, Rocket, Wrench } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X } from 'lucide-react'
 
 const templates = [
-  { name: 'Conservative Arb Bot', description: '87% win rate, 3% min edge', difficulty: 'Beginner', winRate: '87%', icon: '🛡️' },
-  { name: 'Sports High Volume', description: '74% win rate, high frequency', difficulty: 'Intermediate', winRate: '74%', icon: '⚽' },
-  { name: 'Crypto Volatility Play', description: '61% win rate, high returns', difficulty: 'Advanced', winRate: '61%', icon: '📈' },
-  { name: 'Political Momentum', description: '68% win rate, event-driven', difficulty: 'Intermediate', winRate: '68%', icon: '🏛️' },
-  { name: 'Multi-Platform Arb Pro', description: '79% win rate, cross-platform', difficulty: 'Advanced', winRate: '79%', icon: '🔄' },
-  { name: 'Fed News Scalper', description: '92% win rate, news-based', difficulty: 'Expert', winRate: '92%', icon: '📰' },
+  {
+    id: 1,
+    name: 'Conservative Arb Bot',
+    description: 'Low-risk arbitrage between prediction markets. Targets 3% minimum edge before executing.',
+    difficulty: 'Beginner',
+    winRate: 87,
+    monthlyReturn: 4.2,
+    maxDrawdown: 5,
+    icon: '🛡️',
+    markets: ['Kalshi', 'Polymarket'],
+    settings: { minEdge: 3, maxPosition: 100, stopLoss: 10 }
+  },
+  {
+    id: 2,
+    name: 'Sports High Volume',
+    description: 'High-frequency sports betting with volume-based edge detection.',
+    difficulty: 'Intermediate',
+    winRate: 74,
+    monthlyReturn: 8.5,
+    maxDrawdown: 15,
+    icon: '⚽',
+    markets: ['Kalshi'],
+    settings: { minEdge: 2, maxPosition: 250, stopLoss: 15 }
+  },
+  {
+    id: 3,
+    name: 'Crypto Volatility Play',
+    description: 'Capitalizes on crypto market volatility with momentum-based entries.',
+    difficulty: 'Advanced',
+    winRate: 61,
+    monthlyReturn: 15.3,
+    maxDrawdown: 25,
+    icon: '📈',
+    markets: ['Polymarket', 'Binance'],
+    settings: { minEdge: 5, maxPosition: 500, stopLoss: 20 }
+  },
+  {
+    id: 4,
+    name: 'Political Momentum',
+    description: 'Event-driven strategy targeting political prediction markets.',
+    difficulty: 'Intermediate',
+    winRate: 68,
+    monthlyReturn: 6.8,
+    maxDrawdown: 12,
+    icon: '🏛️',
+    markets: ['Kalshi', 'Polymarket'],
+    settings: { minEdge: 4, maxPosition: 200, stopLoss: 12 }
+  },
+  {
+    id: 5,
+    name: 'Multi-Platform Arb Pro',
+    description: 'Cross-platform arbitrage scanning with automated execution.',
+    difficulty: 'Advanced',
+    winRate: 79,
+    monthlyReturn: 7.2,
+    maxDrawdown: 8,
+    icon: '🔄',
+    markets: ['Kalshi', 'Polymarket', 'Binance'],
+    settings: { minEdge: 2.5, maxPosition: 300, stopLoss: 8 }
+  },
+  {
+    id: 6,
+    name: 'Fed News Scalper',
+    description: 'Ultra-fast execution on Federal Reserve news and economic data.',
+    difficulty: 'Expert',
+    winRate: 92,
+    monthlyReturn: 3.5,
+    maxDrawdown: 4,
+    icon: '📰',
+    markets: ['Kalshi'],
+    settings: { minEdge: 1.5, maxPosition: 150, stopLoss: 5 }
+  },
 ]
 
-const backtestData = [
-  { month: 'Jan', pnl: 1200 },
-  { month: 'Feb', pnl: 1800 },
-  { month: 'Mar', pnl: 1400 },
-  { month: 'Apr', pnl: 2200 },
-  { month: 'May', pnl: 2800 },
-  { month: 'Jun', pnl: 2400 },
-]
+const generateBacktestData = (template) => {
+  const baseReturn = template.monthlyReturn
+  const volatility = template.maxDrawdown / 10
+  return [
+    { month: 'Jan', pnl: Math.round((baseReturn * 0.8 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Feb', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Mar', pnl: Math.round((baseReturn * 0.9 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Apr', pnl: Math.round((baseReturn * 1.2 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'May', pnl: Math.round((baseReturn * 1.4 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Jun', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
+  ]
+}
 
 const getDifficultyStyle = (difficulty) => {
   switch (difficulty) {
@@ -37,6 +107,62 @@ const getDifficultyStyle = (difficulty) => {
 
 const StrategyBuilder = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [isBacktesting, setIsBacktesting] = useState(false)
+  const [backtestComplete, setBacktestComplete] = useState(false)
+  const [backtestData, setBacktestData] = useState([])
+  const [deployedStrategies, setDeployedStrategies] = useState([])
+  const [showDeployModal, setShowDeployModal] = useState(false)
+  const [deploySettings, setDeploySettings] = useState({
+    capital: 1000,
+    mode: 'paper'
+  })
+
+  const template = selectedTemplate !== null ? templates[selectedTemplate] : null
+
+  const handleSelectTemplate = (index) => {
+    setSelectedTemplate(index)
+    setBacktestComplete(false)
+    setBacktestData([])
+  }
+
+  const handleBacktest = () => {
+    if (!template) return
+    setIsBacktesting(true)
+    setBacktestComplete(false)
+
+    // Simulate backtest running
+    setTimeout(() => {
+      setBacktestData(generateBacktestData(template))
+      setIsBacktesting(false)
+      setBacktestComplete(true)
+    }, 2000)
+  }
+
+  const handleDeploy = () => {
+    if (!template || !backtestComplete) return
+    setShowDeployModal(true)
+  }
+
+  const confirmDeploy = () => {
+    const newStrategy = {
+      id: Date.now(),
+      name: template.name,
+      capital: deploySettings.capital,
+      mode: deploySettings.mode,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+    }
+    setDeployedStrategies([...deployedStrategies, newStrategy])
+    setShowDeployModal(false)
+    setSelectedTemplate(null)
+    setBacktestComplete(false)
+  }
+
+  const stopStrategy = (id) => {
+    setDeployedStrategies(deployedStrategies.map(s =>
+      s.id === id ? { ...s, status: 'stopped' } : s
+    ))
+  }
 
   return (
     <div className="space-y-6">
@@ -52,14 +178,51 @@ const StrategyBuilder = () => {
         </button>
       </div>
 
+      {/* Deployed Strategies */}
+      {deployedStrategies.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Strategies</h2>
+          <div className="space-y-3">
+            {deployedStrategies.map((strategy) => (
+              <div key={strategy.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className={`w-3 h-3 rounded-full ${strategy.status === 'running' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                  <div>
+                    <p className="font-medium text-gray-900">{strategy.name}</p>
+                    <p className="text-sm text-gray-500">
+                      ${strategy.capital} • {strategy.mode === 'paper' ? 'Paper Trading' : 'Live Trading'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {strategy.status === 'running' ? (
+                    <>
+                      <span className="text-sm text-green-600 font-medium">+$42.50 (4.2%)</span>
+                      <button
+                        onClick={() => stopStrategy(strategy.id)}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Pause className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-500">Stopped</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Templates */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Start with a Template</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template, i) => (
+          {templates.map((t, i) => (
             <button
-              key={i}
-              onClick={() => setSelectedTemplate(i)}
+              key={t.id}
+              onClick={() => handleSelectTemplate(i)}
               className={`text-left p-4 rounded-xl border-2 transition-all ${
                 selectedTemplate === i
                   ? 'border-indigo-500 bg-indigo-50 shadow-md'
@@ -67,15 +230,17 @@ const StrategyBuilder = () => {
               }`}
             >
               <div className="flex items-start justify-between">
-                <span className="text-2xl">{template.icon}</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${getDifficultyStyle(template.difficulty)}`}>
-                  {template.difficulty}
+                <span className="text-2xl">{t.icon}</span>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${getDifficultyStyle(t.difficulty)}`}>
+                  {t.difficulty}
                 </span>
               </div>
-              <h3 className="font-semibold text-gray-900 mt-3">{template.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">{template.description}</p>
-              <div className="flex items-center gap-2 mt-3">
-                <span className="text-sm font-medium text-green-600">{template.winRate} Win Rate</span>
+              <h3 className="font-semibold text-gray-900 mt-3">{t.name}</h3>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{t.description}</p>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-sm font-medium text-green-600">{t.winRate}% Win</span>
+                <span className="text-sm text-gray-400">•</span>
+                <span className="text-sm font-medium text-indigo-600">+{t.monthlyReturn}%/mo</span>
               </div>
             </button>
           ))}
@@ -86,59 +251,241 @@ const StrategyBuilder = () => {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Strategy Canvas</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {template ? template.name : 'Strategy Canvas'}
+            </h2>
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1">
-                <Activity className="w-4 h-4" />
-                Backtest
+              <button
+                onClick={handleBacktest}
+                disabled={!template || isBacktesting}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
+                  template && !isBacktesting
+                    ? 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isBacktesting ? (
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin" />
+                ) : (
+                  <Activity className="w-4 h-4" />
+                )}
+                {isBacktesting ? 'Running...' : 'Backtest'}
               </button>
-              <button className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1 shadow-lg shadow-indigo-500/25">
+              <button
+                onClick={handleDeploy}
+                disabled={!backtestComplete}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
+                  backtestComplete
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/25'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
                 <Rocket className="w-4 h-4" />
                 Deploy
               </button>
             </div>
           </div>
-          <div className="h-80 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-            <div className="text-center">
-              <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">Drag and drop blocks to build your strategy</p>
-              <p className="text-gray-400 text-sm mt-2">Select a template above or start from scratch</p>
+
+          {template ? (
+            <div className="p-6">
+              {/* Strategy Details */}
+              <div className="grid sm:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">Strategy Settings</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Min Edge Required</span>
+                      <span className="font-medium text-gray-900">{template.settings.minEdge}%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Max Position Size</span>
+                      <span className="font-medium text-gray-900">${template.settings.maxPosition}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Stop Loss</span>
+                      <span className="font-medium text-red-600">-{template.settings.stopLoss}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">Target Markets</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {template.markets.map((market) => (
+                      <span key={market} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                        {market}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
+                        <p className="text-xs text-yellow-600 mt-1">
+                          You must run a backtest before deploying this strategy.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Backtest Progress */}
+              {isBacktesting && (
+                <div className="p-4 bg-indigo-50 rounded-lg mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                    <div>
+                      <p className="font-medium text-indigo-900">Running Backtest...</p>
+                      <p className="text-sm text-indigo-600">Analyzing 6 months of historical data</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Backtest Complete */}
+              {backtestComplete && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <Check className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-900">Backtest Complete!</p>
+                      <p className="text-sm text-green-600">Strategy is ready to deploy</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <div className="h-80 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+              <div className="text-center">
+                <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium">Select a template to get started</p>
+                <p className="text-gray-400 text-sm mt-2">Choose from our pre-built strategies above</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Backtest Preview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className="font-semibold text-gray-900 mb-4">Backtest Preview</h3>
+          <h3 className="font-semibold text-gray-900 mb-4">
+            {backtestComplete ? 'Backtest Results' : 'Backtest Preview'}
+          </h3>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={backtestData}>
+              <BarChart data={backtestComplete ? backtestData : (template ? generateBacktestData(template) : [])}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
                 <Tooltip
                   contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                  formatter={(value) => [`$${value}`, 'P&L']}
                 />
-                <Bar dataKey="pnl" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="pnl" fill={backtestComplete ? '#22c55e' : '#6366f1'} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Est. Win Rate</span>
-              <span className="font-medium text-gray-900">74%</span>
+              <span className="font-medium text-gray-900">{template?.winRate || 74}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Est. Monthly Return</span>
-              <span className="font-medium text-green-600">+8.5%</span>
+              <span className="font-medium text-green-600">+{template?.monthlyReturn || 8.5}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Max Drawdown</span>
-              <span className="font-medium text-gray-900">-12%</span>
+              <span className="font-medium text-red-600">-{template?.maxDrawdown || 12}%</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Deploy Modal */}
+      {showDeployModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Deploy Strategy</h3>
+              <button
+                onClick={() => setShowDeployModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Starting Capital
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    value={deploySettings.capital}
+                    onChange={(e) => setDeploySettings({ ...deploySettings, capital: Number(e.target.value) })}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trading Mode
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setDeploySettings({ ...deploySettings, mode: 'paper' })}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      deploySettings.mode === 'paper'
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="font-medium text-gray-900">Paper Trading</p>
+                    <p className="text-xs text-gray-500 mt-1">Practice with virtual money</p>
+                  </button>
+                  <button
+                    onClick={() => setDeploySettings({ ...deploySettings, mode: 'live' })}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      deploySettings.mode === 'live'
+                        ? 'border-indigo-500 bg-indigo-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="font-medium text-gray-900">Live Trading</p>
+                    <p className="text-xs text-gray-500 mt-1">Real money execution</p>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{template?.icon}</div>
+                  <div>
+                    <p className="font-medium text-gray-900">{template?.name}</p>
+                    <p className="text-sm text-gray-500">{template?.winRate}% win rate • +{template?.monthlyReturn}%/mo</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={confirmDeploy}
+                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center justify-center gap-2"
+              >
+                <Rocket className="w-5 h-5" />
+                Deploy {deploySettings.mode === 'paper' ? 'Paper' : 'Live'} Strategy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
