@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target } from 'lucide-react'
 
 const templates = [
   {
@@ -77,9 +77,36 @@ const templates = [
   },
 ]
 
-const generateBacktestData = (template) => {
-  const baseReturn = template.monthlyReturn
-  const volatility = template.maxDrawdown / 10
+const STRATEGY_TYPES = [
+  { id: 'arbitrage', name: 'Arbitrage', icon: '🔄', description: 'Find price differences across markets' },
+  { id: 'momentum', name: 'Momentum', icon: '📈', description: 'Follow market trends and momentum' },
+  { id: 'mean-reversion', name: 'Mean Reversion', icon: '🎯', description: 'Trade when prices deviate from average' },
+  { id: 'news-based', name: 'News Based', icon: '📰', description: 'React to news and events' },
+]
+
+const AVAILABLE_MARKETS = [
+  { id: 'kalshi', name: 'Kalshi', icon: '🎲' },
+  { id: 'polymarket', name: 'Polymarket', icon: '🔮' },
+  { id: 'binance', name: 'Binance', icon: '💰' },
+]
+
+const ENTRY_CONDITIONS = [
+  { id: 'edge-threshold', name: 'Edge Threshold', description: 'Enter when edge exceeds minimum' },
+  { id: 'volume-spike', name: 'Volume Spike', description: 'Enter on unusual volume' },
+  { id: 'price-movement', name: 'Price Movement', description: 'Enter after price moves X%' },
+  { id: 'time-based', name: 'Time Based', description: 'Enter at specific times' },
+]
+
+const EXIT_CONDITIONS = [
+  { id: 'take-profit', name: 'Take Profit', description: 'Exit at target profit' },
+  { id: 'stop-loss', name: 'Stop Loss', description: 'Exit to limit losses' },
+  { id: 'time-exit', name: 'Time Exit', description: 'Exit after time period' },
+  { id: 'trailing-stop', name: 'Trailing Stop', description: 'Dynamic stop that follows profit' },
+]
+
+const generateBacktestData = (config) => {
+  const baseReturn = config?.monthlyReturn || 8
+  const volatility = (config?.maxDrawdown || 15) / 10
   return [
     { month: 'Jan', pnl: Math.round((baseReturn * 0.8 + (Math.random() - 0.5) * volatility) * 100) },
     { month: 'Feb', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
@@ -117,7 +144,26 @@ const StrategyBuilder = () => {
     mode: 'paper'
   })
 
+  // Custom strategy builder state
+  const [showNewStrategyModal, setShowNewStrategyModal] = useState(false)
+  const [builderStep, setBuilderStep] = useState(1)
+  const [customStrategy, setCustomStrategy] = useState({
+    name: '',
+    type: null,
+    markets: [],
+    entryConditions: [],
+    exitConditions: [],
+    settings: {
+      minEdge: 3,
+      maxPosition: 200,
+      stopLoss: 10,
+      takeProfit: 15,
+    }
+  })
+  const [customStrategies, setCustomStrategies] = useState([])
+
   const template = selectedTemplate !== null ? templates[selectedTemplate] : null
+  const activeStrategy = template || (selectedTemplate === 'custom' ? customStrategy : null)
 
   const handleSelectTemplate = (index) => {
     setSelectedTemplate(index)
@@ -125,32 +171,40 @@ const StrategyBuilder = () => {
     setBacktestData([])
   }
 
+  const handleSelectCustomStrategy = (strategy) => {
+    setCustomStrategy(strategy)
+    setSelectedTemplate('custom')
+    setBacktestComplete(false)
+    setBacktestData([])
+  }
+
   const handleBacktest = () => {
-    if (!template) return
+    if (!activeStrategy) return
     setIsBacktesting(true)
     setBacktestComplete(false)
 
-    // Simulate backtest running
     setTimeout(() => {
-      setBacktestData(generateBacktestData(template))
+      setBacktestData(generateBacktestData(activeStrategy))
       setIsBacktesting(false)
       setBacktestComplete(true)
     }, 2000)
   }
 
   const handleDeploy = () => {
-    if (!template || !backtestComplete) return
+    if (!activeStrategy || !backtestComplete) return
     setShowDeployModal(true)
   }
 
   const confirmDeploy = () => {
+    const strategyName = template?.name || customStrategy.name
     const newStrategy = {
       id: Date.now(),
-      name: template.name,
+      name: strategyName,
       capital: deploySettings.capital,
       mode: deploySettings.mode,
       status: 'running',
       startedAt: new Date().toISOString(),
+      icon: template?.icon || '⚡',
     }
     setDeployedStrategies([...deployedStrategies, newStrategy])
     setShowDeployModal(false)
@@ -164,6 +218,67 @@ const StrategyBuilder = () => {
     ))
   }
 
+  // Custom strategy builder functions
+  const openNewStrategy = () => {
+    setShowNewStrategyModal(true)
+    setBuilderStep(1)
+    setCustomStrategy({
+      name: '',
+      type: null,
+      markets: [],
+      entryConditions: [],
+      exitConditions: [],
+      settings: {
+        minEdge: 3,
+        maxPosition: 200,
+        stopLoss: 10,
+        takeProfit: 15,
+      }
+    })
+  }
+
+  const toggleMarket = (marketId) => {
+    setCustomStrategy(prev => ({
+      ...prev,
+      markets: prev.markets.includes(marketId)
+        ? prev.markets.filter(m => m !== marketId)
+        : [...prev.markets, marketId]
+    }))
+  }
+
+  const toggleCondition = (type, conditionId) => {
+    const key = type === 'entry' ? 'entryConditions' : 'exitConditions'
+    setCustomStrategy(prev => ({
+      ...prev,
+      [key]: prev[key].includes(conditionId)
+        ? prev[key].filter(c => c !== conditionId)
+        : [...prev[key], conditionId]
+    }))
+  }
+
+  const canProceed = () => {
+    switch (builderStep) {
+      case 1: return customStrategy.name.length > 0 && customStrategy.type
+      case 2: return customStrategy.markets.length > 0
+      case 3: return customStrategy.entryConditions.length > 0
+      case 4: return customStrategy.exitConditions.length > 0
+      default: return true
+    }
+  }
+
+  const saveCustomStrategy = () => {
+    const newStrategy = {
+      ...customStrategy,
+      id: Date.now(),
+      winRate: Math.floor(60 + Math.random() * 30),
+      monthlyReturn: (5 + Math.random() * 10).toFixed(1),
+      maxDrawdown: Math.floor(8 + Math.random() * 15),
+    }
+    setCustomStrategies([...customStrategies, newStrategy])
+    setShowNewStrategyModal(false)
+    handleSelectCustomStrategy(newStrategy)
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -172,7 +287,10 @@ const StrategyBuilder = () => {
           <h1 className="text-2xl font-bold text-gray-900">Strategy Builder Pro</h1>
           <p className="text-gray-500 text-sm mt-1">Create, backtest, and deploy custom trading strategies.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25">
+        <button
+          onClick={openNewStrategy}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25"
+        >
           <Plus className="w-4 h-4" />
           New Strategy
         </button>
@@ -188,7 +306,7 @@ const StrategyBuilder = () => {
                 <div className="flex items-center gap-4">
                   <div className={`w-3 h-3 rounded-full ${strategy.status === 'running' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
                   <div>
-                    <p className="font-medium text-gray-900">{strategy.name}</p>
+                    <p className="font-medium text-gray-900">{strategy.icon} {strategy.name}</p>
                     <p className="text-sm text-gray-500">
                       ${strategy.capital} • {strategy.mode === 'paper' ? 'Paper Trading' : 'Live Trading'}
                     </p>
@@ -210,6 +328,42 @@ const StrategyBuilder = () => {
                   )}
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Strategies */}
+      {customStrategies.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Custom Strategies</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {customStrategies.map((strategy) => (
+              <button
+                key={strategy.id}
+                onClick={() => handleSelectCustomStrategy(strategy)}
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                  selectedTemplate === 'custom' && customStrategy.id === strategy.id
+                    ? 'border-indigo-500 bg-indigo-50 shadow-md'
+                    : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <span className="text-2xl">⚡</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-indigo-100 text-indigo-700">
+                    Custom
+                  </span>
+                </div>
+                <h3 className="font-semibold text-gray-900 mt-3">{strategy.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {STRATEGY_TYPES.find(t => t.id === strategy.type)?.name} • {strategy.markets.length} market{strategy.markets.length !== 1 ? 's' : ''}
+                </p>
+                <div className="flex items-center gap-3 mt-3">
+                  <span className="text-sm font-medium text-green-600">{strategy.winRate}% Win</span>
+                  <span className="text-sm text-gray-400">•</span>
+                  <span className="text-sm font-medium text-indigo-600">+{strategy.monthlyReturn}%/mo</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
@@ -252,14 +406,14 @@ const StrategyBuilder = () => {
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
-              {template ? template.name : 'Strategy Canvas'}
+              {activeStrategy ? (template?.name || customStrategy.name) : 'Strategy Canvas'}
             </h2>
             <div className="flex gap-2">
               <button
                 onClick={handleBacktest}
-                disabled={!template || isBacktesting}
+                disabled={!activeStrategy || isBacktesting}
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
-                  template && !isBacktesting
+                  activeStrategy && !isBacktesting
                     ? 'text-gray-600 hover:bg-gray-100'
                     : 'text-gray-400 cursor-not-allowed'
                 }`}
@@ -286,7 +440,7 @@ const StrategyBuilder = () => {
             </div>
           </div>
 
-          {template ? (
+          {activeStrategy ? (
             <div className="p-6">
               {/* Strategy Details */}
               <div className="grid sm:grid-cols-2 gap-6 mb-6">
@@ -295,38 +449,40 @@ const StrategyBuilder = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-600">Min Edge Required</span>
-                      <span className="font-medium text-gray-900">{template.settings.minEdge}%</span>
+                      <span className="font-medium text-gray-900">{template?.settings?.minEdge || customStrategy.settings.minEdge}%</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-600">Max Position Size</span>
-                      <span className="font-medium text-gray-900">${template.settings.maxPosition}</span>
+                      <span className="font-medium text-gray-900">${template?.settings?.maxPosition || customStrategy.settings.maxPosition}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-600">Stop Loss</span>
-                      <span className="font-medium text-red-600">-{template.settings.stopLoss}%</span>
+                      <span className="font-medium text-red-600">-{template?.settings?.stopLoss || customStrategy.settings.stopLoss}%</span>
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-3">Target Markets</h3>
                   <div className="flex flex-wrap gap-2">
-                    {template.markets.map((market) => (
+                    {(template?.markets || customStrategy.markets.map(m => AVAILABLE_MARKETS.find(am => am.id === m)?.name)).map((market) => (
                       <span key={market} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
                         {market}
                       </span>
                     ))}
                   </div>
-                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
-                        <p className="text-xs text-yellow-600 mt-1">
-                          You must run a backtest before deploying this strategy.
-                        </p>
+                  {!backtestComplete && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
+                          <p className="text-xs text-yellow-600 mt-1">
+                            You must run a backtest before deploying this strategy.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -362,8 +518,8 @@ const StrategyBuilder = () => {
             <div className="h-80 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
               <div className="text-center">
                 <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">Select a template to get started</p>
-                <p className="text-gray-400 text-sm mt-2">Choose from our pre-built strategies above</p>
+                <p className="text-gray-600 font-medium">Select a template or create your own</p>
+                <p className="text-gray-400 text-sm mt-2">Click "New Strategy" to build from scratch</p>
               </div>
             </div>
           )}
@@ -376,7 +532,7 @@ const StrategyBuilder = () => {
           </h3>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={backtestComplete ? backtestData : (template ? generateBacktestData(template) : [])}>
+              <BarChart data={backtestComplete ? backtestData : (activeStrategy ? generateBacktestData(activeStrategy) : [])}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
@@ -391,15 +547,15 @@ const StrategyBuilder = () => {
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Est. Win Rate</span>
-              <span className="font-medium text-gray-900">{template?.winRate || 74}%</span>
+              <span className="font-medium text-gray-900">{template?.winRate || customStrategy.winRate || 74}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Est. Monthly Return</span>
-              <span className="font-medium text-green-600">+{template?.monthlyReturn || 8.5}%</span>
+              <span className="font-medium text-green-600">+{template?.monthlyReturn || customStrategy.monthlyReturn || 8.5}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Max Drawdown</span>
-              <span className="font-medium text-red-600">-{template?.maxDrawdown || 12}%</span>
+              <span className="font-medium text-red-600">-{template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
             </div>
           </div>
         </div>
@@ -467,10 +623,12 @@ const StrategyBuilder = () => {
 
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="text-2xl">{template?.icon}</div>
+                  <div className="text-2xl">{template?.icon || '⚡'}</div>
                   <div>
-                    <p className="font-medium text-gray-900">{template?.name}</p>
-                    <p className="text-sm text-gray-500">{template?.winRate}% win rate • +{template?.monthlyReturn}%/mo</p>
+                    <p className="font-medium text-gray-900">{template?.name || customStrategy.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {template?.winRate || customStrategy.winRate}% win rate • +{template?.monthlyReturn || customStrategy.monthlyReturn}%/mo
+                    </p>
                   </div>
                 </div>
               </div>
@@ -482,6 +640,267 @@ const StrategyBuilder = () => {
                 <Rocket className="w-5 h-5" />
                 Deploy {deploySettings.mode === 'paper' ? 'Paper' : 'Live'} Strategy
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Strategy Builder Modal */}
+      {showNewStrategyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Create New Strategy</h3>
+                  <p className="text-sm text-gray-500 mt-1">Step {builderStep} of 5</p>
+                </div>
+                <button
+                  onClick={() => setShowNewStrategyModal(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Progress bar */}
+              <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-indigo-600 transition-all duration-300"
+                  style={{ width: `${(builderStep / 5) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {/* Step 1: Name & Type */}
+              {builderStep === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Strategy Name
+                    </label>
+                    <input
+                      type="text"
+                      value={customStrategy.name}
+                      onChange={(e) => setCustomStrategy({ ...customStrategy, name: e.target.value })}
+                      placeholder="My Awesome Strategy"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Strategy Type
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {STRATEGY_TYPES.map((type) => (
+                        <button
+                          key={type.id}
+                          onClick={() => setCustomStrategy({ ...customStrategy, type: type.id })}
+                          className={`p-4 rounded-xl border-2 text-left transition-all ${
+                            customStrategy.type === type.id
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span className="text-2xl">{type.icon}</span>
+                          <p className="font-medium text-gray-900 mt-2">{type.name}</p>
+                          <p className="text-xs text-gray-500 mt-1">{type.description}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Markets */}
+              {builderStep === 2 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Select Markets to Trade
+                  </label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {AVAILABLE_MARKETS.map((market) => (
+                      <button
+                        key={market.id}
+                        onClick={() => toggleMarket(market.id)}
+                        className={`p-4 rounded-xl border-2 text-center transition-all ${
+                          customStrategy.markets.includes(market.id)
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-3xl">{market.icon}</span>
+                        <p className="font-medium text-gray-900 mt-2">{market.name}</p>
+                        {customStrategy.markets.includes(market.id) && (
+                          <Check className="w-5 h-5 text-indigo-600 mx-auto mt-2" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Entry Conditions */}
+              {builderStep === 3 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    When should the bot enter a trade?
+                  </label>
+                  <div className="space-y-3">
+                    {ENTRY_CONDITIONS.map((condition) => (
+                      <button
+                        key={condition.id}
+                        onClick={() => toggleCondition('entry', condition.id)}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                          customStrategy.entryConditions.includes(condition.id)
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div>
+                          <p className="font-medium text-gray-900">{condition.name}</p>
+                          <p className="text-sm text-gray-500">{condition.description}</p>
+                        </div>
+                        {customStrategy.entryConditions.includes(condition.id) && (
+                          <Check className="w-5 h-5 text-indigo-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Exit Conditions */}
+              {builderStep === 4 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    When should the bot exit a trade?
+                  </label>
+                  <div className="space-y-3">
+                    {EXIT_CONDITIONS.map((condition) => (
+                      <button
+                        key={condition.id}
+                        onClick={() => toggleCondition('exit', condition.id)}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                          customStrategy.exitConditions.includes(condition.id)
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div>
+                          <p className="font-medium text-gray-900">{condition.name}</p>
+                          <p className="text-sm text-gray-500">{condition.description}</p>
+                        </div>
+                        {customStrategy.exitConditions.includes(condition.id) && (
+                          <Check className="w-5 h-5 text-indigo-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Risk Settings */}
+              {builderStep === 5 && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Minimum Edge Required (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={customStrategy.settings.minEdge}
+                      onChange={(e) => setCustomStrategy({
+                        ...customStrategy,
+                        settings: { ...customStrategy.settings, minEdge: Number(e.target.value) }
+                      })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Only enter trades with at least this much edge</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Max Position Size ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={customStrategy.settings.maxPosition}
+                      onChange={(e) => setCustomStrategy({
+                        ...customStrategy,
+                        settings: { ...customStrategy.settings, maxPosition: Number(e.target.value) }
+                      })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Maximum amount to risk per trade</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Stop Loss (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={customStrategy.settings.stopLoss}
+                        onChange={(e) => setCustomStrategy({
+                          ...customStrategy,
+                          settings: { ...customStrategy.settings, stopLoss: Number(e.target.value) }
+                        })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Take Profit (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={customStrategy.settings.takeProfit}
+                        onChange={(e) => setCustomStrategy({
+                          ...customStrategy,
+                          settings: { ...customStrategy.settings, takeProfit: Number(e.target.value) }
+                        })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-100 flex justify-between">
+              <button
+                onClick={() => setBuilderStep(Math.max(1, builderStep - 1))}
+                className={`px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ${
+                  builderStep === 1 ? 'invisible' : ''
+                }`}
+              >
+                Back
+              </button>
+              {builderStep < 5 ? (
+                <button
+                  onClick={() => setBuilderStep(builderStep + 1)}
+                  disabled={!canProceed()}
+                  className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                    canProceed()
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={saveCustomStrategy}
+                  className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center gap-2"
+                >
+                  <Zap className="w-4 h-4" />
+                  Create Strategy
+                </button>
+              )}
             </div>
           </div>
         </div>
