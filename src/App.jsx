@@ -6,6 +6,7 @@ import {
   Trophy,
   ShoppingCart,
   BookOpen,
+  Compass,
 } from 'lucide-react'
 
 // Context
@@ -28,6 +29,7 @@ import Leaderboard from './pages/Leaderboard'
 import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
 import Education from './pages/Education'
+import StrategyDiscovery from './pages/StrategyDiscovery'
 
 // Navigation configuration
 const NAV_ITEMS = [
@@ -73,6 +75,13 @@ const NAV_ITEMS = [
     icon: BookOpen,
     requiresPro: false,
   },
+  {
+    id: 'discover',
+    label: 'Discover',
+    shortLabel: 'Discover',
+    icon: Compass,
+    requiresPro: false,
+  },
 ]
 
 // Page renderer component
@@ -90,6 +99,8 @@ const PageRenderer = ({ currentPage }) => {
       return <Marketplace />
     case 'education':
       return <Education />
+    case 'discover':
+      return <StrategyDiscovery />
     default:
       return <Dashboard />
   }
