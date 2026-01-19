@@ -142,11 +142,7 @@ const Accounts = () => {
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionSuccess, setConnectionSuccess] = useState(false)
 
-  const [accounts, setAccounts] = useState([
-    { id: 1, name: 'Kalshi', balance: '$24,500.00', status: 'Connected', type: 'Prediction', icon: '🎯' },
-    { id: 2, name: 'Polymarket', balance: '$12,350.00', status: 'Connected', type: 'Prediction', icon: '📊' },
-    { id: 3, name: 'Manifold', balance: '$8,420.00', status: 'Connected', type: 'Prediction', icon: '🔮' },
-  ])
+  const [accounts, setAccounts] = useState([])
 
   const paperAccount = {
     name: 'Paper Trading',
@@ -277,7 +273,7 @@ const Accounts = () => {
         <p className="text-3xl font-bold mt-1">{totalBalance}</p>
         <div className="flex items-center gap-2 mt-2">
           <TrendingUp className="w-4 h-4" />
-          <span className="text-sm">+$4,230.50 (7.4%) this month</span>
+          <span className="text-sm">$0.00 (0.0%) this month</span>
         </div>
       </div>
 
