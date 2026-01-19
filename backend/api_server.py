@@ -1299,6 +1299,218 @@ def delete_strategy(strategy_id):
 
 
 # --------------------------------------------
+# Deployed Strategies Routes
+# --------------------------------------------
+
+def simulate_strategy_activity(strategy):
+    """Simulate trading activity for a running strategy."""
+    import random
+    
+    if strategy.status != 'running':
+        return
+    
+    # Calculate time since deployment or last trade
+    last_activity = strategy.last_trade_at or strategy.deployed_at
+    now = datetime.utcnow()
+    hours_elapsed = (now - last_activity).total_seconds() / 3600
+    
+    # Don't simulate if less than 1 hour has passed
+    if hours_elapsed < 1:
+        return
+    
+    # Simulate trades based on hours elapsed (1-3 trades per day on average)
+    trades_per_hour = random.uniform(0.04, 0.125)
+    num_trades = int(hours_elapsed * trades_per_hour)
+    
+    if num_trades < 1:
+        return
+    
+    # Get strategy config for win rate simulation
+    config = strategy.config or {}
+    base_win_rate = config.get('winRate', 65) / 100
+    
+    for _ in range(num_trades):
+        is_win = random.random() < base_win_rate
+        
+        if is_win:
+            trade_pnl = random.uniform(0.02, 0.15) * min(strategy.allocated_capital * 0.1, 500)
+            strategy.winning_trades = (strategy.winning_trades or 0) + 1
+        else:
+            trade_pnl = -random.uniform(0.01, 0.08) * min(strategy.allocated_capital * 0.1, 500)
+            strategy.losing_trades = (strategy.losing_trades or 0) + 1
+        
+        strategy.total_trades = (strategy.total_trades or 0) + 1
+        strategy.total_pnl = (strategy.total_pnl or 0) + trade_pnl
+    
+    # Update win rate
+    if strategy.total_trades > 0:
+        strategy.win_rate = (strategy.winning_trades / strategy.total_trades) * 100
+    
+    strategy.last_trade_at = now
+
+
+@app.route('/api/strategies/deployed', methods=['GET'])
+@require_auth
+def get_deployed_strategies():
+    """Get user's deployed strategies with simulated activity."""
+    try:
+        strategies = DeployedStrategy.query.filter_by(user_id=g.user.id).order_by(
+            DeployedStrategy.deployed_at.desc()
+        ).all()
+        
+        # Simulate activity for each running strategy
+        for strategy in strategies:
+            simulate_strategy_activity(strategy)
+        
+        # Save any updates from simulation
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'strategies': [s.to_dict() for s in strategies],
+            'count': len(strategies),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to get deployed strategies: {str(e)}'}), 500
+
+
+@app.route('/api/strategies/deploy', methods=['POST'])
+@require_auth
+def deploy_strategy():
+    """Deploy a strategy for paper or live trading."""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+
+        name = data.get('name', '').strip()
+        if not name:
+            return jsonify({'error': 'Strategy name required'}), 400
+
+        mode = data.get('mode', 'paper')
+        capital = float(data.get('capital', 1000))
+        
+        if capital < 100 or capital > 100000:
+            return jsonify({'error': 'Capital must be between $100 and $100,000'}), 400
+
+        # Get or create paper portfolio for paper trading
+        portfolio_id = None
+        if mode == 'paper':
+            portfolio = PaperTradingService.get_or_create_portfolio(g.user.id)
+            portfolio_id = portfolio.id
+
+        deployed = DeployedStrategy(
+            user_id=g.user.id,
+            portfolio_id=portfolio_id,
+            name=name,
+            description=data.get('description', ''),
+            icon=data.get('icon', '⚡'),
+            template_id=data.get('templateId'),
+            config=data.get('config', {}),
+            markets=data.get('markets', []),
+            categories=data.get('categories', []),
+            mode=mode,
+            allocated_capital=capital,
+            status='running',
+        )
+
+        db.session.add(deployed)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Strategy deployed successfully',
+            'strategy': deployed.to_dict(),
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to deploy strategy: {str(e)}'}), 500
+
+
+@app.route('/api/strategies/deployed/<strategy_id>/stop', methods=['POST'])
+@require_auth
+def stop_deployed_strategy(strategy_id):
+    """Stop a deployed strategy."""
+    try:
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != g.user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        deployed.status = 'stopped'
+        deployed.stopped_at = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Strategy stopped',
+            'strategy': deployed.to_dict(),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to stop strategy: {str(e)}'}), 500
+
+
+@app.route('/api/strategies/deployed/<strategy_id>/resume', methods=['POST'])
+@require_auth
+def resume_deployed_strategy(strategy_id):
+    """Resume a stopped strategy."""
+    try:
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != g.user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        deployed.status = 'running'
+        deployed.stopped_at = None
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Strategy resumed',
+            'strategy': deployed.to_dict(),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to resume strategy: {str(e)}'}), 500
+
+
+@app.route('/api/strategies/deployed/<strategy_id>', methods=['DELETE'])
+@require_auth
+def delete_deployed_strategy(strategy_id):
+    """Delete a deployed strategy."""
+    try:
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != g.user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        db.session.delete(deployed)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Strategy removed'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete strategy: {str(e)}'}), 500
+
+
+# --------------------------------------------
 # Backtest Routes
 # --------------------------------------------
 

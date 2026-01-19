@@ -330,8 +330,10 @@ const StrategyBuilder = () => {
     try {
       setIsLoadingDeployed(true)
       const response = await strategyApi.getDeployed()
-      if (response.data?.strategies) {
-        setDeployedStrategies(response.data.strategies.map(s => ({
+      // Handle response - axios puts data in response.data
+      const strategies = response.data?.strategies || response.strategies || []
+      if (strategies.length > 0) {
+        setDeployedStrategies(strategies.map(s => ({
           id: s.id,
           name: s.name,
           capital: s.allocatedCapital,
