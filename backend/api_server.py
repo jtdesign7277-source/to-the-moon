@@ -685,6 +685,154 @@ def refresh_token():
 
 
 # --------------------------------------------
+# User Dashboard Routes
+# --------------------------------------------
+
+# In-memory user stats storage (per user_id)
+user_stats_db = {}
+user_trades_db = {}
+
+@app.route('/api/user/dashboard', methods=['GET'])
+@require_auth
+def get_user_dashboard():
+    """Get user's dashboard data including stats, trades, and performance."""
+    user = g.user
+    user_id = user['id']
+
+    # Get user's stats (or return zeros for new users)
+    stats = user_stats_db.get(user_id, {
+        'totalPnl': 0,
+        'winRate': 0,
+        'activeStrategies': 0,
+        'totalTrades': 0,
+        'connectedAccounts': 0,
+        'totalBalance': 0,
+        'monthlyChange': 0,
+    })
+
+    # Get user's recent trades (empty for new users)
+    trades = user_trades_db.get(user_id, [])
+
+    # Get performance data (empty for new users)
+    performance_data = []
+    portfolio_data = []
+
+    # If user has trades, calculate performance data
+    if trades:
+        # Group trades by month for performance chart
+        # This would be calculated from actual trade data in production
+        pass
+
+    return jsonify({
+        'success': True,
+        'totalPnl': stats.get('totalPnl', 0),
+        'winRate': stats.get('winRate', 0),
+        'activeStrategies': stats.get('activeStrategies', 0),
+        'totalTrades': stats.get('totalTrades', 0),
+        'connectedAccounts': stats.get('connectedAccounts', 0),
+        'totalBalance': stats.get('totalBalance', 0),
+        'monthlyChange': stats.get('monthlyChange', 0),
+        'recentTrades': trades[-10:] if trades else [],  # Last 10 trades
+        'performanceData': performance_data,
+        'portfolioData': portfolio_data,
+    })
+
+
+@app.route('/api/user/stats', methods=['PUT'])
+@require_auth
+def update_user_stats():
+    """Update user's stats (called when trades are made)."""
+    user = g.user
+    user_id = user['id']
+
+    data = request.get_json() or {}
+
+    # Initialize stats if not exists
+    if user_id not in user_stats_db:
+        user_stats_db[user_id] = {
+            'totalPnl': 0,
+            'winRate': 0,
+            'activeStrategies': 0,
+            'totalTrades': 0,
+            'connectedAccounts': 0,
+            'totalBalance': 0,
+            'monthlyChange': 0,
+        }
+
+    # Update stats
+    stats = user_stats_db[user_id]
+    for key in ['totalPnl', 'winRate', 'activeStrategies', 'totalTrades',
+                'connectedAccounts', 'totalBalance', 'monthlyChange']:
+        if key in data:
+            stats[key] = data[key]
+
+    return jsonify({
+        'success': True,
+        'stats': stats,
+    })
+
+
+@app.route('/api/user/trades', methods=['POST'])
+@require_auth
+def add_user_trade():
+    """Add a trade to user's history."""
+    user = g.user
+    user_id = user['id']
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            'error': 'Bad Request',
+            'message': 'Trade data is required'
+        }), 400
+
+    # Initialize trades list if not exists
+    if user_id not in user_trades_db:
+        user_trades_db[user_id] = []
+
+    # Add trade with timestamp
+    trade = {
+        'id': f'trade_{uuid.uuid4().hex[:8]}',
+        'pair': data.get('pair', 'Unknown'),
+        'type': data.get('type', 'Long'),
+        'entry': data.get('entry', '$0.00'),
+        'exit': data.get('exit', '$0.00'),
+        'pnl': data.get('pnl', '+$0'),
+        'status': data.get('status', 'Won'),
+        'timestamp': datetime.now().isoformat(),
+    }
+
+    user_trades_db[user_id].append(trade)
+
+    # Update user stats
+    if user_id not in user_stats_db:
+        user_stats_db[user_id] = {
+            'totalPnl': 0,
+            'winRate': 0,
+            'activeStrategies': 0,
+            'totalTrades': 0,
+            'connectedAccounts': 0,
+            'totalBalance': 0,
+            'monthlyChange': 0,
+        }
+
+    stats = user_stats_db[user_id]
+    stats['totalTrades'] = len(user_trades_db[user_id])
+
+    # Calculate win rate
+    trades = user_trades_db[user_id]
+    wins = sum(1 for t in trades if t.get('status') == 'Won')
+    stats['winRate'] = round((wins / len(trades)) * 100) if trades else 0
+
+    return jsonify({
+        'success': True,
+        'trade': trade,
+        'stats': stats,
+    }), 201
+
+
+# --------------------------------------------
 # Subscription Routes
 # --------------------------------------------
 

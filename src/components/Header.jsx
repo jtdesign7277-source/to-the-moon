@@ -29,12 +29,12 @@ const Header = ({
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="xl:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -50,7 +50,7 @@ const Header = ({
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-0.5 flex-1 justify-center min-w-0">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = currentPage === item.id
@@ -58,14 +58,15 @@ const Header = ({
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.id, item.requiresPro)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
                       ? 'bg-indigo-100 text-indigo-700'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  {item.label}
+                  <span className="hidden 2xl:inline">{item.label}</span>
+                  <span className="2xl:hidden">{item.shortLabel || item.label}</span>
                   {item.requiresPro && !isPro && (
                     <Lock className="w-3 h-3 text-indigo-600" />
                   )}
@@ -75,7 +76,7 @@ const Header = ({
           </nav>
 
           {/* Right side controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Trading Mode Toggle */}
             <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
               <button
