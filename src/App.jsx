@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   Wallet,
@@ -25,6 +25,7 @@ import Accounts from './pages/Accounts'
 import StrategyBuilder from './pages/StrategyBuilder'
 import Leaderboard from './pages/Leaderboard'
 import Marketplace from './pages/Marketplace'
+import Admin from './pages/Admin'
 
 // Navigation configuration
 const NAV_ITEMS = [
@@ -85,11 +86,18 @@ const PageRenderer = ({ currentPage }) => {
 
 // Main app content (needs to be inside AppProvider)
 const AppContent = () => {
-  const [view, setView] = useState('landing') // 'landing' | 'auth' | 'app'
+  const [view, setView] = useState('landing') // 'landing' | 'auth' | 'app' | 'admin'
   const [user, setUser] = useState(null)
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isPro, openUpgradeModal, setIsPro } = useApp()
+
+  // Check for admin route on mount
+  useEffect(() => {
+    if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
+      setView('admin')
+    }
+  }, [])
 
   // Check for existing auth on mount
   useEffect(() => {
@@ -136,6 +144,18 @@ const AppContent = () => {
     setView('landing')
   }
 
+  // Show admin page
+  if (view === 'admin') {
+    return (
+      <Admin
+        onBack={() => {
+          window.location.hash = ''
+          setView('landing')
+        }}
+      />
+    )
+  }
+
   // Show landing page
   if (view === 'landing') {
     return (
@@ -151,6 +171,7 @@ const AppContent = () => {
       <Auth
         onSuccess={handleAuthSuccess}
         onBack={() => setView('landing')}
+        onAdminAccess={() => setView('admin')}
       />
     )
   }

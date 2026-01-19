@@ -12,7 +12,7 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-export default function Auth({ onSuccess, onBack }) {
+export default function Auth({ onSuccess, onBack, onAdminAccess }) {
   const [mode, setMode] = useState('login') // 'login' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,6 +24,20 @@ export default function Auth({ onSuccess, onBack }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
+    // Secret admin access - type "admin" as email
+    if (email.toLowerCase() === 'admin' && mode === 'login') {
+      // Store admin key temporarily and redirect to admin panel
+      if (password) {
+        localStorage.setItem('ttm_admin_key', password)
+        if (onAdminAccess) {
+          onAdminAccess()
+        }
+      } else {
+        setError('Enter admin key as password')
+      }
+      return
+    }
 
     // Basic validation
     if (!email || !password) {
@@ -159,7 +173,7 @@ export default function Auth({ onSuccess, onBack }) {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
