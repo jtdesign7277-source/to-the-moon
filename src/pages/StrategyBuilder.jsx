@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp } from 'lucide-react'
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
+import BacktestResultsPanel from '../components/BacktestResultsPanel'
 
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
@@ -227,6 +228,7 @@ const StrategyBuilder = () => {
     }
   })
   const [customStrategies, setCustomStrategies] = useState([])
+  const [showExpandedBacktest, setShowExpandedBacktest] = useState(false)
 
   const template = selectedTemplate !== null ? templates[selectedTemplate] : null
   const activeStrategy = template || (selectedTemplate === 'custom' ? customStrategy : null)
@@ -950,9 +952,20 @@ const StrategyBuilder = () => {
 
         {/* Backtest Preview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className="font-semibold text-gray-900 mb-4">
-            {backtestComplete ? 'Backtest Results' : 'Backtest Preview'}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">
+              {backtestComplete ? 'Backtest Results' : 'Backtest Preview'}
+            </h3>
+            {backtestComplete && activeStrategy && (
+              <button
+                onClick={() => setShowExpandedBacktest(true)}
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+              >
+                View Full Report
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={backtestComplete ? backtestData : (activeStrategy ? generateBacktestData(activeStrategy) : [])}>
@@ -974,37 +987,81 @@ const StrategyBuilder = () => {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Total P&L (6mo)</span>
-              <span className={`font-medium ${(template?.backtestStats?.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {(template?.backtestStats?.profitLoss || 0) >= 0 ? '+' : ''}${template?.backtestStats?.profitLoss?.toLocaleString() || '0'}
+              <span className={`font-medium ${(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0) >= 0 ? '+' : ''}${(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Total Trades</span>
-              <span className="font-medium text-gray-900">{template?.backtestStats?.totalTrades || '-'}</span>
+              <span className="font-medium text-gray-900">{template?.backtestStats?.totalTrades || customStrategy?.backtestStats?.totalTrades || '-'}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Avg Win / Loss</span>
               <span className="font-medium text-gray-900">
-                <span className="text-green-600">${template?.backtestStats?.avgWin || 0}</span>
+                <span className="text-green-600">${template?.backtestStats?.avgWin || customStrategy?.backtestStats?.avgWin || 0}</span>
                 {' / '}
-                <span className="text-red-600">${Math.abs(template?.backtestStats?.avgLoss || 0)}</span>
+                <span className="text-red-600">${Math.abs(template?.backtestStats?.avgLoss || customStrategy?.backtestStats?.avgLoss || 0)}</span>
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Max Drawdown</span>
-              <span className="font-medium text-red-600">{template?.backtestStats?.maxDrawdown || template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
+              <span className="font-medium text-red-600">{template?.backtestStats?.maxDrawdown || customStrategy?.backtestStats?.maxDrawdown || template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Sharpe Ratio</span>
-              <span className="font-medium text-indigo-600">{template?.backtestStats?.sharpeRatio || '-'}</span>
+              <span className="font-medium text-indigo-600">{template?.backtestStats?.sharpeRatio || customStrategy?.backtestStats?.sharpeRatio || '-'}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Sortino Ratio</span>
-              <span className="font-medium text-indigo-600">{template?.backtestStats?.sortinoRatio || '-'}</span>
+              <span className="font-medium text-indigo-600">{template?.backtestStats?.sortinoRatio || customStrategy?.backtestStats?.sortinoRatio || '-'}</span>
+            </div>
+          </div>
+          {/* View Full Report Button */}
+          {backtestComplete && activeStrategy && (
+            <button
+              onClick={() => setShowExpandedBacktest(true)}
+              className="w-full mt-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <Activity className="w-4 h-4" />
+              View Full Backtest Report
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Expanded Backtest Results Modal */}
+      {showExpandedBacktest && activeStrategy && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-full flex items-start justify-center py-8">
+            <div className="bg-gray-50 rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {template?.name || customStrategy?.name || 'Strategy'} - Full Backtest Report
+                </h2>
+                <button
+                  onClick={() => setShowExpandedBacktest(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6">
+                <BacktestResultsPanel
+                  strategy={template || customStrategy}
+                  backtestStats={template?.backtestStats || customStrategy?.backtestStats}
+                  monthlyReturns={template?.monthlyReturns || customStrategy?.monthlyReturns}
+                  isLoading={isBacktesting}
+                  onRerunBacktest={() => {
+                    setShowExpandedBacktest(false)
+                    rerunBacktest()
+                  }}
+                  initialCapital={10000}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Deploy Modal */}
       {showDeployModal && (
