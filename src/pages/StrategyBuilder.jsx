@@ -340,8 +340,13 @@ const StrategyBuilder = () => {
           startedAt: s.deployedAt,
           stoppedAt: s.stoppedAt,
           icon: s.icon || '⚡',
-          pnl: s.totalPnl,
-          trades: s.totalTrades,
+          pnl: s.totalPnl || 0,
+          trades: s.totalTrades || 0,
+          winRate: s.winRate || 0,
+          winningTrades: s.winningTrades || 0,
+          losingTrades: s.losingTrades || 0,
+          markets: s.markets || ['Kalshi', 'Polymarket'],
+          lastTradeAt: s.lastTradeAt,
         })))
       }
     } catch (error) {
@@ -979,12 +984,20 @@ const StrategyBuilder = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-gray-500">
+                          {strategy.trades > 0 && (
+                            <>
+                              <span className="flex items-center gap-1 text-green-600 font-medium">
+                                {strategy.trades} trades
+                              </span>
+                              <span>•</span>
+                            </>
+                          )}
                           <span className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                             {activity.marketsScanned} scanned
                           </span>
                           <span>•</span>
-                          <span>{formatTimeAgo(activity.lastActive)}</span>
+                          <span>{strategy.lastTradeAt ? formatTimeAgo(strategy.lastTradeAt) : formatTimeAgo(activity.lastActive)}</span>
                         </div>
                       </div>
                     </div>

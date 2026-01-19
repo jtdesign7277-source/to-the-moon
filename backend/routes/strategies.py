@@ -323,10 +323,63 @@ def run_backtest():
 # DEPLOYED STRATEGIES ENDPOINTS
 # ============================================
 
+def simulate_strategy_activity(strategy):
+    """
+    Simulate trading activity for a running strategy.
+    Updates P&L and trade counts based on time elapsed since last check.
+    """
+    from datetime import datetime, timedelta
+    import random
+    
+    if strategy.status != 'running':
+        return
+    
+    # Calculate time since deployment or last trade
+    last_activity = strategy.last_trade_at or strategy.deployed_at
+    now = datetime.utcnow()
+    hours_elapsed = (now - last_activity).total_seconds() / 3600
+    
+    # Don't simulate if less than 1 hour has passed
+    if hours_elapsed < 1:
+        return
+    
+    # Simulate trades based on hours elapsed (1-3 trades per day on average)
+    trades_per_hour = random.uniform(0.04, 0.125)  # 1-3 trades per day
+    num_trades = int(hours_elapsed * trades_per_hour)
+    
+    if num_trades < 1:
+        return
+    
+    # Get strategy config for win rate simulation
+    config = strategy.config or {}
+    base_win_rate = config.get('winRate', 65) / 100
+    
+    for _ in range(num_trades):
+        is_win = random.random() < base_win_rate
+        
+        if is_win:
+            # Winning trade: 2-15% of trade size
+            trade_pnl = random.uniform(0.02, 0.15) * min(strategy.allocated_capital * 0.1, 500)
+            strategy.winning_trades += 1
+        else:
+            # Losing trade: 1-8% of trade size (smaller losses)
+            trade_pnl = -random.uniform(0.01, 0.08) * min(strategy.allocated_capital * 0.1, 500)
+            strategy.losing_trades += 1
+        
+        strategy.total_trades += 1
+        strategy.total_pnl = (strategy.total_pnl or 0) + trade_pnl
+    
+    # Update win rate
+    if strategy.total_trades > 0:
+        strategy.win_rate = (strategy.winning_trades / strategy.total_trades) * 100
+    
+    strategy.last_trade_at = now
+    
+
 @strategies_bp.route('/deployed', methods=['GET'])
 @jwt_required_custom
 def get_deployed_strategies():
-    """Get user's deployed strategies."""
+    """Get user's deployed strategies with simulated activity."""
     try:
         from models import DeployedStrategy
         user = g.current_user
@@ -334,6 +387,13 @@ def get_deployed_strategies():
         strategies = DeployedStrategy.query.filter_by(user_id=user.id).order_by(
             DeployedStrategy.deployed_at.desc()
         ).all()
+        
+        # Simulate activity for each running strategy
+        for strategy in strategies:
+            simulate_strategy_activity(strategy)
+        
+        # Save any updates from simulation
+        db.session.commit()
 
         return jsonify({
             'strategies': [s.to_dict() for s in strategies],
@@ -341,7 +401,90 @@ def get_deployed_strategies():
         }), 200
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': f'Failed to get deployed strategies: {str(e)}'}), 500
+
+
+@strategies_bp.route('/deployed/<string:strategy_id>/activity', methods=['GET'])
+@jwt_required_custom
+def get_strategy_activity(strategy_id):
+    """Get recent activity log for a deployed strategy."""
+    try:
+        from models import DeployedStrategy
+        from datetime import datetime, timedelta
+        import random
+        
+        user = g.current_user
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        # Generate simulated activity based on strategy history
+        activities = []
+        markets = deployed.markets or ['Kalshi', 'Polymarket']
+        config = deployed.config or {}
+        
+        now = datetime.utcnow()
+        
+        # If strategy has trades, generate activity
+        if deployed.total_trades > 0:
+            for i in range(min(deployed.total_trades, 20)):  # Last 20 activities
+                hours_ago = i * random.uniform(1, 6)
+                activity_time = now - timedelta(hours=hours_ago)
+                
+                market = random.choice(markets)
+                is_win = random.random() < (deployed.win_rate / 100 if deployed.win_rate else 0.6)
+                
+                if is_win:
+                    pnl = random.uniform(5, 50)
+                    activity = {
+                        'id': f'act_{i}',
+                        'type': 'trade_closed',
+                        'message': f'Closed winning trade on {market}',
+                        'pnl': round(pnl, 2),
+                        'market': market,
+                        'timestamp': activity_time.isoformat(),
+                    }
+                else:
+                    pnl = -random.uniform(3, 25)
+                    activity = {
+                        'id': f'act_{i}',
+                        'type': 'trade_closed',
+                        'message': f'Closed trade on {market}',
+                        'pnl': round(pnl, 2),
+                        'market': market,
+                        'timestamp': activity_time.isoformat(),
+                    }
+                activities.append(activity)
+        
+        # Add recent scanning activity
+        scan_messages = [
+            f'Scanned {random.randint(15, 50)} opportunities on {random.choice(markets)}',
+            f'Identified {random.randint(1, 5)}% edge on {random.choice(markets)}',
+            f'Monitoring price movements on {random.choice(markets)}',
+            f'Analyzed market conditions - waiting for entry',
+        ]
+        
+        for i in range(5):
+            minutes_ago = i * random.randint(5, 20)
+            activities.insert(0, {
+                'id': f'scan_{i}',
+                'type': 'scan',
+                'message': random.choice(scan_messages),
+                'timestamp': (now - timedelta(minutes=minutes_ago)).isoformat(),
+            })
+
+        return jsonify({
+            'activities': activities[:25],  # Limit to 25 most recent
+            'strategy': deployed.to_dict(),
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to get activity: {str(e)}'}), 500
 
 
 @strategies_bp.route('/deploy', methods=['POST'])

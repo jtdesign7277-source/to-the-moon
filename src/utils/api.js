@@ -216,6 +216,9 @@ export const strategyApi = {
 
   deleteDeployed: (id) =>
     api.delete(`/strategies/deployed/${id}`),
+
+  getActivity: (id) =>
+    api.get(`/strategies/deployed/${id}/activity`),
 };
 
 // ============================================
