@@ -200,6 +200,22 @@ export const strategyApi = {
 
   backtest: (strategyId, params) =>
     api.post('/strategies/backtest', { strategy_id: strategyId, ...params }),
+
+  // Deployed strategies
+  getDeployed: () =>
+    api.get('/strategies/deployed'),
+
+  deploy: (data) =>
+    api.post('/strategies/deploy', data),
+
+  stopDeployed: (id) =>
+    api.post(`/strategies/deployed/${id}/stop`),
+
+  resumeDeployed: (id) =>
+    api.post(`/strategies/deployed/${id}/resume`),
+
+  deleteDeployed: (id) =>
+    api.delete(`/strategies/deployed/${id}`),
 };
 
 // ============================================

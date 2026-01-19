@@ -4,7 +4,8 @@ import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingU
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
-import { paperTradingApi } from '../utils/api'
+import { paperTradingApi, strategyApi } from '../utils/api'
+import { useAuth } from '../hooks/useAuth'
 
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
@@ -200,11 +201,13 @@ const getDifficultyStyle = (difficulty) => {
 }
 
 const StrategyBuilder = () => {
+  const { user } = useAuth()
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [isBacktesting, setIsBacktesting] = useState(false)
   const [backtestComplete, setBacktestComplete] = useState(false)
   const [backtestData, setBacktestData] = useState([])
   const [deployedStrategies, setDeployedStrategies] = useState([])
+  const [isLoadingDeployed, setIsLoadingDeployed] = useState(false)
   const [showDeployModal, setShowDeployModal] = useState(false)
   const [deploySettings, setDeploySettings] = useState({
     capital: 1000,
@@ -234,6 +237,38 @@ const StrategyBuilder = () => {
 
   const template = selectedTemplate !== null ? templates[selectedTemplate] : null
   const activeStrategy = template || (selectedTemplate === 'custom' ? customStrategy : null)
+
+  // Fetch deployed strategies on mount
+  useEffect(() => {
+    if (user) {
+      fetchDeployedStrategies()
+    }
+  }, [user])
+
+  const fetchDeployedStrategies = async () => {
+    try {
+      setIsLoadingDeployed(true)
+      const response = await strategyApi.getDeployed()
+      if (response.data?.strategies) {
+        setDeployedStrategies(response.data.strategies.map(s => ({
+          id: s.id,
+          name: s.name,
+          capital: s.allocatedCapital,
+          mode: s.mode,
+          status: s.status,
+          startedAt: s.deployedAt,
+          stoppedAt: s.stoppedAt,
+          icon: s.icon || '⚡',
+          pnl: s.totalPnl,
+          trades: s.totalTrades,
+        })))
+      }
+    } catch (error) {
+      console.error('Failed to fetch deployed strategies:', error)
+    } finally {
+      setIsLoadingDeployed(false)
+    }
+  }
 
   const handleSelectTemplate = (index) => {
     setSelectedTemplate(index)
@@ -269,46 +304,125 @@ const StrategyBuilder = () => {
     setShowDeployModal(true)
   }
 
-  const confirmDeploy = () => {
+  const confirmDeploy = async () => {
     const strategyName = template?.name || customStrategy.name
-    const newStrategy = {
-      id: Date.now(),
-      name: strategyName,
-      capital: deploySettings.capital,
-      mode: deploySettings.mode,
-      status: 'running',
-      startedAt: new Date().toISOString(),
-      icon: template?.icon || '⚡',
-      pnl: 0,  // Initialize P&L at zero
-      trades: 0,
-    }
-
+    
     // Track strategy deployment in Google Analytics
     trackStrategyDeploy(strategyName)
 
-    setDeployedStrategies([...deployedStrategies, newStrategy])
+    // If user is logged in, save to backend
+    if (user) {
+      try {
+        const response = await strategyApi.deploy({
+          name: strategyName,
+          description: template?.description || customStrategy.description || '',
+          icon: template?.icon || '⚡',
+          templateId: template?.id,
+          config: template?.settings || customStrategy.settings || {},
+          markets: template?.markets || customStrategy.markets || [],
+          categories: template?.categories || [],
+          capital: deploySettings.capital,
+          mode: deploySettings.mode,
+        })
+
+        if (response.data?.strategy) {
+          const s = response.data.strategy
+          setDeployedStrategies([...deployedStrategies, {
+            id: s.id,
+            name: s.name,
+            capital: s.allocatedCapital,
+            mode: s.mode,
+            status: s.status,
+            startedAt: s.deployedAt,
+            icon: s.icon || '⚡',
+            pnl: 0,
+            trades: 0,
+          }])
+        }
+      } catch (error) {
+        console.error('Failed to deploy strategy:', error)
+        // Fall back to local state
+        const newStrategy = {
+          id: Date.now(),
+          name: strategyName,
+          capital: deploySettings.capital,
+          mode: deploySettings.mode,
+          status: 'running',
+          startedAt: new Date().toISOString(),
+          icon: template?.icon || '⚡',
+          pnl: 0,
+          trades: 0,
+        }
+        setDeployedStrategies([...deployedStrategies, newStrategy])
+      }
+    } else {
+      // Not logged in - store locally
+      const newStrategy = {
+        id: Date.now(),
+        name: strategyName,
+        capital: deploySettings.capital,
+        mode: deploySettings.mode,
+        status: 'running',
+        startedAt: new Date().toISOString(),
+        icon: template?.icon || '⚡',
+        pnl: 0,
+        trades: 0,
+      }
+      setDeployedStrategies([...deployedStrategies, newStrategy])
+    }
+
     setShowDeployModal(false)
     setSelectedTemplate(null)
     setBacktestComplete(false)
   }
 
-  const stopStrategy = (id) => {
+  const stopStrategy = async (id) => {
+    // Update UI immediately
     setDeployedStrategies(deployedStrategies.map(s =>
       s.id === id ? { ...s, status: 'stopped', stoppedAt: new Date().toISOString() } : s
     ))
+    
+    // Call backend if user is logged in and ID is a string (backend ID)
+    if (user && typeof id === 'string') {
+      try {
+        await strategyApi.stopDeployed(id)
+      } catch (error) {
+        console.error('Failed to stop strategy on server:', error)
+      }
+    }
   }
 
   // Resume a stopped strategy
-  const resumeStrategy = (id) => {
+  const resumeStrategy = async (id) => {
+    // Update UI immediately
     setDeployedStrategies(deployedStrategies.map(s =>
       s.id === id ? { ...s, status: 'running', resumedAt: new Date().toISOString() } : s
     ))
+    
+    // Call backend if user is logged in and ID is a string (backend ID)
+    if (user && typeof id === 'string') {
+      try {
+        await strategyApi.resumeDeployed(id)
+      } catch (error) {
+        console.error('Failed to resume strategy on server:', error)
+      }
+    }
   }
 
   // Remove deployed strategy (doesn't delete the strategy config, just removes from running)
-  const removeDeployedStrategy = (id) => {
+  const removeDeployedStrategy = async (id) => {
+    // Update UI immediately
     setDeployedStrategies(deployedStrategies.filter(s => s.id !== id))
     setShowRemoveDeployedConfirm(null)
+    
+    // Call backend if user is logged in and ID is a string (backend ID)
+    if (user && typeof id === 'string') {
+      try {
+        await strategyApi.deleteDeployed(id)
+      } catch (error) {
+        console.error('Failed to delete strategy on server:', error)
+      }
+    }
   }
 
   // State for edit mode and delete confirmation

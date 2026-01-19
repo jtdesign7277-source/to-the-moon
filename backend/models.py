@@ -511,6 +511,77 @@ class PaperPosition(db.Model):
 
 
 # ============================================
+# 11. DEPLOYED STRATEGY MODEL
+# ============================================
+class DeployedStrategy(db.Model):
+    """A strategy that has been deployed for paper or live trading."""
+    __tablename__ = 'deployed_strategies'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'dep_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    portfolio_id = db.Column(db.String(50), db.ForeignKey('paper_portfolios.id', ondelete='SET NULL'), nullable=True)
+    
+    # Strategy info
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, default='')
+    icon = db.Column(db.String(10), default='⚡')
+    template_id = db.Column(db.Integer, nullable=True)  # If based on a template
+    
+    # Configuration
+    config = db.Column(db.JSON, default=dict)  # Strategy settings (minEdge, stopLoss, etc.)
+    markets = db.Column(db.JSON, default=list)  # ['Kalshi', 'Manifold']
+    categories = db.Column(db.JSON, default=list)  # ['politics', 'sports']
+    
+    # Deployment settings
+    mode = db.Column(db.String(20), default='paper')  # 'paper' or 'live'
+    allocated_capital = db.Column(db.Float, default=1000.0)
+    status = db.Column(db.String(20), default='running')  # running, stopped, paused
+    
+    # Performance tracking
+    total_trades = db.Column(db.Integer, default=0)
+    winning_trades = db.Column(db.Integer, default=0)
+    losing_trades = db.Column(db.Integer, default=0)
+    total_pnl = db.Column(db.Float, default=0.0)
+    unrealized_pnl = db.Column(db.Float, default=0.0)
+    win_rate = db.Column(db.Float, default=0.0)
+    
+    # Timestamps
+    deployed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    stopped_at = db.Column(db.DateTime, nullable=True)
+    last_trade_at = db.Column(db.DateTime, nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        """Serialize deployed strategy to dictionary."""
+        return {
+            'id': self.id,
+            'userId': self.user_id,
+            'name': self.name,
+            'description': self.description,
+            'icon': self.icon,
+            'templateId': self.template_id,
+            'config': self.config or {},
+            'markets': self.markets or [],
+            'categories': self.categories or [],
+            'mode': self.mode,
+            'allocatedCapital': self.allocated_capital,
+            'status': self.status,
+            'totalTrades': self.total_trades,
+            'winningTrades': self.winning_trades,
+            'losingTrades': self.losing_trades,
+            'totalPnl': self.total_pnl,
+            'unrealizedPnl': self.unrealized_pnl,
+            'winRate': self.win_rate,
+            'deployedAt': self.deployed_at.isoformat() if self.deployed_at else None,
+            'stoppedAt': self.stopped_at.isoformat() if self.stopped_at else None,
+            'lastTradeAt': self.last_trade_at.isoformat() if self.last_trade_at else None,
+        }
+
+    def __repr__(self):
+        return f'<DeployedStrategy {self.name} ({self.status})>'
+
+
+# ============================================
 # DATABASE INITIALIZATION HELPERS
 # ============================================
 def init_db(app):

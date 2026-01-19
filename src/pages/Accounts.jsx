@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft, RefreshCw } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { useAuth } from '../hooks/useAuth'
 import { trackAccountConnect } from '../utils/analytics'
 import { paperTradingApi } from '../utils/api'
 
@@ -135,7 +136,8 @@ const AVAILABLE_PLATFORMS = [
 ]
 
 const Accounts = () => {
-  const { tradingMode, user } = useApp()
+  const { tradingMode, setTradingMode } = useApp()
+  const { user } = useAuth()
   const [showAddAccountModal, setShowAddAccountModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [apiCredentials, setApiCredentials] = useState({})
@@ -480,6 +482,28 @@ const Accounts = () => {
                 </div>
               </div>
             )}
+
+            {/* Connect Real Account CTA for Paper Traders */}
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">
+                  🚀
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">Ready for Live Trading?</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Once you're comfortable with paper trading, switch to live mode and connect your real trading accounts.
+                  </p>
+                  <button
+                    onClick={() => setTradingMode('live')}
+                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Key className="w-4 h-4" />
+                    Switch to Live Trading
+                  </button>
+                </div>
+              </div>
+            </div>
           </>
         ) : (
           accounts.map((account) => (

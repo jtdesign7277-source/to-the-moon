@@ -317,3 +317,173 @@ def run_backtest():
 
     except Exception as e:
         return jsonify({'error': f'Backtest failed: {str(e)}'}), 500
+
+
+# ============================================
+# DEPLOYED STRATEGIES ENDPOINTS
+# ============================================
+
+@strategies_bp.route('/deployed', methods=['GET'])
+@jwt_required_custom
+def get_deployed_strategies():
+    """Get user's deployed strategies."""
+    try:
+        from models import DeployedStrategy
+        user = g.current_user
+
+        strategies = DeployedStrategy.query.filter_by(user_id=user.id).order_by(
+            DeployedStrategy.deployed_at.desc()
+        ).all()
+
+        return jsonify({
+            'strategies': [s.to_dict() for s in strategies],
+            'count': len(strategies),
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to get deployed strategies: {str(e)}'}), 500
+
+
+@strategies_bp.route('/deploy', methods=['POST'])
+@jwt_required_custom
+def deploy_strategy():
+    """Deploy a strategy for paper or live trading."""
+    try:
+        from models import DeployedStrategy, PaperPortfolio
+        from services.paper_trading_service import PaperTradingService
+        
+        user = g.current_user
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+
+        name = data.get('name', '').strip()
+        if not name:
+            return jsonify({'error': 'Strategy name required'}), 400
+
+        mode = data.get('mode', 'paper')
+        capital = float(data.get('capital', 1000))
+        
+        if capital < 100 or capital > 100000:
+            return jsonify({'error': 'Capital must be between $100 and $100,000'}), 400
+
+        # Get or create paper portfolio for paper trading
+        portfolio_id = None
+        if mode == 'paper':
+            portfolio = PaperTradingService.get_or_create_portfolio(user.id)
+            portfolio_id = portfolio.id
+
+        deployed = DeployedStrategy(
+            user_id=user.id,
+            portfolio_id=portfolio_id,
+            name=name,
+            description=data.get('description', ''),
+            icon=data.get('icon', '⚡'),
+            template_id=data.get('templateId'),
+            config=data.get('config', {}),
+            markets=data.get('markets', []),
+            categories=data.get('categories', []),
+            mode=mode,
+            allocated_capital=capital,
+            status='running',
+        )
+
+        db.session.add(deployed)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Strategy deployed successfully',
+            'strategy': deployed.to_dict(),
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to deploy strategy: {str(e)}'}), 500
+
+
+@strategies_bp.route('/deployed/<string:strategy_id>/stop', methods=['POST'])
+@jwt_required_custom
+def stop_deployed_strategy(strategy_id):
+    """Stop a deployed strategy."""
+    try:
+        from models import DeployedStrategy
+        from datetime import datetime
+        
+        user = g.current_user
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        deployed.status = 'stopped'
+        deployed.stopped_at = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Strategy stopped',
+            'strategy': deployed.to_dict(),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to stop strategy: {str(e)}'}), 500
+
+
+@strategies_bp.route('/deployed/<string:strategy_id>/resume', methods=['POST'])
+@jwt_required_custom
+def resume_deployed_strategy(strategy_id):
+    """Resume a stopped strategy."""
+    try:
+        from models import DeployedStrategy
+        
+        user = g.current_user
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        deployed.status = 'running'
+        deployed.stopped_at = None
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Strategy resumed',
+            'strategy': deployed.to_dict(),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to resume strategy: {str(e)}'}), 500
+
+
+@strategies_bp.route('/deployed/<string:strategy_id>', methods=['DELETE'])
+@jwt_required_custom
+def delete_deployed_strategy(strategy_id):
+    """Delete a deployed strategy."""
+    try:
+        from models import DeployedStrategy
+        
+        user = g.current_user
+        deployed = DeployedStrategy.query.get(strategy_id)
+
+        if not deployed:
+            return jsonify({'error': 'Strategy not found'}), 404
+
+        if deployed.user_id != user.id:
+            return jsonify({'error': 'Access denied'}), 403
+
+        db.session.delete(deployed)
+        db.session.commit()
+
+        return jsonify({'message': 'Strategy removed'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete strategy: {str(e)}'}), 500

@@ -126,6 +126,38 @@ CREATE INDEX idx_strategy_follows_user_id ON strategy_follows(user_id);
 CREATE INDEX idx_strategy_follows_strategy_id ON strategy_follows(strategy_id);
 
 -- ============================================
+-- 7. DEPLOYED_STRATEGIES TABLE
+-- ============================================
+CREATE TABLE deployed_strategies (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    portfolio_id VARCHAR(50) REFERENCES paper_portfolios(id) ON DELETE SET NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT DEFAULT '',
+    icon VARCHAR(10) DEFAULT '⚡',
+    template_id INTEGER,
+    config JSONB DEFAULT '{}',
+    markets JSONB DEFAULT '[]',
+    categories JSONB DEFAULT '[]',
+    mode VARCHAR(20) DEFAULT 'paper',
+    allocated_capital DECIMAL(18, 2) DEFAULT 1000.00,
+    status VARCHAR(20) DEFAULT 'running',
+    total_trades INTEGER DEFAULT 0,
+    winning_trades INTEGER DEFAULT 0,
+    losing_trades INTEGER DEFAULT 0,
+    total_pnl DECIMAL(18, 2) DEFAULT 0.00,
+    unrealized_pnl DECIMAL(18, 2) DEFAULT 0.00,
+    win_rate DECIMAL(5, 2) DEFAULT 0.00,
+    deployed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    stopped_at TIMESTAMP,
+    last_trade_at TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_deployed_strategies_user_id ON deployed_strategies(user_id);
+CREATE INDEX idx_deployed_strategies_status ON deployed_strategies(status);
+
+-- ============================================
 -- AUTO-UPDATE TIMESTAMPS TRIGGER
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at()
