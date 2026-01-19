@@ -56,3 +56,4 @@ htmlcov/
 *.bak
 *.tmp
 .cache/
+.vercel

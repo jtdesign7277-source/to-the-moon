@@ -154,8 +154,68 @@ const StrategyBuilder = () => {
     ))
   }
 
+  // State for edit mode and delete confirmation
+  const [editingStrategyId, setEditingStrategyId] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
+
+  // Calculate realistic stats based on strategy configuration
+  const calculateStrategyStats = (strategy) => {
+    // Base stats affected by strategy type
+    const typeMultipliers = {
+      'arbitrage': { winRate: 0.82, trades: 1.2, sharpe: 1.1 },
+      'momentum': { winRate: 0.68, trades: 1.0, sharpe: 0.9 },
+      'mean-reversion': { winRate: 0.72, trades: 0.9, sharpe: 1.0 },
+      'news-based': { winRate: 0.75, trades: 0.6, sharpe: 1.05 },
+    }
+    const typeMult = typeMultipliers[strategy.type] || { winRate: 0.70, trades: 1.0, sharpe: 1.0 }
+
+    // Higher minEdge = higher win rate but fewer trades
+    const edgeFactor = Math.min(strategy.settings.minEdge / 3, 1.5)
+    const baseWinRate = 65 + (edgeFactor * 15)
+    const winRate = Math.min(95, Math.round(baseWinRate * typeMult.winRate))
+
+    // More markets = more trades
+    const marketFactor = strategy.markets.length
+    const baseTrades = 80 + (marketFactor * 40)
+    const totalTrades = Math.round(baseTrades * typeMult.trades * (1 + Math.random() * 0.2))
+
+    // Calculate P&L based on win rate and position sizing
+    const avgWin = Math.round(strategy.settings.maxPosition * (strategy.settings.takeProfit / 100) * 0.8)
+    const avgLoss = -Math.round(strategy.settings.maxPosition * (strategy.settings.stopLoss / 100) * 0.7)
+    const winningTrades = Math.round(totalTrades * (winRate / 100))
+    const losingTrades = totalTrades - winningTrades
+    const profitLoss = Math.round((winningTrades * avgWin) + (losingTrades * avgLoss))
+
+    // Risk metrics
+    const maxDrawdown = Math.round(strategy.settings.stopLoss * (1.5 + Math.random() * 0.5))
+    const sharpeRatio = Math.round((1.2 + (edgeFactor * 0.8) * typeMult.sharpe) * 10) / 10
+    const sortinoRatio = Math.round((sharpeRatio * 1.3) * 10) / 10
+
+    // Monthly returns (6 months)
+    const monthlyReturn = profitLoss / 6
+    const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const monthlyReturns = months.map(month => ({
+      month,
+      pnl: Math.round(monthlyReturn * (0.7 + Math.random() * 0.6))
+    }))
+
+    return {
+      winRate,
+      totalTrades,
+      profitLoss,
+      avgWin,
+      avgLoss,
+      maxDrawdown: -maxDrawdown,
+      sharpeRatio,
+      sortinoRatio,
+      monthlyReturn: Math.round((profitLoss / 10000) * 100 * 10) / 10, // % based on $10k
+      monthlyReturns,
+    }
+  }
+
   // Custom strategy builder functions
   const openNewStrategy = () => {
+    setEditingStrategyId(null)
     setShowNewStrategyModal(true)
     setBuilderStep(1)
     setCustomStrategy({
@@ -171,6 +231,62 @@ const StrategyBuilder = () => {
         takeProfit: 15,
       }
     })
+  }
+
+  // Edit existing custom strategy
+  const editCustomStrategy = (strategy, e) => {
+    e.stopPropagation()
+    setEditingStrategyId(strategy.id)
+    setCustomStrategy({
+      ...strategy,
+      settings: strategy.settings || {
+        minEdge: 3,
+        maxPosition: 200,
+        stopLoss: 10,
+        takeProfit: 15,
+      }
+    })
+    setBuilderStep(1)
+    setShowNewStrategyModal(true)
+  }
+
+  // Delete custom strategy
+  const deleteCustomStrategy = (strategyId) => {
+    setCustomStrategies(customStrategies.filter(s => s.id !== strategyId))
+    setShowDeleteConfirm(null)
+    // Clear selection if deleted strategy was selected
+    if (selectedTemplate === 'custom' && customStrategy.id === strategyId) {
+      setSelectedTemplate(null)
+      setBacktestComplete(false)
+    }
+  }
+
+  // Re-run backtest with current settings
+  const rerunBacktest = () => {
+    if (selectedTemplate === 'custom' && customStrategy.id) {
+      const newStats = calculateStrategyStats(customStrategy)
+      const updatedStrategy = {
+        ...customStrategy,
+        ...newStats,
+        backtestStats: {
+          totalTrades: newStats.totalTrades,
+          winRate: newStats.winRate,
+          profitLoss: newStats.profitLoss,
+          avgWin: newStats.avgWin,
+          avgLoss: newStats.avgLoss,
+          maxDrawdown: newStats.maxDrawdown,
+          sharpeRatio: newStats.sharpeRatio,
+          sortinoRatio: newStats.sortinoRatio,
+        }
+      }
+      setCustomStrategy(updatedStrategy)
+      setCustomStrategies(customStrategies.map(s =>
+        s.id === customStrategy.id ? updatedStrategy : s
+      ))
+      handleBacktest()
+    } else {
+      handleBacktest()
+    }
   }
 
   const toggleMarket = (marketId) => {
@@ -203,16 +319,38 @@ const StrategyBuilder = () => {
   }
 
   const saveCustomStrategy = () => {
-    const newStrategy = {
+    // Calculate realistic stats based on configuration
+    const stats = calculateStrategyStats(customStrategy)
+
+    const strategyToSave = {
       ...customStrategy,
-      id: Date.now(),
-      winRate: Math.floor(60 + Math.random() * 30),
-      monthlyReturn: (5 + Math.random() * 10).toFixed(1),
-      maxDrawdown: Math.floor(8 + Math.random() * 15),
+      id: editingStrategyId || Date.now(),
+      ...stats,
+      backtestStats: {
+        totalTrades: stats.totalTrades,
+        winRate: stats.winRate,
+        profitLoss: stats.profitLoss,
+        avgWin: stats.avgWin,
+        avgLoss: stats.avgLoss,
+        maxDrawdown: stats.maxDrawdown,
+        sharpeRatio: stats.sharpeRatio,
+        sortinoRatio: stats.sortinoRatio,
+      }
     }
-    setCustomStrategies([...customStrategies, newStrategy])
+
+    if (editingStrategyId) {
+      // Update existing strategy
+      setCustomStrategies(customStrategies.map(s =>
+        s.id === editingStrategyId ? strategyToSave : s
+      ))
+    } else {
+      // Add new strategy
+      setCustomStrategies([...customStrategies, strategyToSave])
+    }
+
     setShowNewStrategyModal(false)
-    handleSelectCustomStrategy(newStrategy)
+    setEditingStrategyId(null)
+    handleSelectCustomStrategy(strategyToSave)
   }
 
   return (
@@ -275,10 +413,10 @@ const StrategyBuilder = () => {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Custom Strategies</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {customStrategies.map((strategy) => (
-              <button
+              <div
                 key={strategy.id}
                 onClick={() => handleSelectCustomStrategy(strategy)}
-                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                className={`relative text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   selectedTemplate === 'custom' && customStrategy.id === strategy.id
                     ? 'border-indigo-500 bg-indigo-50 shadow-md'
                     : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
@@ -286,9 +424,25 @@ const StrategyBuilder = () => {
               >
                 <div className="flex items-start justify-between">
                   <span className="text-2xl">⚡</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-indigo-100 text-indigo-700">
-                    Custom
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => editCustomStrategy(strategy, e)}
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title="Edit strategy"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowDeleteConfirm(strategy.id)
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete strategy"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="font-semibold text-gray-900 mt-3">{strategy.name}</h3>
                 <p className="text-sm text-gray-500 mt-1">
@@ -299,8 +453,44 @@ const StrategyBuilder = () => {
                   <span className="text-sm text-gray-400">•</span>
                   <span className="text-sm font-medium text-indigo-600">+{strategy.monthlyReturn}%/mo</span>
                 </div>
-              </button>
+                {strategy.backtestStats && (
+                  <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                    {strategy.backtestStats.totalTrades} trades • ${strategy.backtestStats.profitLoss?.toLocaleString()} P&L
+                  </div>
+                )}
+              </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Strategy?</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                This will permanently delete this custom strategy. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => deleteCustomStrategy(showDeleteConfirm)}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -345,8 +535,18 @@ const StrategyBuilder = () => {
               {activeStrategy ? (template?.name || customStrategy.name) : 'Strategy Canvas'}
             </h2>
             <div className="flex gap-2">
+              {/* Edit button for custom strategies */}
+              {selectedTemplate === 'custom' && customStrategy.id && (
+                <button
+                  onClick={(e) => editCustomStrategy(customStrategy, e)}
+                  className="px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 text-gray-600 hover:bg-gray-100"
+                >
+                  <Settings className="w-4 h-4" />
+                  Edit
+                </button>
+              )}
               <button
-                onClick={handleBacktest}
+                onClick={backtestComplete ? rerunBacktest : handleBacktest}
                 disabled={!activeStrategy || isBacktesting}
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
                   activeStrategy && !isBacktesting
@@ -356,10 +556,12 @@ const StrategyBuilder = () => {
               >
                 {isBacktesting ? (
                   <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin" />
+                ) : backtestComplete ? (
+                  <RefreshCw className="w-4 h-4" />
                 ) : (
                   <Activity className="w-4 h-4" />
                 )}
-                {isBacktesting ? 'Running...' : 'Backtest'}
+                {isBacktesting ? 'Running...' : backtestComplete ? 'Re-run' : 'Backtest'}
               </button>
               <button
                 onClick={handleDeploy}
@@ -611,11 +813,16 @@ const StrategyBuilder = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Create New Strategy</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {editingStrategyId ? 'Edit Strategy' : 'Create New Strategy'}
+                  </h3>
                   <p className="text-sm text-gray-500 mt-1">Step {builderStep} of 5</p>
                 </div>
                 <button
-                  onClick={() => setShowNewStrategyModal(false)}
+                  onClick={() => {
+                    setShowNewStrategyModal(false)
+                    setEditingStrategyId(null)
+                  }}
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
                 >
                   <X className="w-5 h-5" />
@@ -856,7 +1063,7 @@ const StrategyBuilder = () => {
                   className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center gap-2"
                 >
                   <Zap className="w-4 h-4" />
-                  Create Strategy
+                  {editingStrategyId ? 'Save Changes' : 'Create Strategy'}
                 </button>
               )}
             </div>
