@@ -33,7 +33,7 @@ if os.environ.get('ALLOWED_ORIGINS'):
 CORS(app,
      origins=ALLOWED_ORIGINS,
      supports_credentials=True,
-     allow_headers=['Content-Type', 'Authorization'],
+     allow_headers=['Content-Type', 'Authorization', 'X-Admin-Key'],
      expose_headers=['Content-Type', 'Authorization'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 
