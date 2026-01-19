@@ -63,7 +63,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 from models import (
     db, User, Subscription, UserStats, Trade, Strategy,
     WaitlistEntry, BacktestResult, PaperPortfolio, PaperTrade, PaperPosition,
-    create_demo_user
+    DeployedStrategy, create_demo_user
 )
 
 # Import paper trading service

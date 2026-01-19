@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from flask import Flask
 from models import (
     db, User, Subscription, UserStats, Strategy, Trade,
-    WaitlistEntry, BacktestResult, create_demo_user
+    WaitlistEntry, BacktestResult, PaperPortfolio, PaperTrade, PaperPosition,
+    DeployedStrategy, create_demo_user
 )
 import bcrypt
 
