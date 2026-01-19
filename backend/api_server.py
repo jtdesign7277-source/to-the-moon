@@ -483,6 +483,14 @@ def signup():
         users_db[user_id] = new_user
         users_by_email[email] = new_user
 
+        # Also add to waitlist (so admin can see all registered users)
+        if email not in waitlist_db:
+            waitlist_db[email] = {
+                'email': email,
+                'joined_at': datetime.now().isoformat(),
+                'source': 'signup',  # Track that this came from account creation
+            }
+
         # Generate JWT token
         access_token = generate_jwt_token(user_id)
 

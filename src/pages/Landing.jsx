@@ -51,7 +51,7 @@ function useAnimatedCounter(target, duration = 2000) {
   return count
 }
 
-export default function Landing({ onEnterApp }) {
+export default function Landing({ onEnterApp, onLegal }) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [errorMessage, setErrorMessage] = useState('')
@@ -378,9 +378,9 @@ export default function Landing({ onEnterApp }) {
             </div>
 
             <div className="flex items-center gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
+              <button onClick={() => onLegal?.('terms')} className="hover:text-white transition-colors">Terms</button>
+              <button onClick={() => onLegal?.('privacy')} className="hover:text-white transition-colors">Privacy</button>
+              <button onClick={() => onLegal?.('risk')} className="hover:text-white transition-colors">Risk Disclaimer</button>
             </div>
 
             <p className="text-sm text-gray-500">

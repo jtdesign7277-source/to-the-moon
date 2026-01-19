@@ -30,6 +30,7 @@ import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
 import Education from './pages/Education'
 import StrategyDiscovery from './pages/StrategyDiscovery'
+import Legal from './pages/Legal'
 
 // Navigation configuration
 const NAV_ITEMS = [
@@ -85,7 +86,7 @@ const NAV_ITEMS = [
 ]
 
 // Page renderer component
-const PageRenderer = ({ currentPage }) => {
+const PageRenderer = ({ currentPage, legalTab }) => {
   switch (currentPage) {
     case 'dashboard':
       return <Dashboard />
@@ -101,6 +102,8 @@ const PageRenderer = ({ currentPage }) => {
       return <Education />
     case 'discover':
       return <StrategyDiscovery />
+    case 'legal':
+      return <Legal initialTab={legalTab} />
     default:
       return <Dashboard />
   }
@@ -108,10 +111,11 @@ const PageRenderer = ({ currentPage }) => {
 
 // Main app content (needs to be inside AppProvider)
 const AppContent = () => {
-  const [view, setView] = useState('landing') // 'landing' | 'auth' | 'app' | 'admin'
+  const [view, setView] = useState('landing') // 'landing' | 'auth' | 'app' | 'admin' | 'legal'
   const [user, setUser] = useState(null)
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [legalTab, setLegalTab] = useState('terms')
   const { isPro, openUpgradeModal, setIsPro } = useApp()
 
   // Check for admin route on mount
@@ -178,11 +182,27 @@ const AppContent = () => {
     )
   }
 
+  // Show legal page (standalone, from landing)
+  if (view === 'legal') {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <Legal
+          initialTab={legalTab}
+          onBack={() => setView('landing')}
+        />
+      </div>
+    )
+  }
+
   // Show landing page
   if (view === 'landing') {
     return (
       <Landing
         onEnterApp={() => setView('auth')}
+        onLegal={(tab) => {
+          setLegalTab(tab)
+          setView('legal')
+        }}
       />
     )
   }
@@ -210,7 +230,7 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-0 flex flex-col">
       {/* Header */}
       <Header
         navItems={NAV_ITEMS}
@@ -223,9 +243,38 @@ const AppContent = () => {
       />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <PageRenderer currentPage={currentPage} />
+      <main className="max-w-7xl mx-auto px-4 py-6 flex-1">
+        <PageRenderer currentPage={currentPage} legalTab={legalTab} />
       </main>
+
+      {/* Footer with Legal Links */}
+      <footer className="hidden lg:block bg-white border-t border-gray-200 py-4 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} ToTheMoon. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 text-sm">
+            <button
+              onClick={() => { setLegalTab('terms'); setCurrentPage('legal'); }}
+              className="text-gray-500 hover:text-indigo-600 transition-colors"
+            >
+              Terms of Service
+            </button>
+            <button
+              onClick={() => { setLegalTab('privacy'); setCurrentPage('legal'); }}
+              className="text-gray-500 hover:text-indigo-600 transition-colors"
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => { setLegalTab('risk'); setCurrentPage('legal'); }}
+              className="text-gray-500 hover:text-indigo-600 transition-colors"
+            >
+              Risk Disclaimer
+            </button>
+          </div>
+        </div>
+      </footer>
 
       {/* Mobile Bottom Navigation */}
       <MobileNav
