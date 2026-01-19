@@ -281,6 +281,236 @@ class BacktestResult(db.Model):
 
 
 # ============================================
+# 8. PAPER PORTFOLIO MODEL
+# ============================================
+class PaperPortfolio(db.Model):
+    """Paper trading portfolio - tracks virtual balance and P&L."""
+    __tablename__ = 'paper_portfolios'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'pp_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, unique=True, index=True)
+    
+    # Balance tracking
+    starting_balance = db.Column(db.Float, default=100000.0)  # $100,000 starting
+    current_balance = db.Column(db.Float, default=100000.0)
+    available_balance = db.Column(db.Float, default=100000.0)  # Balance not in open positions
+    
+    # Performance metrics
+    total_pnl = db.Column(db.Float, default=0.0)
+    total_pnl_percent = db.Column(db.Float, default=0.0)
+    realized_pnl = db.Column(db.Float, default=0.0)
+    unrealized_pnl = db.Column(db.Float, default=0.0)
+    
+    # Trade stats
+    total_trades = db.Column(db.Integer, default=0)
+    winning_trades = db.Column(db.Integer, default=0)
+    losing_trades = db.Column(db.Integer, default=0)
+    win_rate = db.Column(db.Float, default=0.0)
+    
+    # Monthly tracking
+    month_start_balance = db.Column(db.Float, default=100000.0)
+    monthly_pnl = db.Column(db.Float, default=0.0)
+    monthly_pnl_percent = db.Column(db.Float, default=0.0)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_trade_at = db.Column(db.DateTime, nullable=True)
+
+    # Relationships
+    trades = db.relationship('PaperTrade', backref='portfolio', lazy='dynamic', cascade='all, delete-orphan')
+    positions = db.relationship('PaperPosition', backref='portfolio', lazy='dynamic', cascade='all, delete-orphan')
+
+    def update_stats(self):
+        """Recalculate portfolio statistics."""
+        if self.total_trades > 0:
+            self.win_rate = (self.winning_trades / self.total_trades) * 100
+        else:
+            self.win_rate = 0.0
+        
+        self.total_pnl = self.current_balance - self.starting_balance
+        if self.starting_balance > 0:
+            self.total_pnl_percent = (self.total_pnl / self.starting_balance) * 100
+        
+        self.monthly_pnl = self.current_balance - self.month_start_balance
+        if self.month_start_balance > 0:
+            self.monthly_pnl_percent = (self.monthly_pnl / self.month_start_balance) * 100
+
+    def to_dict(self):
+        """Serialize portfolio to dictionary."""
+        return {
+            'id': self.id,
+            'userId': self.user_id,
+            'startingBalance': self.starting_balance,
+            'currentBalance': self.current_balance,
+            'availableBalance': self.available_balance,
+            'totalPnl': self.total_pnl,
+            'totalPnlPercent': self.total_pnl_percent,
+            'realizedPnl': self.realized_pnl,
+            'unrealizedPnl': self.unrealized_pnl,
+            'totalTrades': self.total_trades,
+            'winningTrades': self.winning_trades,
+            'losingTrades': self.losing_trades,
+            'winRate': self.win_rate,
+            'monthlyPnl': self.monthly_pnl,
+            'monthlyPnlPercent': self.monthly_pnl_percent,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
+            'lastTradeAt': self.last_trade_at.isoformat() if self.last_trade_at else None,
+        }
+
+    def __repr__(self):
+        return f'<PaperPortfolio user_id={self.user_id} balance=${self.current_balance:.2f}>'
+
+
+# ============================================
+# 9. PAPER TRADE MODEL
+# ============================================
+class PaperTrade(db.Model):
+    """Individual paper trade record."""
+    __tablename__ = 'paper_trades'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'pt_{generate_uuid()}')
+    portfolio_id = db.Column(db.String(50), db.ForeignKey('paper_portfolios.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    strategy_id = db.Column(db.String(50), nullable=True)
+    
+    # Market info
+    platform = db.Column(db.String(50), default='kalshi')  # kalshi, polymarket, manifold
+    market_id = db.Column(db.String(100), nullable=False)
+    market_title = db.Column(db.String(500), nullable=False)
+    
+    # Trade details
+    side = db.Column(db.String(10), nullable=False)  # 'yes' or 'no'
+    action = db.Column(db.String(10), nullable=False)  # 'buy' or 'sell'
+    quantity = db.Column(db.Integer, nullable=False)  # Number of contracts
+    entry_price = db.Column(db.Float, nullable=False)  # Price per contract (0.01 to 0.99)
+    exit_price = db.Column(db.Float, nullable=True)  # Price when closed
+    
+    # Cost basis
+    cost_basis = db.Column(db.Float, nullable=False)  # Total cost of position
+    current_value = db.Column(db.Float, nullable=True)  # Current market value
+    
+    # P&L
+    pnl = db.Column(db.Float, default=0.0)
+    pnl_percent = db.Column(db.Float, default=0.0)
+    
+    # Status
+    status = db.Column(db.String(20), default='open')  # open, closed, expired
+    result = db.Column(db.String(20), nullable=True)  # win, loss, breakeven
+    
+    # Timestamps
+    opened_at = db.Column(db.DateTime, default=datetime.utcnow)
+    closed_at = db.Column(db.DateTime, nullable=True)
+
+    def close_trade(self, exit_price: float):
+        """Close the trade and calculate P&L."""
+        self.exit_price = exit_price
+        self.current_value = self.quantity * exit_price
+        self.pnl = self.current_value - self.cost_basis
+        if self.cost_basis > 0:
+            self.pnl_percent = (self.pnl / self.cost_basis) * 100
+        self.status = 'closed'
+        self.closed_at = datetime.utcnow()
+        
+        if self.pnl > 0:
+            self.result = 'win'
+        elif self.pnl < 0:
+            self.result = 'loss'
+        else:
+            self.result = 'breakeven'
+
+    def to_dict(self):
+        """Serialize trade to dictionary."""
+        return {
+            'id': self.id,
+            'portfolioId': self.portfolio_id,
+            'strategyId': self.strategy_id,
+            'platform': self.platform,
+            'marketId': self.market_id,
+            'marketTitle': self.market_title,
+            'side': self.side,
+            'action': self.action,
+            'quantity': self.quantity,
+            'entryPrice': self.entry_price,
+            'exitPrice': self.exit_price,
+            'costBasis': self.cost_basis,
+            'currentValue': self.current_value,
+            'pnl': self.pnl,
+            'pnlPercent': self.pnl_percent,
+            'status': self.status,
+            'result': self.result,
+            'openedAt': self.opened_at.isoformat() if self.opened_at else None,
+            'closedAt': self.closed_at.isoformat() if self.closed_at else None,
+        }
+
+    def __repr__(self):
+        return f'<PaperTrade {self.id} {self.market_title[:30]}>'
+
+
+# ============================================
+# 10. PAPER POSITION MODEL
+# ============================================
+class PaperPosition(db.Model):
+    """Current open position in paper trading."""
+    __tablename__ = 'paper_positions'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'pos_{generate_uuid()}')
+    portfolio_id = db.Column(db.String(50), db.ForeignKey('paper_portfolios.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    
+    # Market info
+    platform = db.Column(db.String(50), default='kalshi')
+    market_id = db.Column(db.String(100), nullable=False)
+    market_title = db.Column(db.String(500), nullable=False)
+    
+    # Position details
+    side = db.Column(db.String(10), nullable=False)  # 'yes' or 'no'
+    quantity = db.Column(db.Integer, nullable=False)
+    avg_entry_price = db.Column(db.Float, nullable=False)
+    current_price = db.Column(db.Float, nullable=True)
+    
+    # Value
+    cost_basis = db.Column(db.Float, nullable=False)
+    current_value = db.Column(db.Float, nullable=True)
+    unrealized_pnl = db.Column(db.Float, default=0.0)
+    unrealized_pnl_percent = db.Column(db.Float, default=0.0)
+    
+    # Timestamps
+    opened_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def update_price(self, new_price: float):
+        """Update position with new market price."""
+        self.current_price = new_price
+        self.current_value = self.quantity * new_price
+        self.unrealized_pnl = self.current_value - self.cost_basis
+        if self.cost_basis > 0:
+            self.unrealized_pnl_percent = (self.unrealized_pnl / self.cost_basis) * 100
+
+    def to_dict(self):
+        """Serialize position to dictionary."""
+        return {
+            'id': self.id,
+            'platform': self.platform,
+            'marketId': self.market_id,
+            'marketTitle': self.market_title,
+            'side': self.side,
+            'quantity': self.quantity,
+            'avgEntryPrice': self.avg_entry_price,
+            'currentPrice': self.current_price,
+            'costBasis': self.cost_basis,
+            'currentValue': self.current_value,
+            'unrealizedPnl': self.unrealized_pnl,
+            'unrealizedPnlPercent': self.unrealized_pnl_percent,
+            'openedAt': self.opened_at.isoformat() if self.opened_at else None,
+        }
+
+    def __repr__(self):
+        return f'<PaperPosition {self.market_title[:30]} qty={self.quantity}>'
+
+
+# ============================================
 # DATABASE INITIALIZATION HELPERS
 # ============================================
 def init_db(app):

@@ -4,6 +4,7 @@ import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingU
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
+import { paperTradingApi } from '../utils/api'
 
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
@@ -278,6 +279,8 @@ const StrategyBuilder = () => {
       status: 'running',
       startedAt: new Date().toISOString(),
       icon: template?.icon || '⚡',
+      pnl: 0,  // Initialize P&L at zero
+      trades: 0,
     }
 
     // Track strategy deployment in Google Analytics
@@ -636,7 +639,9 @@ const StrategyBuilder = () => {
                 <div className="flex items-center gap-2">
                   {strategy.status === 'running' ? (
                     <>
-                      <span className="text-sm text-green-600 font-medium">+$42.50 (4.2%)</span>
+                      <span className={`text-sm font-medium ${(strategy.pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {(strategy.pnl || 0) >= 0 ? '+' : ''}${(strategy.pnl || 0).toFixed(2)} ({((strategy.pnl || 0) / strategy.capital * 100).toFixed(1)}%)
+                      </span>
                       <button
                         onClick={() => stopStrategy(strategy.id)}
                         className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"

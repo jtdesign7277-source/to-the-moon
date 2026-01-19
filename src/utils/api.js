@@ -237,6 +237,39 @@ export const leaderboardApi = {
 };
 
 // ============================================
+// PAPER TRADING ENDPOINTS
+// ============================================
+export const paperTradingApi = {
+  /** Get paper trading portfolio with positions and recent trades */
+  getPortfolio: () =>
+    api.get('/paper/portfolio'),
+
+  /** Reset portfolio to $100,000 starting balance */
+  resetPortfolio: () =>
+    api.post('/paper/portfolio/reset'),
+
+  /** Execute a paper trade */
+  executeTrade: (data) =>
+    api.post('/paper/trade', data),
+
+  /** Get all open positions */
+  getPositions: () =>
+    api.get('/paper/positions'),
+
+  /** Close a specific position */
+  closePosition: (positionId) =>
+    api.post(`/paper/positions/${positionId}/close`),
+
+  /** Get trade history */
+  getTrades: (limit = 50) =>
+    api.get('/paper/trades', { params: { limit } }),
+
+  /** Quick buy with dollar amount (auto-calculates quantity) */
+  quickBuy: (data) =>
+    api.post('/paper/quick-buy', data),
+};
+
+// ============================================
 // HEALTH CHECK
 // ============================================
 export const healthApi = {

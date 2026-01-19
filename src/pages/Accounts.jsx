@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Plus, AlertCircle, Check, TrendingUp, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft, RefreshCw } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { trackAccountConnect } from '../utils/analytics'
+import { paperTradingApi } from '../utils/api'
 
 // Available platforms to connect
 const AVAILABLE_PLATFORMS = [
@@ -134,27 +135,106 @@ const AVAILABLE_PLATFORMS = [
 ]
 
 const Accounts = () => {
-  const { tradingMode } = useApp()
+  const { tradingMode, user } = useApp()
   const [showAddAccountModal, setShowAddAccountModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [apiCredentials, setApiCredentials] = useState({})
   const [showSecrets, setShowSecrets] = useState({})
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionSuccess, setConnectionSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isResetting, setIsResetting] = useState(false)
 
   const [accounts, setAccounts] = useState([])
+  
+  // Paper trading portfolio state
+  const [paperPortfolio, setPaperPortfolio] = useState({
+    currentBalance: 100000,
+    startingBalance: 100000,
+    monthlyPnl: 0,
+    monthlyPnlPercent: 0,
+    totalPnl: 0,
+    totalPnlPercent: 0,
+    totalTrades: 0,
+    winRate: 0,
+  })
+  const [paperPositions, setPaperPositions] = useState([])
+  const [recentTrades, setRecentTrades] = useState([])
+
+  // Fetch paper trading portfolio on mount
+  useEffect(() => {
+    if (user && tradingMode === 'paper') {
+      fetchPaperPortfolio()
+    } else {
+      setIsLoading(false)
+    }
+  }, [user, tradingMode])
+
+  const fetchPaperPortfolio = async () => {
+    try {
+      setIsLoading(true)
+      const response = await paperTradingApi.getPortfolio()
+      const data = response.data
+      
+      if (data.portfolio) {
+        setPaperPortfolio(data.portfolio)
+      }
+      if (data.positions) {
+        setPaperPositions(data.positions)
+      }
+      if (data.recentTrades) {
+        setRecentTrades(data.recentTrades)
+      }
+    } catch (error) {
+      console.error('Failed to fetch paper portfolio:', error)
+      // Keep default values on error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResetPortfolio = async () => {
+    if (!confirm('Are you sure you want to reset your paper trading account? This will clear all trades and reset your balance to $100,000.')) {
+      return
+    }
+    
+    try {
+      setIsResetting(true)
+      await paperTradingApi.resetPortfolio()
+      await fetchPaperPortfolio()
+    } catch (error) {
+      console.error('Failed to reset portfolio:', error)
+    } finally {
+      setIsResetting(false)
+    }
+  }
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(value || 0)
+  }
+
+  const formatPercent = (value) => {
+    const prefix = value >= 0 ? '+' : ''
+    return `${prefix}${(value || 0).toFixed(1)}%`
+  }
 
   const paperAccount = {
     name: 'Paper Trading',
-    balance: '$100,000.00',
+    balance: formatCurrency(paperPortfolio.currentBalance),
     status: 'Active',
     type: 'Simulated',
     icon: '📝'
   }
 
-  const totalBalance = tradingMode === 'paper' ? '$100,000.00' : '$' + accounts.reduce((sum, acc) => {
-    return sum + parseFloat(acc.balance.replace(/[$,]/g, ''))
-  }, 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+  const totalBalance = tradingMode === 'paper' 
+    ? formatCurrency(paperPortfolio.currentBalance)
+    : '$' + accounts.reduce((sum, acc) => {
+        return sum + parseFloat(acc.balance.replace(/[$,]/g, ''))
+      }, 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
 
   const openAddAccount = () => {
     setShowAddAccountModal(true)
@@ -269,37 +349,147 @@ const Accounts = () => {
 
       {/* Total Balance Card */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
-        <p className="text-indigo-100 text-sm">Total Balance</p>
-        <p className="text-3xl font-bold mt-1">{totalBalance}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <TrendingUp className="w-4 h-4" />
-          <span className="text-sm">$0.00 (0.0%) this month</span>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-indigo-100 text-sm">Total Balance</p>
+            <p className="text-3xl font-bold mt-1">{isLoading ? '...' : totalBalance}</p>
+            <div className="flex items-center gap-2 mt-2">
+              {paperPortfolio.monthlyPnl >= 0 ? (
+                <TrendingUp className="w-4 h-4" />
+              ) : (
+                <TrendingDown className="w-4 h-4" />
+              )}
+              <span className="text-sm">
+                {tradingMode === 'paper' 
+                  ? `${paperPortfolio.monthlyPnl >= 0 ? '+' : ''}${formatCurrency(paperPortfolio.monthlyPnl)} (${formatPercent(paperPortfolio.monthlyPnlPercent)}) this month`
+                  : '$0.00 (0.0%) this month'
+                }
+              </span>
+            </div>
+          </div>
+          {tradingMode === 'paper' && (
+            <button
+              onClick={fetchPaperPortfolio}
+              disabled={isLoading}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="Refresh portfolio"
+            >
+              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Account Cards */}
       <div className="grid gap-4">
         {tradingMode === 'paper' ? (
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl">
-                  {paperAccount.icon}
+          <>
+            {/* Paper Trading Account Card */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl">
+                    {paperAccount.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{paperAccount.name}</h3>
+                    <p className="text-sm text-gray-500">{paperAccount.type}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold text-gray-900">{paperAccount.balance}</p>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                    <Check className="w-3 h-3" />
+                    {paperAccount.status}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Paper Trading Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
+                <div>
+                  <p className="text-sm text-gray-500">Total P&L</p>
+                  <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {paperPortfolio.totalPnl >= 0 ? '+' : ''}{formatCurrency(paperPortfolio.totalPnl)}
+                  </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{paperAccount.name}</h3>
-                  <p className="text-sm text-gray-500">{paperAccount.type}</p>
+                  <p className="text-sm text-gray-500">Win Rate</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {paperPortfolio.totalTrades > 0 ? `${paperPortfolio.winRate.toFixed(1)}%` : '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Trades</p>
+                  <p className="text-lg font-semibold text-gray-900">{paperPortfolio.totalTrades}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Open Positions</p>
+                  <p className="text-lg font-semibold text-gray-900">{paperPositions.length}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-gray-900">{paperAccount.balance}</p>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                  <Check className="w-3 h-3" />
-                  {paperAccount.status}
-                </span>
+              
+              {/* Reset Button */}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <button
+                  onClick={handleResetPortfolio}
+                  disabled={isResetting}
+                  className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  {isResetting ? 'Resetting...' : 'Reset Paper Account to $100,000'}
+                </button>
               </div>
             </div>
-          </div>
+
+            {/* Open Positions */}
+            {paperPositions.length > 0 && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h3 className="font-semibold text-gray-900 mb-4">Open Positions</h3>
+                <div className="space-y-3">
+                  {paperPositions.map((position) => (
+                    <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 text-sm">{position.marketTitle}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {position.quantity} {position.side.toUpperCase()} @ {formatCurrency(position.avgEntryPrice)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-semibold ${position.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {position.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(position.unrealizedPnl)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatPercent(position.unrealizedPnlPercent)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Trades */}
+            {recentTrades.length > 0 && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h3 className="font-semibold text-gray-900 mb-4">Recent Trades</h3>
+                <div className="space-y-2">
+                  {recentTrades.slice(0, 5).map((trade) => (
+                    <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                      <div>
+                        <p className="text-sm text-gray-900">{trade.action.toUpperCase()} {trade.quantity} {trade.side.toUpperCase()}</p>
+                        <p className="text-xs text-gray-500">{trade.marketTitle?.substring(0, 40)}...</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {trade.status === 'closed' ? (trade.pnl >= 0 ? '+' : '') + formatCurrency(trade.pnl) : 'Open'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           accounts.map((account) => (
             <div
