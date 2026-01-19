@@ -1,5 +1,6 @@
 import { X, Crown, Check, Zap, Shield, BarChart3, Sparkles } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { trackProUpgrade } from '../utils/analytics'
 
 const UpgradeModal = () => {
   const { showUpgradeModal, closeUpgradeModal, handleUpgradeSuccess } = useApp()
@@ -32,6 +33,10 @@ const UpgradeModal = () => {
   const handleUpgrade = () => {
     // In production, this would integrate with Stripe or another payment provider
     // For now, we simulate a successful upgrade
+
+    // Track Pro upgrade conversion in Google Analytics
+    trackProUpgrade(9.99, 'monthly')
+
     handleUpgradeSuccess()
   }
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -7,6 +8,7 @@ import {
   ChevronRight, Check, X, Rocket, Crown
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 
 const performanceData = [
   { date: 'Jan', pnl: 2400, trades: 24 },
@@ -32,6 +34,11 @@ const portfolioData = [
 
 const Dashboard = () => {
   const { tradingMode, isPro, openUpgradeModal } = useApp()
+
+  // Track page view when dashboard loads
+  useEffect(() => {
+    trackPageView('Dashboard')
+  }, [])
 
   const stats = [
     {
@@ -71,6 +78,23 @@ const Dashboard = () => {
     { pair: 'AVAX/USD', type: 'Long', entry: '$34.20', exit: '$36.80', pnl: '+$260', status: 'Won' },
   ]
 
+  // Handle upgrade button click with tracking
+  const handleUpgradeClick = () => {
+    trackUpgradeModalOpen('dashboard_banner')
+    trackButtonClick('Upgrade to Pro', 'dashboard')
+    openUpgradeModal()
+  }
+
+  // Handle stat card click with tracking
+  const handleStatClick = (stat) => {
+    trackStatView(stat.label, stat.value)
+  }
+
+  // Handle View All trades click
+  const handleViewAllTrades = () => {
+    trackButtonClick('View All Trades', 'dashboard')
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -109,7 +133,7 @@ const Dashboard = () => {
               </div>
             </div>
             <button
-              onClick={openUpgradeModal}
+              onClick={handleUpgradeClick}
               className="px-4 py-2 bg-white text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition-colors flex items-center gap-2 shadow-lg"
             >
               <Crown className="w-4 h-4" />
@@ -124,7 +148,11 @@ const Dashboard = () => {
         {stats.map((stat, i) => {
           const Icon = stat.icon
           return (
-            <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all">
+            <div
+              key={i}
+              onClick={() => handleStatClick(stat)}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+            >
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">{stat.label}</p>
                 <div className={`p-2 rounded-lg ${stat.positive ? 'bg-green-50' : 'bg-red-50'}`}>
@@ -223,7 +251,10 @@ const Dashboard = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Recent Trades</h2>
-          <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors">
+          <button
+            onClick={handleViewAllTrades}
+            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors"
+          >
             View All <ChevronRight className="w-4 h-4" />
           </button>
         </div>

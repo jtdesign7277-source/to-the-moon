@@ -48,6 +48,7 @@ import {
   Legend,
 } from 'recharts'
 import { STRATEGY_TEMPLATES, MARKET_CATEGORIES } from '../data/prebuiltStrategies'
+import { trackStrategyView, trackStrategyFork } from '../utils/analytics'
 
 // Risk level configuration
 const RISK_LEVELS = [
@@ -598,9 +599,18 @@ const StrategyDiscovery = () => {
 
   // Handle fork
   const handleFork = (strategy) => {
+    // Track strategy fork in Google Analytics
+    trackStrategyFork(strategy.name)
     // Navigate to strategy builder with this strategy as base
     // For now, just show an alert
     alert(`Forking "${strategy.name}" - This would navigate to Strategy Builder with pre-filled settings`)
+  }
+
+  // Handle view
+  const handleView = (strategy) => {
+    // Track strategy view in Google Analytics
+    trackStrategyView(strategy.name)
+    setViewStrategy(strategy)
   }
 
   // Categories for filter
@@ -754,7 +764,7 @@ const StrategyDiscovery = () => {
             onCompare={toggleCompare}
             isComparing={compareIds.includes(strategy.id)}
             onFork={handleFork}
-            onView={setViewStrategy}
+            onView={handleView}
           />
         ))}
       </div>

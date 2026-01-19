@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   AlertCircle,
 } from 'lucide-react'
+import { trackSignup } from '../utils/analytics'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -74,6 +75,12 @@ export default function Auth({ onSuccess, onBack, onAdminAccess }) {
       if (response.ok && data.success) {
         // Store token
         localStorage.setItem('ttm_access_token', data.access_token)
+
+        // Track signup event in Google Analytics
+        if (mode === 'signup') {
+          trackSignup(email)
+        }
+
         onSuccess(data.user)
       } else {
         setError(data.message || 'Authentication failed')

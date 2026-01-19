@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp } from 'lucide-react'
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
+import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
 
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
@@ -251,6 +252,10 @@ const StrategyBuilder = () => {
     setIsBacktesting(true)
     setBacktestComplete(false)
 
+    // Track backtest run in Google Analytics
+    const strategyName = template?.name || customStrategy.name || 'Custom Strategy'
+    trackBacktestRun(strategyName)
+
     setTimeout(() => {
       setBacktestData(generateBacktestData(activeStrategy))
       setIsBacktesting(false)
@@ -274,6 +279,10 @@ const StrategyBuilder = () => {
       startedAt: new Date().toISOString(),
       icon: template?.icon || '⚡',
     }
+
+    // Track strategy deployment in Google Analytics
+    trackStrategyDeploy(strategyName)
+
     setDeployedStrategies([...deployedStrategies, newStrategy])
     setShowDeployModal(false)
     setSelectedTemplate(null)

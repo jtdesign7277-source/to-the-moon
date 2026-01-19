@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, AlertCircle, Check, TrendingUp, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { trackAccountConnect } from '../utils/analytics'
 
 // Available platforms to connect
 const AVAILABLE_PLATFORMS = [
@@ -214,6 +215,9 @@ const Accounts = () => {
     setAccounts(prev => [...prev, newAccount])
     setIsConnecting(false)
     setConnectionSuccess(true)
+
+    // Track account connection in Google Analytics
+    trackAccountConnect(selectedPlatform.name)
 
     // Close modal after showing success
     setTimeout(() => {

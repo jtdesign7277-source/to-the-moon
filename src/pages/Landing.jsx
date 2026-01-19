@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react'
+import { trackWaitlistSignup } from '../utils/analytics'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -83,6 +84,9 @@ export default function Landing({ onEnterApp, onLegal }) {
       const data = await response.json()
 
       if (response.ok) {
+        // Track waitlist signup in Google Analytics
+        trackWaitlistSignup(email)
+
         setStatus('success')
         setEmail('')
       } else {
