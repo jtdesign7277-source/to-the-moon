@@ -32,12 +32,8 @@ RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
-EXPOSE 5000
+# Expose port (Railway provides PORT env var)
+EXPOSE ${PORT:-5000}
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:5000/api/health', timeout=5)"
-
-# Run with gunicorn
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "api_server:app"]
+# Run with gunicorn using Railway's PORT
+CMD gunicorn -w 2 -b 0.0.0.0:${PORT:-5000} --access-logfile - --error-logfile - api_server:app

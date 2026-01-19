@@ -273,6 +273,16 @@ def validate_strategy_config(config):
 # Routes
 # ============================================
 
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint - redirects to health check"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'ToTheMoon API v1.0.0',
+        'health': '/api/health'
+    })
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
