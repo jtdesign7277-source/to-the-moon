@@ -36,6 +36,9 @@ python-dateutil==2.8.2
 # Production Server
 gunicorn==21.2.0
 
+# Error Monitoring
+sentry-sdk[flask]==1.39.1
+
 # Development & Testing
 pytest==7.4.3
 pytest-flask==1.3.0

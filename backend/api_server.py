@@ -15,6 +15,29 @@ import bcrypt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 
+# Initialize Sentry for error tracking (before Flask app)
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[FlaskIntegration()],
+        environment=os.environ.get('ENVIRONMENT', 'development'),
+
+        # Performance monitoring
+        traces_sample_rate=0.1,  # 10% of transactions
+
+        # Filter out common/expected errors
+        before_send=lambda event, hint: None if os.environ.get('ENVIRONMENT') == 'development' else event,
+
+        # Don't send PII by default
+        send_default_pii=False,
+    )
+    print("[Sentry] Initialized error tracking")
+
 # Initialize Flask app
 app = Flask(__name__)
 
@@ -222,6 +245,15 @@ def require_auth(f):
             }), 401
 
         g.user = user
+
+        # Set Sentry user context for better error tracking
+        if SENTRY_DSN:
+            sentry_sdk.set_user({
+                'id': user.get('id'),
+                'email': user.get('email'),
+                'username': user.get('username'),
+            })
+
         return f(*args, **kwargs)
     return decorated
 
@@ -291,8 +323,42 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
-        'version': '1.0.0'
+        'version': '1.0.0',
+        'sentry': 'enabled' if SENTRY_DSN else 'disabled'
     })
+
+
+@app.route('/api/debug/sentry-test', methods=['POST'])
+def sentry_test():
+    """Test endpoint to verify Sentry is working (admin only)."""
+    # Require admin key for this endpoint
+    admin_key = request.headers.get('X-Admin-Key')
+    if admin_key != os.environ.get('ADMIN_KEY', 'dev-admin-key'):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if not SENTRY_DSN:
+        return jsonify({
+            'success': False,
+            'message': 'Sentry is not configured. Set SENTRY_DSN environment variable.'
+        })
+
+    try:
+        # Capture a test message
+        sentry_sdk.capture_message("Sentry test message from ToTheMoon API")
+
+        # Optionally trigger a real error (commented out by default)
+        # raise Exception("Sentry test exception")
+
+        return jsonify({
+            'success': True,
+            'message': 'Test message sent to Sentry. Check your Sentry dashboard.'
+        })
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        return jsonify({
+            'success': True,
+            'message': f'Test exception captured: {str(e)}'
+        })
 
 
 # --------------------------------------------
