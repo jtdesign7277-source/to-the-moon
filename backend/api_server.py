@@ -1,6 +1,7 @@
 """
 ToTheMoon API Server
 Flask backend with subscription, strategies, and backtesting endpoints
+PostgreSQL database for persistent storage
 """
 
 import os
@@ -41,6 +42,31 @@ if SENTRY_DSN:
 # Initialize Flask app
 app = Flask(__name__)
 
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Railway uses postgres:// but SQLAlchemy needs postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    # Fallback to SQLite for local development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tothemoon.db'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
+
+# Import and initialize database models
+from models import (
+    db, User, Subscription, UserStats, Trade, Strategy,
+    WaitlistEntry, BacktestResult, create_demo_user
+)
+
+db.init_app(app)
+
 # CORS configuration - allow frontend origins
 ALLOWED_ORIGINS = [
     'http://localhost:5173',      # Vite dev server
@@ -70,35 +96,11 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-producti
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 30))
 
-# In-memory storage (replace with database in production)
-# Users are now stored with hashed passwords
-users_db = {}
-users_by_email = {}  # Index for quick email lookup
-
-# Create demo user with hashed password
-demo_password_hash = bcrypt.hashpw('demo123'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-demo_user = {
-    'id': 'user_1',
-    'email': 'demo@example.com',
-    'username': 'DemoUser',
-    'password_hash': demo_password_hash,
-    'tier': 'pro',
-    'created_at': datetime.now().isoformat(),
-    'subscription': {
-        'id': 'sub_demo123',
-        'status': 'active',
-        'expires_at': (datetime.now() + timedelta(days=30)).isoformat(),
-        'renews_at': (datetime.now() + timedelta(days=30)).isoformat(),
-        'billing_cycle': 'monthly',
-        'price': 9.99,
-    }
-}
-users_db['user_1'] = demo_user
-users_by_email['demo@example.com'] = demo_user
-
-strategies_db = {}
-backtest_results_db = {}
-waitlist_db = {}  # Email waitlist storage
+# Initialize database tables and create demo user
+with app.app_context():
+    db.create_all()
+    create_demo_user()
+    print("[Database] PostgreSQL initialized successfully")
 
 # Sample leaderboard data
 leaderboard_data = [
@@ -194,15 +196,7 @@ def validate_username(username):
     return True, None
 
 
-def sanitize_user(user):
-    """Remove sensitive fields from user object for API response."""
-    return {
-        'id': user['id'],
-        'email': user['email'],
-        'username': user.get('username'),
-        'tier': user.get('tier', 'free'),
-        'created_at': user.get('created_at'),
-    }
+# Note: sanitize_user is now a method on the User model (user.sanitize())
 
 
 # ============================================
@@ -227,8 +221,8 @@ def get_current_user():
     if not user_id:
         return None
 
-    # Look up user in database
-    user = users_db.get(user_id)
+    # Look up user in PostgreSQL database
+    user = User.query.get(user_id)
     return user
 
 
@@ -249,9 +243,9 @@ def require_auth(f):
         # Set Sentry user context for better error tracking
         if SENTRY_DSN:
             sentry_sdk.set_user({
-                'id': user.get('id'),
-                'email': user.get('email'),
-                'username': user.get('username'),
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
             })
 
         return f(*args, **kwargs)
@@ -270,7 +264,7 @@ def require_pro(f):
                 'message': 'Valid authentication token required'
             }), 401
 
-        if user.get('tier') != 'pro':
+        if user.tier != 'pro':
             return jsonify({
                 'error': 'Forbidden',
                 'message': 'Pro subscription required for this feature'
@@ -320,10 +314,18 @@ def root():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
+    # Check database connection
+    db_status = 'healthy'
+    try:
+        db.session.execute(db.text('SELECT 1'))
+    except Exception as e:
+        db_status = f'unhealthy: {str(e)}'
+
     return jsonify({
-        'status': 'healthy',
+        'status': 'healthy' if db_status == 'healthy' else 'degraded',
         'timestamp': datetime.now().isoformat(),
         'version': '1.0.0',
+        'database': db_status,
         'sentry': 'enabled' if SENTRY_DSN else 'disabled'
     })
 
@@ -393,17 +395,17 @@ def join_waitlist():
             }), 400
 
         # Check if already on waitlist
-        if email in waitlist_db:
+        existing = WaitlistEntry.query.filter_by(email=email).first()
+        if existing:
             return jsonify({
                 'success': True,
                 'message': 'You are already on the waitlist!'
             })
 
         # Add to waitlist
-        waitlist_db[email] = {
-            'email': email,
-            'joined_at': datetime.now().isoformat(),
-        }
+        entry = WaitlistEntry(email=email, source='landing')
+        db.session.add(entry)
+        db.session.commit()
 
         return jsonify({
             'success': True,
@@ -411,6 +413,7 @@ def join_waitlist():
         }), 201
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({
             'error': 'Server Error',
             'message': str(e)
@@ -420,8 +423,9 @@ def join_waitlist():
 @app.route('/api/waitlist/count', methods=['GET'])
 def get_waitlist_count():
     """Get total number of waitlist signups."""
+    count = WaitlistEntry.query.count()
     return jsonify({
-        'count': len(waitlist_db) + 500  # Add base count for social proof
+        'count': count + 500  # Add base count for social proof
     })
 
 
@@ -442,15 +446,11 @@ def get_waitlist_admin():
         }), 401
 
     # Return all waitlist entries sorted by join date
-    entries = sorted(
-        waitlist_db.values(),
-        key=lambda x: x.get('joined_at', ''),
-        reverse=True
-    )
+    entries = WaitlistEntry.query.order_by(WaitlistEntry.joined_at.desc()).all()
 
     return jsonify({
         'total': len(entries),
-        'entries': entries
+        'entries': [e.to_dict() for e in entries]
     })
 
 
@@ -489,7 +489,8 @@ def signup():
             }), 400
 
         # Check if email already exists
-        if email in users_by_email:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
             return jsonify({
                 'error': 'Conflict',
                 'message': 'An account with this email already exists'
@@ -524,50 +525,51 @@ def signup():
             }), 400
 
         # Check if username already exists
-        for user in users_db.values():
-            if user.get('username', '').lower() == username.lower():
-                return jsonify({
-                    'error': 'Conflict',
-                    'message': 'This username is already taken'
-                }), 409
+        existing_username = User.query.filter(
+            db.func.lower(User.username) == username.lower()
+        ).first()
+        if existing_username:
+            return jsonify({
+                'error': 'Conflict',
+                'message': 'This username is already taken'
+            }), 409
 
         # Create new user
-        user_id = f'user_{uuid.uuid4().hex[:12]}'
         password_hash = hash_password(password)
 
-        new_user = {
-            'id': user_id,
-            'email': email,
-            'username': username,
-            'password_hash': password_hash,
-            'tier': 'free',
-            'created_at': datetime.now().isoformat(),
-            'subscription': None,
-        }
+        new_user = User(
+            email=email,
+            username=username,
+            password_hash=password_hash,
+            tier='free',
+        )
+        db.session.add(new_user)
+        db.session.flush()  # Get the user ID
 
-        # Store user
-        users_db[user_id] = new_user
-        users_by_email[email] = new_user
+        # Create default user stats
+        user_stats = UserStats(user_id=new_user.id)
+        db.session.add(user_stats)
 
         # Also add to waitlist (so admin can see all registered users)
-        if email not in waitlist_db:
-            waitlist_db[email] = {
-                'email': email,
-                'joined_at': datetime.now().isoformat(),
-                'source': 'signup',  # Track that this came from account creation
-            }
+        existing_waitlist = WaitlistEntry.query.filter_by(email=email).first()
+        if not existing_waitlist:
+            waitlist_entry = WaitlistEntry(email=email, source='signup')
+            db.session.add(waitlist_entry)
+
+        db.session.commit()
 
         # Generate JWT token
-        access_token = generate_jwt_token(user_id)
+        access_token = generate_jwt_token(new_user.id)
 
         return jsonify({
             'success': True,
             'message': 'Account created successfully',
             'access_token': access_token,
-            'user': sanitize_user(new_user)
+            'user': new_user.sanitize()
         }), 201
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({
             'error': 'Server Error',
             'message': str(e)
@@ -596,8 +598,8 @@ def login():
                 'message': 'Email and password are required'
             }), 400
 
-        # Find user by email
-        user = users_by_email.get(email)
+        # Find user by email in PostgreSQL
+        user = User.query.filter_by(email=email).first()
 
         if not user:
             return jsonify({
@@ -606,20 +608,20 @@ def login():
             }), 401
 
         # Verify password
-        if not verify_password(password, user['password_hash']):
+        if not verify_password(password, user.password_hash):
             return jsonify({
                 'error': 'Unauthorized',
                 'message': 'Invalid email or password'
             }), 401
 
         # Generate JWT token
-        access_token = generate_jwt_token(user['id'])
+        access_token = generate_jwt_token(user.id)
 
         return jsonify({
             'success': True,
             'message': 'Login successful',
             'access_token': access_token,
-            'user': sanitize_user(user)
+            'user': user.sanitize()
         })
 
     except Exception as e:
@@ -635,22 +637,15 @@ def get_current_user_info():
     """Get current authenticated user's information."""
     user = g.user
 
-    # Include subscription details
-    subscription = user.get('subscription')
+    # Include subscription details from database
     subscription_info = None
-
-    if subscription:
-        subscription_info = {
-            'id': subscription.get('id'),
-            'status': subscription.get('status'),
-            'expires_at': subscription.get('expires_at'),
-            'renews_at': subscription.get('renews_at'),
-        }
+    if user.subscription:
+        subscription_info = user.subscription.to_dict()
 
     return jsonify({
         'success': True,
         'user': {
-            **sanitize_user(user),
+            **user.sanitize(),
             'subscription': subscription_info,
         }
     })
@@ -675,12 +670,12 @@ def refresh_token():
     user = g.user
 
     # Generate new token
-    new_token = generate_jwt_token(user['id'])
+    new_token = generate_jwt_token(user.id)
 
     return jsonify({
         'success': True,
         'access_token': new_token,
-        'user': sanitize_user(user)
+        'user': user.sanitize()
     })
 
 
@@ -688,51 +683,40 @@ def refresh_token():
 # User Dashboard Routes
 # --------------------------------------------
 
-# In-memory user stats storage (per user_id)
-user_stats_db = {}
-user_trades_db = {}
-
 @app.route('/api/user/dashboard', methods=['GET'])
 @require_auth
 def get_user_dashboard():
     """Get user's dashboard data including stats, trades, and performance."""
     user = g.user
-    user_id = user['id']
 
-    # Get user's stats (or return zeros for new users)
-    stats = user_stats_db.get(user_id, {
-        'totalPnl': 0,
-        'winRate': 0,
-        'activeStrategies': 0,
-        'totalTrades': 0,
-        'connectedAccounts': 0,
-        'totalBalance': 0,
-        'monthlyChange': 0,
-    })
+    # Get user's stats from database (or create defaults for new users)
+    stats = user.stats
+    if not stats:
+        stats = UserStats(user_id=user.id)
+        db.session.add(stats)
+        db.session.commit()
 
-    # Get user's recent trades (empty for new users)
-    trades = user_trades_db.get(user_id, [])
+    stats_dict = stats.to_dict()
+
+    # Get user's recent trades from database
+    trades = Trade.query.filter_by(user_id=user.id).order_by(
+        Trade.timestamp.desc()
+    ).limit(10).all()
 
     # Get performance data (empty for new users)
     performance_data = []
     portfolio_data = []
 
-    # If user has trades, calculate performance data
-    if trades:
-        # Group trades by month for performance chart
-        # This would be calculated from actual trade data in production
-        pass
-
     return jsonify({
         'success': True,
-        'totalPnl': stats.get('totalPnl', 0),
-        'winRate': stats.get('winRate', 0),
-        'activeStrategies': stats.get('activeStrategies', 0),
-        'totalTrades': stats.get('totalTrades', 0),
-        'connectedAccounts': stats.get('connectedAccounts', 0),
-        'totalBalance': stats.get('totalBalance', 0),
-        'monthlyChange': stats.get('monthlyChange', 0),
-        'recentTrades': trades[-10:] if trades else [],  # Last 10 trades
+        'totalPnl': stats_dict.get('totalPnl', 0),
+        'winRate': stats_dict.get('winRate', 0),
+        'activeStrategies': stats_dict.get('activeStrategies', 0),
+        'totalTrades': stats_dict.get('totalTrades', 0),
+        'connectedAccounts': stats_dict.get('connectedAccounts', 0),
+        'totalBalance': stats_dict.get('totalBalance', 0),
+        'monthlyChange': stats_dict.get('monthlyChange', 0),
+        'recentTrades': [t.to_dict() for t in trades],
         'performanceData': performance_data,
         'portfolioData': portfolio_data,
     })
@@ -743,32 +727,35 @@ def get_user_dashboard():
 def update_user_stats():
     """Update user's stats (called when trades are made)."""
     user = g.user
-    user_id = user['id']
 
     data = request.get_json() or {}
 
-    # Initialize stats if not exists
-    if user_id not in user_stats_db:
-        user_stats_db[user_id] = {
-            'totalPnl': 0,
-            'winRate': 0,
-            'activeStrategies': 0,
-            'totalTrades': 0,
-            'connectedAccounts': 0,
-            'totalBalance': 0,
-            'monthlyChange': 0,
-        }
+    # Get or create user stats
+    stats = user.stats
+    if not stats:
+        stats = UserStats(user_id=user.id)
+        db.session.add(stats)
 
-    # Update stats
-    stats = user_stats_db[user_id]
-    for key in ['totalPnl', 'winRate', 'activeStrategies', 'totalTrades',
-                'connectedAccounts', 'totalBalance', 'monthlyChange']:
-        if key in data:
-            stats[key] = data[key]
+    # Update stats with camelCase to snake_case mapping
+    field_mapping = {
+        'totalPnl': 'total_pnl',
+        'winRate': 'win_rate',
+        'activeStrategies': 'active_strategies',
+        'totalTrades': 'total_trades',
+        'connectedAccounts': 'connected_accounts',
+        'totalBalance': 'total_balance',
+        'monthlyChange': 'monthly_change',
+    }
+
+    for camel_key, snake_key in field_mapping.items():
+        if camel_key in data:
+            setattr(stats, snake_key, data[camel_key])
+
+    db.session.commit()
 
     return jsonify({
         'success': True,
-        'stats': stats,
+        'stats': stats.to_dict(),
     })
 
 
@@ -777,7 +764,6 @@ def update_user_stats():
 def add_user_trade():
     """Add a trade to user's history."""
     user = g.user
-    user_id = user['id']
 
     data = request.get_json()
 
@@ -787,48 +773,39 @@ def add_user_trade():
             'message': 'Trade data is required'
         }), 400
 
-    # Initialize trades list if not exists
-    if user_id not in user_trades_db:
-        user_trades_db[user_id] = []
+    # Create new trade in database
+    trade = Trade(
+        user_id=user.id,
+        pair=data.get('pair', 'Unknown'),
+        trade_type=data.get('type', 'Long'),
+        entry=data.get('entry', '$0.00'),
+        exit=data.get('exit', '$0.00'),
+        pnl=data.get('pnl', '+$0'),
+        status=data.get('status', 'Won'),
+    )
+    db.session.add(trade)
 
-    # Add trade with timestamp
-    trade = {
-        'id': f'trade_{uuid.uuid4().hex[:8]}',
-        'pair': data.get('pair', 'Unknown'),
-        'type': data.get('type', 'Long'),
-        'entry': data.get('entry', '$0.00'),
-        'exit': data.get('exit', '$0.00'),
-        'pnl': data.get('pnl', '+$0'),
-        'status': data.get('status', 'Won'),
-        'timestamp': datetime.now().isoformat(),
-    }
+    # Get or create user stats
+    stats = user.stats
+    if not stats:
+        stats = UserStats(user_id=user.id)
+        db.session.add(stats)
 
-    user_trades_db[user_id].append(trade)
+    # Update stats
+    total_trades = Trade.query.filter_by(user_id=user.id).count() + 1  # +1 for the new trade
+    wins = Trade.query.filter_by(user_id=user.id, status='Won').count()
+    if data.get('status') == 'Won':
+        wins += 1
 
-    # Update user stats
-    if user_id not in user_stats_db:
-        user_stats_db[user_id] = {
-            'totalPnl': 0,
-            'winRate': 0,
-            'activeStrategies': 0,
-            'totalTrades': 0,
-            'connectedAccounts': 0,
-            'totalBalance': 0,
-            'monthlyChange': 0,
-        }
+    stats.total_trades = total_trades
+    stats.win_rate = round((wins / total_trades) * 100) if total_trades else 0
 
-    stats = user_stats_db[user_id]
-    stats['totalTrades'] = len(user_trades_db[user_id])
-
-    # Calculate win rate
-    trades = user_trades_db[user_id]
-    wins = sum(1 for t in trades if t.get('status') == 'Won')
-    stats['winRate'] = round((wins / len(trades)) * 100) if trades else 0
+    db.session.commit()
 
     return jsonify({
         'success': True,
-        'trade': trade,
-        'stats': stats,
+        'trade': trade.to_dict(),
+        'stats': stats.to_dict(),
     }), 201
 
 
@@ -848,8 +825,8 @@ def get_subscription_status():
             'features': ['dashboard', 'accounts', 'leaderboard', 'marketplace-browse', 'paper-trading']
         })
 
-    subscription = user.get('subscription', {})
-    tier = user.get('tier', 'free')
+    subscription = user.subscription
+    tier = user.tier or 'free'
 
     # Define features by tier
     free_features = ['dashboard', 'accounts', 'leaderboard', 'marketplace-browse', 'paper-trading']
@@ -858,15 +835,17 @@ def get_subscription_status():
         'priority-support', 'api-access', 'custom-alerts', 'backtesting'
     ]
 
+    sub_data = subscription.to_dict() if subscription else {}
+
     return jsonify({
         'tier': tier,
-        'expires_at': subscription.get('expires_at'),
-        'renews_at': subscription.get('renews_at'),
-        'cancelled_at': subscription.get('cancelled_at'),
-        'billing_cycle': subscription.get('billing_cycle', 'monthly'),
-        'price': subscription.get('price', 9.99),
+        'expires_at': sub_data.get('expires_at'),
+        'renews_at': sub_data.get('renews_at'),
+        'cancelled_at': sub_data.get('cancelled_at'),
+        'billing_cycle': sub_data.get('billing_cycle', 'monthly'),
+        'price': sub_data.get('price', 9.99),
         'features': pro_features if tier == 'pro' else free_features,
-        'subscription_id': subscription.get('id')
+        'subscription_id': sub_data.get('id')
     })
 
 
@@ -879,22 +858,33 @@ def upgrade_subscription():
     # In production, this would process payment through Stripe
     # For demo, just upgrade the user
 
-    user['tier'] = 'pro'
-    user['subscription'] = {
-        'id': f'sub_{uuid.uuid4().hex[:12]}',
-        'status': 'active',
-        'expires_at': (datetime.now() + timedelta(days=30)).isoformat(),
-        'renews_at': (datetime.now() + timedelta(days=30)).isoformat(),
-        'billing_cycle': 'monthly',
-        'price': 9.99,
-    }
+    user.tier = 'pro'
+
+    # Create or update subscription
+    if user.subscription:
+        user.subscription.status = 'active'
+        user.subscription.expires_at = datetime.utcnow() + timedelta(days=30)
+        user.subscription.renews_at = datetime.utcnow() + timedelta(days=30)
+        user.subscription.cancelled_at = None
+    else:
+        subscription = Subscription(
+            user_id=user.id,
+            status='active',
+            billing_cycle='monthly',
+            price=9.99,
+            expires_at=datetime.utcnow() + timedelta(days=30),
+            renews_at=datetime.utcnow() + timedelta(days=30),
+        )
+        db.session.add(subscription)
+
+    db.session.commit()
 
     return jsonify({
         'success': True,
         'message': 'Successfully upgraded to Pro!',
         'tier': 'pro',
-        'expires_at': user['subscription']['expires_at'],
-        'renews_at': user['subscription']['renews_at'],
+        'expires_at': user.subscription.expires_at.isoformat() if user.subscription else None,
+        'renews_at': user.subscription.renews_at.isoformat() if user.subscription else None,
         'features': [
             'dashboard', 'accounts', 'leaderboard', 'marketplace-browse',
             'paper-trading', 'strategy-builder', 'live-trading',
@@ -949,21 +939,23 @@ def cancel_subscription():
     """Cancel user's subscription"""
     user = g.user
 
-    if user.get('tier') != 'pro':
+    if user.tier != 'pro':
         return jsonify({
             'error': 'Bad Request',
             'message': 'No active subscription to cancel'
         }), 400
 
-    subscription = user.get('subscription', {})
-    subscription['cancelled_at'] = datetime.now().isoformat()
-    subscription['status'] = 'cancelled'
+    subscription = user.subscription
+    if subscription:
+        subscription.cancelled_at = datetime.utcnow()
+        subscription.status = 'cancelled'
+        db.session.commit()
 
     return jsonify({
         'success': True,
         'message': 'Subscription cancelled. Access continues until end of billing period.',
-        'cancelled_at': subscription['cancelled_at'],
-        'expires_at': subscription.get('expires_at')
+        'cancelled_at': subscription.cancelled_at.isoformat() if subscription and subscription.cancelled_at else None,
+        'expires_at': subscription.expires_at.isoformat() if subscription and subscription.expires_at else None
     })
 
 
@@ -1096,35 +1088,37 @@ def list_strategies():
     limit = min(int(request.args.get('limit', 20)), 100)
     offset = int(request.args.get('offset', 0))
 
-    strategies = list(strategies_db.values())
+    # Build query
+    query = Strategy.query
 
     # Apply filters
     if category:
-        strategies = [s for s in strategies if s.get('category') == category]
+        query = query.filter_by(category=category)
     if risk_profile:
-        strategies = [s for s in strategies if s.get('risk_profile') == risk_profile]
+        query = query.filter_by(risk_profile=risk_profile)
     if difficulty:
-        strategies = [s for s in strategies if s.get('difficulty') == difficulty]
+        query = query.filter_by(difficulty=difficulty)
 
     # Filter to public or user's own
     if user:
-        strategies = [
-            s for s in strategies
-            if s.get('is_public') or s.get('user_id') == user['id']
-        ]
+        query = query.filter(
+            db.or_(Strategy.is_public == True, Strategy.user_id == user.id)
+        )
     else:
-        strategies = [s for s in strategies if s.get('is_public')]
+        query = query.filter_by(is_public=True)
+
+    # Get total before pagination
+    total = query.count()
 
     # Paginate
-    total = len(strategies)
-    strategies = strategies[offset:offset + limit]
+    strategies = query.offset(offset).limit(limit).all()
 
     return jsonify({
         'success': True,
         'total': total,
         'limit': limit,
         'offset': offset,
-        'data': strategies
+        'data': [s.to_dict() for s in strategies]
     })
 
 
@@ -1150,18 +1144,16 @@ def create_strategy():
                 'errors': errors
             }), 400
 
-        # Create strategy
-        strategy_id = f'strat_{uuid.uuid4().hex[:12]}'
-        strategy = {
-            'id': strategy_id,
-            'user_id': g.user['id'],
-            'name': data.get('name'),
-            'description': data.get('description', ''),
-            'category': data.get('category', 'custom'),
-            'risk_profile': data.get('risk_profile', 'moderate'),
-            'difficulty': data.get('difficulty', 'intermediate'),
-            'is_public': data.get('is_public', False),
-            'config': {
+        # Create strategy in database
+        strategy = Strategy(
+            user_id=g.user.id,
+            name=data.get('name'),
+            description=data.get('description', ''),
+            category=data.get('category', 'custom'),
+            risk_profile=data.get('risk_profile', 'moderate'),
+            difficulty=data.get('difficulty', 'intermediate'),
+            is_public=data.get('is_public', False),
+            config={
                 'min_edge': data.get('min_edge', 0.02),
                 'max_position_size': data.get('max_position_size', 0.10),
                 'max_daily_trades': data.get('max_daily_trades', 20),
@@ -1169,23 +1161,23 @@ def create_strategy():
                 'take_profit': data.get('take_profit', 0.10),
                 'allowed_markets': data.get('allowed_markets', ['crypto']),
             },
-            'rules': {
+            rules={
                 'entry': data.get('entry_rules', []),
                 'exit': data.get('exit_rules', []),
             },
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat(),
-        }
+        )
 
-        strategies_db[strategy_id] = strategy
+        db.session.add(strategy)
+        db.session.commit()
 
         return jsonify({
             'success': True,
             'message': 'Strategy created successfully',
-            'data': strategy
+            'data': strategy.to_dict()
         }), 201
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({
             'error': 'Server Error',
             'message': str(e)
@@ -1195,7 +1187,7 @@ def create_strategy():
 @app.route('/api/strategies/<strategy_id>', methods=['GET'])
 def get_strategy(strategy_id):
     """Get strategy details by ID"""
-    strategy = strategies_db.get(strategy_id)
+    strategy = Strategy.query.get(strategy_id)
 
     if not strategy:
         return jsonify({
@@ -1205,8 +1197,8 @@ def get_strategy(strategy_id):
 
     # Check access permissions
     user = get_current_user()
-    if not strategy.get('is_public'):
-        if not user or strategy.get('user_id') != user['id']:
+    if not strategy.is_public:
+        if not user or strategy.user_id != user.id:
             return jsonify({
                 'error': 'Forbidden',
                 'message': 'You do not have access to this strategy'
@@ -1214,7 +1206,7 @@ def get_strategy(strategy_id):
 
     return jsonify({
         'success': True,
-        'data': strategy
+        'data': strategy.to_dict()
     })
 
 
@@ -1222,7 +1214,7 @@ def get_strategy(strategy_id):
 @require_auth
 def update_strategy(strategy_id):
     """Update an existing strategy"""
-    strategy = strategies_db.get(strategy_id)
+    strategy = Strategy.query.get(strategy_id)
 
     if not strategy:
         return jsonify({
@@ -1231,7 +1223,7 @@ def update_strategy(strategy_id):
         }), 404
 
     # Check ownership
-    if strategy.get('user_id') != g.user['id']:
+    if strategy.user_id != g.user.id:
         return jsonify({
             'error': 'Forbidden',
             'message': 'You can only update your own strategies'
@@ -1241,24 +1233,33 @@ def update_strategy(strategy_id):
         data = request.get_json() or {}
 
         # Update allowed fields
-        updatable_fields = [
-            'name', 'description', 'category', 'risk_profile',
-            'difficulty', 'is_public', 'config', 'rules'
-        ]
+        if 'name' in data:
+            strategy.name = data['name']
+        if 'description' in data:
+            strategy.description = data['description']
+        if 'category' in data:
+            strategy.category = data['category']
+        if 'risk_profile' in data:
+            strategy.risk_profile = data['risk_profile']
+        if 'difficulty' in data:
+            strategy.difficulty = data['difficulty']
+        if 'is_public' in data:
+            strategy.is_public = data['is_public']
+        if 'config' in data:
+            strategy.config = data['config']
+        if 'rules' in data:
+            strategy.rules = data['rules']
 
-        for field in updatable_fields:
-            if field in data:
-                strategy[field] = data[field]
-
-        strategy['updated_at'] = datetime.now().isoformat()
+        db.session.commit()
 
         return jsonify({
             'success': True,
             'message': 'Strategy updated successfully',
-            'data': strategy
+            'data': strategy.to_dict()
         })
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({
             'error': 'Server Error',
             'message': str(e)
@@ -1269,7 +1270,7 @@ def update_strategy(strategy_id):
 @require_auth
 def delete_strategy(strategy_id):
     """Delete a strategy"""
-    strategy = strategies_db.get(strategy_id)
+    strategy = Strategy.query.get(strategy_id)
 
     if not strategy:
         return jsonify({
@@ -1278,13 +1279,14 @@ def delete_strategy(strategy_id):
         }), 404
 
     # Check ownership
-    if strategy.get('user_id') != g.user['id']:
+    if strategy.user_id != g.user.id:
         return jsonify({
             'error': 'Forbidden',
             'message': 'You can only delete your own strategies'
         }), 403
 
-    del strategies_db[strategy_id]
+    db.session.delete(strategy)
+    db.session.commit()
 
     return jsonify({
         'success': True,
@@ -1377,8 +1379,18 @@ def run_backtest():
             'completed_at': datetime.now().isoformat(),
         }
 
-        # Store results
-        backtest_results_db[backtest_id] = results
+        # Store results in database
+        backtest = BacktestResult(
+            id=backtest_id,
+            user_id=g.user.id if hasattr(g, 'user') and g.user else None,
+            strategy_id=strategy_id,
+            status='completed',
+            parameters=results['parameters'],
+            results=results['results'],
+            equity_curve=results['equity_curve'],
+        )
+        db.session.add(backtest)
+        db.session.commit()
 
         return jsonify({
             'success': True,
@@ -1397,9 +1409,9 @@ def run_backtest():
 @require_auth
 def get_backtest_results(backtest_id):
     """Get backtest results by ID"""
-    results = backtest_results_db.get(backtest_id)
+    backtest = BacktestResult.query.get(backtest_id)
 
-    if not results:
+    if not backtest:
         return jsonify({
             'error': 'Not Found',
             'message': f'Backtest with ID {backtest_id} not found'
@@ -1407,7 +1419,7 @@ def get_backtest_results(backtest_id):
 
     return jsonify({
         'success': True,
-        'data': results
+        'data': backtest.to_dict()
     })
 
 

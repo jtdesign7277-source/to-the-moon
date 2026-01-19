@@ -2,10 +2,17 @@
 TO THE MOON - SQLAlchemy Models
 Database ORM models matching the PostgreSQL schema.
 """
-from datetime import datetime
+import uuid
+from datetime import datetime, timedelta
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+
+
+def generate_uuid():
+    """Generate a unique ID."""
+    return uuid.uuid4().hex[:12]
 
 
 # ============================================
@@ -15,18 +22,19 @@ class User(db.Model):
     """User account model."""
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'user_{generate_uuid()}')
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    tier = db.Column(db.String(20), default='free')  # 'free' or 'pro'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
     subscription = db.relationship('Subscription', backref='user', uselist=False, lazy=True, cascade='all, delete-orphan')
-    strategies = db.relationship('Strategy', backref='user', lazy=True)
-    trades = db.relationship('Trade', backref='user', lazy=True, cascade='all, delete-orphan')
-    followed_strategies = db.relationship('StrategyFollow', backref='user', lazy=True, cascade='all, delete-orphan')
+    stats = db.relationship('UserStats', backref='user', uselist=False, lazy=True, cascade='all, delete-orphan')
+    strategies = db.relationship('Strategy', backref='user', lazy='dynamic')
+    trades = db.relationship('Trade', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     def to_dict(self):
         """Serialize user to dictionary."""
@@ -34,6 +42,17 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'username': self.username,
+            'tier': self.tier,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+    def sanitize(self):
+        """Return user data safe for API response (no sensitive data)."""
+        return {
+            'id': self.id,
+            'email': self.email,
+            'username': self.username,
+            'tier': self.tier,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -48,21 +67,22 @@ class Subscription(db.Model):
     """User subscription model (free/pro tier)."""
     __tablename__ = 'subscriptions'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, unique=True)
-    tier = db.Column(db.String(20), nullable=False, default='free')  # 'free' or 'pro'
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'sub_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, unique=True)
+    status = db.Column(db.String(20), default='active')  # active, cancelled, expired
+    billing_cycle = db.Column(db.String(20), default='monthly')  # monthly, yearly
+    price = db.Column(db.Float, default=9.99)
     stripe_subscription_id = db.Column(db.String(255), unique=True, nullable=True)
-    is_active = db.Column(db.Boolean, default=True)
     expires_at = db.Column(db.DateTime, nullable=True)
+    renews_at = db.Column(db.DateTime, nullable=True)
+    cancelled_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     @property
-    def is_pro(self):
-        """Check if user has active Pro subscription."""
-        if self.tier != 'pro':
-            return False
-        if not self.is_active:
+    def is_active(self):
+        """Check if subscription is currently active."""
+        if self.status != 'active':
             return False
         if self.expires_at and self.expires_at < datetime.utcnow():
             return False
@@ -72,67 +92,50 @@ class Subscription(db.Model):
         """Serialize subscription to dictionary."""
         return {
             'id': self.id,
-            'user_id': self.user_id,
-            'tier': self.tier,
-            'is_active': self.is_active,
-            'is_pro': self.is_pro,
+            'status': self.status,
+            'billing_cycle': self.billing_cycle,
+            'price': self.price,
             'expires_at': self.expires_at.isoformat() if self.expires_at else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'renews_at': self.renews_at.isoformat() if self.renews_at else None,
+            'cancelled_at': self.cancelled_at.isoformat() if self.cancelled_at else None,
         }
 
     def __repr__(self):
-        return f'<Subscription user_id={self.user_id} tier={self.tier}>'
+        return f'<Subscription user_id={self.user_id} status={self.status}>'
 
 
 # ============================================
-# 3. STRATEGY MODEL
+# 3. USER STATS MODEL
 # ============================================
-class Strategy(db.Model):
-    """Trading strategy model."""
-    __tablename__ = 'strategies'
+class UserStats(db.Model):
+    """User statistics/dashboard data model."""
+    __tablename__ = 'user_stats'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    category = db.Column(db.String(50), nullable=False, default='custom')
-    config = db.Column(db.JSON, default=dict)
-    is_public = db.Column(db.Boolean, default=False)
-    is_template = db.Column(db.Boolean, default=False)
-
-    # Performance metrics
-    win_rate = db.Column(db.Numeric(5, 2), default=0)
-    total_profit = db.Column(db.Numeric(15, 2), default=0)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, unique=True)
+    total_pnl = db.Column(db.Float, default=0)
+    win_rate = db.Column(db.Float, default=0)
+    active_strategies = db.Column(db.Integer, default=0)
     total_trades = db.Column(db.Integer, default=0)
-    followers_count = db.Column(db.Integer, default=0)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    connected_accounts = db.Column(db.Integer, default=0)
+    total_balance = db.Column(db.Float, default=0)
+    monthly_change = db.Column(db.Float, default=0)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
-    trades = db.relationship('Trade', backref='strategy', lazy=True)
-    followers = db.relationship('StrategyFollow', backref='strategy', lazy=True, cascade='all, delete-orphan')
-
     def to_dict(self):
-        """Serialize strategy to dictionary."""
+        """Serialize stats to dictionary (camelCase for frontend)."""
         return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'name': self.name,
-            'description': self.description,
-            'category': self.category,
-            'config': self.config or {},
-            'is_public': self.is_public,
-            'is_template': self.is_template,
-            'win_rate': float(self.win_rate) if self.win_rate else 0,
-            'total_profit': float(self.total_profit) if self.total_profit else 0,
-            'total_trades': self.total_trades or 0,
-            'followers_count': self.followers_count or 0,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'totalPnl': self.total_pnl or 0,
+            'winRate': self.win_rate or 0,
+            'activeStrategies': self.active_strategies or 0,
+            'totalTrades': self.total_trades or 0,
+            'connectedAccounts': self.connected_accounts or 0,
+            'totalBalance': self.total_balance or 0,
+            'monthlyChange': self.monthly_change or 0,
         }
 
     def __repr__(self):
-        return f'<Strategy {self.name}>'
+        return f'<UserStats user_id={self.user_id}>'
 
 
 # ============================================
@@ -142,122 +145,195 @@ class Trade(db.Model):
     """Trade record model."""
     __tablename__ = 'trades'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    strategy_id = db.Column(db.Integer, db.ForeignKey('strategies.id', ondelete='SET NULL'), nullable=True)
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'trade_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    strategy_id = db.Column(db.String(50), db.ForeignKey('strategies.id', ondelete='SET NULL'), nullable=True)
 
-    # Trade details
-    market = db.Column(db.String(50), nullable=False)  # BTC/USD, ETH/USD, prediction market name
-    side = db.Column(db.String(10), nullable=False)    # 'long', 'short', 'yes', 'no'
-    size = db.Column(db.Numeric(20, 8), nullable=False)
-    entry_price = db.Column(db.Numeric(20, 8), nullable=False)
-    exit_price = db.Column(db.Numeric(20, 8), nullable=True)
-    profit = db.Column(db.Numeric(15, 2), nullable=True)
-    status = db.Column(db.String(20), default='open')  # 'open', 'closed', 'cancelled'
-
-    # Mode & Platform
-    is_paper = db.Column(db.Boolean, default=True)
-    platform = db.Column(db.String(50), nullable=True)  # kalshi, polymarket, binance
+    # Trade details (stored as strings for frontend compatibility)
+    pair = db.Column(db.String(50), default='Unknown')
+    trade_type = db.Column(db.String(20), default='Long')  # Long, Short
+    entry = db.Column(db.String(50), default='$0.00')
+    exit = db.Column(db.String(50), default='$0.00')
+    pnl = db.Column(db.String(50), default='+$0')
+    status = db.Column(db.String(20), default='Won')  # Won, Lost
 
     # Timestamps
-    opened_at = db.Column(db.DateTime, default=datetime.utcnow)
-    closed_at = db.Column(db.DateTime, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def calculate_profit(self):
-        """Calculate P&L when closing trade."""
-        if self.exit_price is None:
-            return None
-
-        entry = float(self.entry_price)
-        exit_p = float(self.exit_price)
-        qty = float(self.size)
-
-        if self.side in ('long', 'yes'):
-            return (exit_p - entry) * qty
-        else:  # short, no
-            return (entry - exit_p) * qty
 
     def to_dict(self):
         """Serialize trade to dictionary."""
         return {
             'id': self.id,
-            'user_id': self.user_id,
-            'strategy_id': self.strategy_id,
-            'market': self.market,
-            'side': self.side,
-            'size': float(self.size) if self.size else 0,
-            'entry_price': float(self.entry_price) if self.entry_price else 0,
-            'exit_price': float(self.exit_price) if self.exit_price else None,
-            'profit': float(self.profit) if self.profit else None,
+            'pair': self.pair,
+            'type': self.trade_type,
+            'entry': self.entry,
+            'exit': self.exit,
+            'pnl': self.pnl,
             'status': self.status,
-            'is_paper': self.is_paper,
-            'platform': self.platform,
-            'opened_at': self.opened_at.isoformat() if self.opened_at else None,
-            'closed_at': self.closed_at.isoformat() if self.closed_at else None,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
         }
 
     def __repr__(self):
-        return f'<Trade {self.id} {self.market} {self.side}>'
+        return f'<Trade {self.id} {self.pair}>'
 
 
 # ============================================
-# 5. LEADERBOARD SNAPSHOT MODEL
+# 5. STRATEGY MODEL
 # ============================================
-class LeaderboardSnapshot(db.Model):
-    """Leaderboard snapshot model (cached rankings)."""
-    __tablename__ = 'leaderboard_snapshot'
+class Strategy(db.Model):
+    """Trading strategy model."""
+    __tablename__ = 'strategies'
 
-    id = db.Column(db.Integer, primary_key=True)
-    snapshot_date = db.Column(db.Date, nullable=False, default=datetime.utcnow().date)
-    period = db.Column(db.String(20), nullable=False, default='monthly')  # daily, weekly, monthly, alltime
-    rankings = db.Column(db.JSON, nullable=False)  # Array of ranking objects
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'strat_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, default='')
+    category = db.Column(db.String(50), default='custom')
+    risk_profile = db.Column(db.String(20), default='moderate')
+    difficulty = db.Column(db.String(20), default='intermediate')
+    is_public = db.Column(db.Boolean, default=False)
+    config = db.Column(db.JSON, default=dict)
+    rules = db.Column(db.JSON, default=dict)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (
-        db.UniqueConstraint('snapshot_date', 'period', name='unique_snapshot_date_period'),
-    )
+    # Relationships
+    trades = db.relationship('Trade', backref='strategy', lazy='dynamic')
 
     def to_dict(self):
-        """Serialize leaderboard snapshot to dictionary."""
-        return {
-            'id': self.id,
-            'snapshot_date': self.snapshot_date.isoformat() if self.snapshot_date else None,
-            'period': self.period,
-            'rankings': self.rankings or [],
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-        }
-
-    def __repr__(self):
-        return f'<LeaderboardSnapshot {self.snapshot_date} {self.period}>'
-
-
-# ============================================
-# 6. STRATEGY FOLLOW MODEL
-# ============================================
-class StrategyFollow(db.Model):
-    """Strategy follow/subscription model."""
-    __tablename__ = 'strategy_follows'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    strategy_id = db.Column(db.Integer, db.ForeignKey('strategies.id', ondelete='CASCADE'), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'strategy_id', name='unique_user_strategy_follow'),
-    )
-
-    def to_dict(self):
-        """Serialize strategy follow to dictionary."""
+        """Serialize strategy to dictionary."""
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'strategy_id': self.strategy_id,
-            'is_active': self.is_active,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'risk_profile': self.risk_profile,
+            'difficulty': self.difficulty,
+            'is_public': self.is_public,
+            'config': self.config or {},
+            'rules': self.rules or {},
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
 
     def __repr__(self):
-        return f'<StrategyFollow user={self.user_id} strategy={self.strategy_id}>'
+        return f'<Strategy {self.name}>'
+
+
+# ============================================
+# 6. WAITLIST MODEL
+# ============================================
+class WaitlistEntry(db.Model):
+    """Beta waitlist entry model."""
+    __tablename__ = 'waitlist'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    source = db.Column(db.String(50), default='landing')  # landing, signup
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        """Serialize waitlist entry to dictionary."""
+        return {
+            'email': self.email,
+            'source': self.source,
+            'joined_at': self.joined_at.isoformat() if self.joined_at else None,
+        }
+
+    def __repr__(self):
+        return f'<WaitlistEntry {self.email}>'
+
+
+# ============================================
+# 7. BACKTEST RESULT MODEL
+# ============================================
+class BacktestResult(db.Model):
+    """Backtest result storage model."""
+    __tablename__ = 'backtest_results'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'bt_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+    strategy_id = db.Column(db.String(50), nullable=True)
+    status = db.Column(db.String(20), default='completed')
+    parameters = db.Column(db.JSON, default=dict)
+    results = db.Column(db.JSON, default=dict)
+    equity_curve = db.Column(db.JSON, default=list)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        """Serialize backtest result to dictionary."""
+        return {
+            'backtest_id': self.id,
+            'strategy_id': self.strategy_id,
+            'status': self.status,
+            'parameters': self.parameters or {},
+            'results': self.results or {},
+            'equity_curve': self.equity_curve or [],
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+        }
+
+    def __repr__(self):
+        return f'<BacktestResult {self.id}>'
+
+
+# ============================================
+# DATABASE INITIALIZATION HELPERS
+# ============================================
+def init_db(app):
+    """Initialize the database with the Flask app."""
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
+        print("[Database] Tables created successfully")
+
+
+def create_demo_user():
+    """Create a demo user if it doesn't exist."""
+    import bcrypt
+
+    demo_email = 'demo@example.com'
+    existing = User.query.filter_by(email=demo_email).first()
+
+    if not existing:
+        password_hash = bcrypt.hashpw('demo123'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        demo_user = User(
+            id='user_1',
+            email=demo_email,
+            username='DemoUser',
+            password_hash=password_hash,
+            tier='pro',
+        )
+        db.session.add(demo_user)
+        db.session.flush()  # Get the user ID
+
+        demo_subscription = Subscription(
+            user_id='user_1',
+            status='active',
+            billing_cycle='monthly',
+            price=9.99,
+            expires_at=datetime.utcnow() + timedelta(days=30),
+            renews_at=datetime.utcnow() + timedelta(days=30),
+        )
+        db.session.add(demo_subscription)
+
+        demo_stats = UserStats(
+            user_id='user_1',
+            total_pnl=0,
+            win_rate=0,
+            active_strategies=0,
+            total_trades=0,
+            connected_accounts=0,
+            total_balance=0,
+            monthly_change=0,
+        )
+        db.session.add(demo_stats)
+
+        db.session.commit()
+        print("[Database] Demo user created")
+    else:
+        print("[Database] Demo user already exists")
