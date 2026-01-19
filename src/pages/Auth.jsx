@@ -237,19 +237,6 @@ export default function Auth({ onSuccess, onBack, onAdminAccess }) {
               )}
             </button>
           </form>
-
-          {/* Demo Account Info */}
-          {mode === 'login' && (
-            <div className="mt-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-              <p className="text-sm text-indigo-300 font-medium mb-1">Demo Account</p>
-              <p className="text-xs text-gray-400">
-                Email: <span className="text-gray-300">demo@example.com</span>
-              </p>
-              <p className="text-xs text-gray-400">
-                Password: <span className="text-gray-300">demo123</span>
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
