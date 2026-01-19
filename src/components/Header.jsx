@@ -127,18 +127,18 @@ const Header = ({
             {user && (
               <div className="relative group">
                 <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4 text-indigo-600" />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700">
+                  <span className="hidden lg:block text-sm font-medium text-gray-700 max-w-[100px] truncate">
                     {user.username || user.email?.split('@')[0]}
                   </span>
                 </button>
                 {/* Dropdown */}
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{user.username}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={onLogout}
@@ -156,7 +156,7 @@ const Header = ({
 
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200 bg-white animate-in slide-in-from-top-2 duration-200">
+        <div className="xl:hidden border-t border-gray-200 bg-white animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-3 space-y-1">
             {/* Mobile Trading Toggle */}
             <div className="flex items-center justify-between py-2 mb-2 border-b border-gray-100 pb-3">
