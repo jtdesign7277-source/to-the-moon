@@ -216,6 +216,10 @@ const StrategyBuilder = () => {
     mode: 'paper'
   })
 
+  // Template customization state (Pro feature)
+  const [templateSettings, setTemplateSettings] = useState({})
+  const [templateMarkets, setTemplateMarkets] = useState([])
+
   // Custom strategy builder state
   const [showNewStrategyModal, setShowNewStrategyModal] = useState(false)
   const [builderStep, setBuilderStep] = useState(1)
@@ -276,6 +280,77 @@ const StrategyBuilder = () => {
     setSelectedTemplate(index)
     setBacktestComplete(false)
     setBacktestData([])
+    // Initialize template customization with default values
+    const t = templates[index]
+    if (t) {
+      setTemplateSettings({
+        minEdge: t.settings.minEdge,
+        maxPosition: t.settings.maxPosition,
+        stopLoss: t.settings.stopLoss,
+        takeProfit: t.settings.takeProfit || 15,
+      })
+      setTemplateMarkets([...t.markets])
+    }
+  }
+
+  // Reset template settings to defaults
+  const resetTemplateSettings = () => {
+    if (template) {
+      setTemplateSettings({
+        minEdge: template.settings.minEdge,
+        maxPosition: template.settings.maxPosition,
+        stopLoss: template.settings.stopLoss,
+        takeProfit: template.settings.takeProfit || 15,
+      })
+      setTemplateMarkets([...template.markets])
+      setBacktestComplete(false)
+    }
+  }
+
+  // Update a template setting (Pro only)
+  const updateTemplateSetting = (key, value) => {
+    if (!isPro) {
+      openUpgradeModal()
+      return
+    }
+    setTemplateSettings(prev => ({ ...prev, [key]: value }))
+    setBacktestComplete(false) // Require re-backtest after changes
+  }
+
+  // Toggle a market for template (Pro only)
+  const toggleTemplateMarket = (market) => {
+    if (!isPro) {
+      openUpgradeModal()
+      return
+    }
+    setTemplateMarkets(prev => {
+      if (prev.includes(market)) {
+        return prev.filter(m => m !== market)
+      }
+      return [...prev, market]
+    })
+    setBacktestComplete(false)
+  }
+
+  // Get current template settings (customized or default)
+  const getCurrentTemplateSettings = () => {
+    if (template && Object.keys(templateSettings).length > 0) {
+      return templateSettings
+    }
+    return template?.settings || {}
+  }
+
+  // Check if template has been customized
+  const isTemplateCustomized = () => {
+    if (!template) return false
+    const current = getCurrentTemplateSettings()
+    const original = template.settings
+    return (
+      current.minEdge !== original.minEdge ||
+      current.maxPosition !== original.maxPosition ||
+      current.stopLoss !== original.stopLoss ||
+      JSON.stringify(templateMarkets.sort()) !== JSON.stringify(template.markets.sort())
+    )
   }
 
   const handleSelectCustomStrategy = (strategy) => {
@@ -308,20 +383,31 @@ const StrategyBuilder = () => {
 
   const confirmDeploy = async () => {
     const strategyName = template?.name || customStrategy.name
+    const customizedName = template && isTemplateCustomized() 
+      ? `${strategyName} (Custom)` 
+      : strategyName
     
     // Track strategy deployment in Google Analytics
-    trackStrategyDeploy(strategyName)
+    trackStrategyDeploy(customizedName)
+
+    // Use customized settings for templates, or custom strategy settings
+    const deployConfig = template 
+      ? getCurrentTemplateSettings()
+      : customStrategy.settings || {}
+    const deployMarkets = template 
+      ? templateMarkets 
+      : customStrategy.markets || []
 
     // If user is logged in, save to backend
     if (user) {
       try {
         const response = await strategyApi.deploy({
-          name: strategyName,
+          name: customizedName,
           description: template?.description || customStrategy.description || '',
           icon: template?.icon || '⚡',
           templateId: template?.id,
-          config: template?.settings || customStrategy.settings || {},
-          markets: template?.markets || customStrategy.markets || [],
+          config: deployConfig,
+          markets: deployMarkets,
           categories: template?.categories || [],
           capital: deploySettings.capital,
           mode: deploySettings.mode,
@@ -346,7 +432,7 @@ const StrategyBuilder = () => {
         // Fall back to local state
         const newStrategy = {
           id: Date.now(),
-          name: strategyName,
+          name: customizedName,
           capital: deploySettings.capital,
           mode: deploySettings.mode,
           status: 'running',
@@ -361,7 +447,7 @@ const StrategyBuilder = () => {
       // Not logged in - store locally
       const newStrategy = {
         id: Date.now(),
-        name: strategyName,
+        name: customizedName,
         capital: deploySettings.capital,
         mode: deploySettings.mode,
         status: 'running',
@@ -375,6 +461,8 @@ const StrategyBuilder = () => {
 
     setShowDeployModal(false)
     setSelectedTemplate(null)
+    setTemplateSettings({})
+    setTemplateMarkets([])
     setBacktestComplete(false)
   }
 
@@ -1000,46 +1088,188 @@ const StrategyBuilder = () => {
               {/* Strategy Details */}
               <div className="grid sm:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">Strategy Settings</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-gray-500">Strategy Settings</h3>
+                    {template && (
+                      <div className="flex items-center gap-2">
+                        {isTemplateCustomized() && (
+                          <button
+                            onClick={resetTemplateSettings}
+                            className="text-xs text-gray-500 hover:text-indigo-600 flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            Reset
+                          </button>
+                        )}
+                        {!isPro && (
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                            PRO to edit
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    {/* Min Edge - Editable for templates */}
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
                       <span className="text-sm text-gray-600">Min Edge Required</span>
-                      <span className="font-medium text-gray-900">{template?.settings?.minEdge || customStrategy.settings.minEdge}%</span>
+                      {template ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0.5"
+                            max="20"
+                            value={getCurrentTemplateSettings().minEdge || 3}
+                            onChange={(e) => updateTemplateSetting('minEdge', parseFloat(e.target.value))}
+                            onClick={(e) => !isPro && e.preventDefault()}
+                            className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
+                              isPro 
+                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' 
+                                : 'border-gray-200 bg-gray-100 cursor-pointer'
+                            }`}
+                            readOnly={!isPro}
+                          />
+                          <span className="text-sm text-gray-500">%</span>
+                        </div>
+                      ) : (
+                        <span className="font-medium text-gray-900">{customStrategy.settings.minEdge}%</span>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    {/* Max Position - Editable for templates */}
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
                       <span className="text-sm text-gray-600">Max Position Size</span>
-                      <span className="font-medium text-gray-900">${template?.settings?.maxPosition || customStrategy.settings.maxPosition}</span>
+                      {template ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">$</span>
+                          <input
+                            type="number"
+                            step="50"
+                            min="50"
+                            max="10000"
+                            value={getCurrentTemplateSettings().maxPosition || 100}
+                            onChange={(e) => updateTemplateSetting('maxPosition', parseInt(e.target.value))}
+                            onClick={(e) => !isPro && e.preventDefault()}
+                            className={`w-20 px-2 py-1 text-right text-sm font-medium border rounded ${
+                              isPro 
+                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' 
+                                : 'border-gray-200 bg-gray-100 cursor-pointer'
+                            }`}
+                            readOnly={!isPro}
+                          />
+                        </div>
+                      ) : (
+                        <span className="font-medium text-gray-900">${customStrategy.settings.maxPosition}</span>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    {/* Stop Loss - Editable for templates */}
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
                       <span className="text-sm text-gray-600">Stop Loss</span>
-                      <span className="font-medium text-red-600">-{template?.settings?.stopLoss || customStrategy.settings.stopLoss}%</span>
+                      {template ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-red-500">-</span>
+                          <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            max="50"
+                            value={getCurrentTemplateSettings().stopLoss || 10}
+                            onChange={(e) => updateTemplateSetting('stopLoss', parseInt(e.target.value))}
+                            onClick={(e) => !isPro && e.preventDefault()}
+                            className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
+                              isPro 
+                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-red-600' 
+                                : 'border-gray-200 bg-gray-100 cursor-pointer text-red-600'
+                            }`}
+                            readOnly={!isPro}
+                          />
+                          <span className="text-sm text-red-500">%</span>
+                        </div>
+                      ) : (
+                        <span className="font-medium text-red-600">-{customStrategy.settings.stopLoss}%</span>
+                      )}
+                    </div>
+                    {/* Take Profit - Editable for templates */}
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
+                      <span className="text-sm text-gray-600">Take Profit</span>
+                      {template ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-green-500">+</span>
+                          <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            max="100"
+                            value={getCurrentTemplateSettings().takeProfit || 15}
+                            onChange={(e) => updateTemplateSetting('takeProfit', parseInt(e.target.value))}
+                            onClick={(e) => !isPro && e.preventDefault()}
+                            className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
+                              isPro 
+                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-green-600' 
+                                : 'border-gray-200 bg-gray-100 cursor-pointer text-green-600'
+                            }`}
+                            readOnly={!isPro}
+                          />
+                          <span className="text-sm text-green-500">%</span>
+                        </div>
+                      ) : (
+                        <span className="font-medium text-green-600">+{customStrategy.settings.takeProfit}%</span>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">Target Markets</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {(template?.markets || customStrategy.markets.map(m => AVAILABLE_MARKETS.find(am => am.id === m)?.name)).map((market) => (
-                      <span key={market} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
-                        {market}
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-gray-500">Target Markets</h3>
+                    {template && !isPro && (
+                      <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                        PRO to edit
                       </span>
-                    ))}
+                    )}
                   </div>
-                  {!backtestComplete && (
-                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
-                          <p className="text-xs text-yellow-600 mt-1">
-                            You must run a backtest before deploying this strategy.
-                          </p>
-                        </div>
-                      </div>
+                  {template ? (
+                    <div className="flex flex-wrap gap-2">
+                      {['Kalshi', 'Manifold', 'Polymarket', 'PredictIt'].map((market) => {
+                        const isSelected = templateMarkets.includes(market)
+                        return (
+                          <button
+                            key={market}
+                            onClick={() => toggleTemplateMarket(market)}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                              isSelected
+                                ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-500'
+                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            } ${!isPro ? 'cursor-pointer' : ''}`}
+                          >
+                            {market}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {customStrategy.markets.map(m => AVAILABLE_MARKETS.find(am => am.id === m)?.name).map((market) => (
+                        <span key={market} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                          {market}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
+              {!backtestComplete && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
+                      <p className="text-xs text-yellow-600 mt-1">
+                        You must run a backtest before deploying this strategy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Backtest Progress */}
               {isBacktesting && (
