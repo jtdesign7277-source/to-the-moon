@@ -12,6 +12,7 @@ import {
 // Context
 import { AppProvider } from './contexts/AppContext'
 import { useApp } from './hooks/useApp'
+import { AuthProvider } from './hooks/useAuth'
 
 // Components
 import Header from './components/Header'
@@ -295,9 +296,11 @@ const AppContent = () => {
 // Root App component with providers
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </AuthProvider>
   )
 }
 
