@@ -34,16 +34,16 @@ def get_subscription_status():
             'leaderboard',
             'marketplace-browse',
             'paper-trading',
+            'strategy-builder',
+            'backtesting',
         ]
 
         pro_features = free_features + [
-            'strategy-builder',
             'live-trading',
             'advanced-analytics',
             'priority-support',
             'api-access',
             'custom-alerts',
-            'backtesting',
             'multi-platform-arb',
         ]
 

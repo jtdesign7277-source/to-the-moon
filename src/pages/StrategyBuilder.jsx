@@ -6,6 +6,7 @@ import BacktestResultsPanel from '../components/BacktestResultsPanel'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
 import { paperTradingApi, strategyApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
+import { useApp } from '../hooks/useApp'
 
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
@@ -202,6 +203,7 @@ const getDifficultyStyle = (difficulty) => {
 
 const StrategyBuilder = () => {
   const { user } = useAuth()
+  const { isPro, openUpgradeModal } = useApp()
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [isBacktesting, setIsBacktesting] = useState(false)
   const [backtestComplete, setBacktestComplete] = useState(false)
@@ -1238,15 +1240,25 @@ const StrategyBuilder = () => {
                     <p className="text-xs text-gray-500 mt-1">Practice with virtual money</p>
                   </button>
                   <button
-                    onClick={() => setDeploySettings({ ...deploySettings, mode: 'live' })}
-                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                    onClick={() => {
+                      if (isPro) {
+                        setDeploySettings({ ...deploySettings, mode: 'live' })
+                      } else {
+                        setShowDeployModal(false)
+                        openUpgradeModal()
+                      }
+                    }}
+                    className={`p-3 rounded-xl border-2 text-left transition-all relative ${
                       deploySettings.mode === 'live'
                         ? 'border-indigo-500 bg-indigo-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                    } ${!isPro ? 'opacity-75' : ''}`}
                   >
+                    {!isPro && (
+                      <span className="absolute top-2 right-2 text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">PRO</span>
+                    )}
                     <p className="font-medium text-gray-900">Live Trading</p>
-                    <p className="text-xs text-gray-500 mt-1">Real money execution</p>
+                    <p className="text-xs text-gray-500 mt-1">{isPro ? 'Real money execution' : '$9.99/mo - Real money'}</p>
                   </button>
                 </div>
               </div>

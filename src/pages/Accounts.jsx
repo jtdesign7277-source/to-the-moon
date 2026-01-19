@@ -136,7 +136,7 @@ const AVAILABLE_PLATFORMS = [
 ]
 
 const Accounts = () => {
-  const { tradingMode, setTradingMode } = useApp()
+  const { tradingMode, setTradingMode, isPro, openUpgradeModal } = useApp()
   const { user } = useAuth()
   const [showAddAccountModal, setShowAddAccountModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState(null)
@@ -492,14 +492,17 @@ const Accounts = () => {
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">Ready for Live Trading?</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Once you're comfortable with paper trading, switch to live mode and connect your real trading accounts.
+                    {isPro 
+                      ? 'Switch to live mode and connect your real trading accounts.'
+                      : 'Upgrade to Pro ($9.99/mo) to connect real accounts and trade with real money.'
+                    }
                   </p>
                   <button
-                    onClick={() => setTradingMode('live')}
+                    onClick={() => isPro ? setTradingMode('live') : openUpgradeModal()}
                     className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     <Key className="w-4 h-4" />
-                    Switch to Live Trading
+                    {isPro ? 'Switch to Live Trading' : 'Upgrade to Pro'}
                   </button>
                 </div>
               </div>
