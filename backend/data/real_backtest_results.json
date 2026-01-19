@@ -1,0 +1,95 @@
+{
+  "frontend_stats": {
+    "Conservative Arb Bot": {
+      "totalTrades": 54,
+      "winRate": 78,
+      "profitLoss": 2866,
+      "avgWin": 175,
+      "avgLoss": -375,
+      "maxDrawdown": -10,
+      "sharpeRatio": 2.3,
+      "sortinoRatio": 1.4
+    },
+    "Sports High Volume": {
+      "totalTrades": 15,
+      "winRate": 67,
+      "profitLoss": -1339,
+      "avgWin": 132,
+      "avgLoss": -533,
+      "maxDrawdown": -16,
+      "sharpeRatio": -1.5,
+      "sortinoRatio": -0.9
+    },
+    "Crypto Volatility Play": {
+      "totalTrades": 22,
+      "winRate": 91,
+      "profitLoss": 10290,
+      "avgWin": 598,
+      "avgLoss": -839,
+      "maxDrawdown": -6,
+      "sharpeRatio": 5.7,
+      "sortinoRatio": 3.5
+    },
+    "Political Momentum": {
+      "totalTrades": 28,
+      "winRate": 100,
+      "profitLoss": 11152,
+      "avgWin": 398,
+      "avgLoss": 0,
+      "maxDrawdown": 0,
+      "sharpeRatio": 12.0,
+      "sortinoRatio": 15.5
+    },
+    "Multi-Platform Arb Pro": {
+      "totalTrades": 110,
+      "winRate": 68,
+      "profitLoss": -1054,
+      "avgWin": 158,
+      "avgLoss": -369,
+      "maxDrawdown": -26,
+      "sharpeRatio": -0.6,
+      "sortinoRatio": -0.4
+    },
+    "Fed News Scalper": {
+      "totalTrades": 4,
+      "winRate": 100,
+      "profitLoss": 705,
+      "avgWin": 176,
+      "avgLoss": 0,
+      "maxDrawdown": 0,
+      "sharpeRatio": 34.2,
+      "sortinoRatio": 44.4
+    },
+    "First Trade Simplified": {
+      "totalTrades": 5,
+      "winRate": 100,
+      "profitLoss": 135,
+      "avgWin": 27,
+      "avgLoss": 0,
+      "maxDrawdown": 0,
+      "sharpeRatio": 7.1,
+      "sortinoRatio": 9.3
+    },
+    "Election Cycle Trader": {
+      "totalTrades": 2,
+      "winRate": 100,
+      "profitLoss": 500,
+      "avgWin": 250,
+      "avgLoss": 0,
+      "maxDrawdown": 0,
+      "sharpeRatio": 18.9,
+      "sortinoRatio": 24.6
+    },
+    "Market Maker Lite": {
+      "totalTrades": 38,
+      "winRate": 66,
+      "profitLoss": 2583,
+      "avgWin": 199,
+      "avgLoss": -185,
+      "maxDrawdown": -7,
+      "sharpeRatio": 3.2,
+      "sortinoRatio": 3.1
+    }
+  },
+  "generated": "2025-01-19"
+}

@@ -359,6 +359,35 @@ def get_waitlist_count():
     })
 
 
+@app.route('/api/waitlist/admin', methods=['GET'])
+def get_waitlist_admin():
+    """Get all waitlist entries (admin endpoint).
+
+    Protected by a simple admin key for now.
+    In production, use proper authentication.
+    """
+    admin_key = request.headers.get('X-Admin-Key')
+    expected_key = os.environ.get('ADMIN_KEY', 'admin-secret-key')
+
+    if admin_key != expected_key:
+        return jsonify({
+            'error': 'Unauthorized',
+            'message': 'Invalid or missing admin key'
+        }), 401
+
+    # Return all waitlist entries sorted by join date
+    entries = sorted(
+        waitlist_db.values(),
+        key=lambda x: x.get('joined_at', ''),
+        reverse=True
+    )
+
+    return jsonify({
+        'total': len(entries),
+        'entries': entries
+    })
+
+
 # --------------------------------------------
 # Authentication Routes
 # --------------------------------------------
@@ -1374,6 +1403,167 @@ def get_strategy_stats(strategy_name):
     except Exception as e:
         return jsonify({
             'error': 'Stats Error',
+            'message': str(e)
+        }), 500
+
+
+# --------------------------------------------
+# Real Historical Backtest Routes
+# --------------------------------------------
+
+@app.route('/api/backtest/real/run', methods=['POST'])
+def run_real_backtest():
+    """Run real backtests using historical market data from Kalshi/Manifold."""
+    try:
+        from services.real_backtest_engine import RealBacktestEngine, STRATEGY_CONFIGS
+
+        data = request.get_json() or {}
+        strategy_name = data.get('strategyName')
+        days = data.get('days', 180)
+        initial_capital = data.get('initialCapital', 10000)
+
+        if not strategy_name:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'strategyName is required'
+            }), 400
+
+        if strategy_name not in STRATEGY_CONFIGS:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': f'Unknown strategy: {strategy_name}. Available: {list(STRATEGY_CONFIGS.keys())}'
+            }), 400
+
+        engine = RealBacktestEngine(initial_capital=initial_capital, days=days)
+        result = engine.run_backtest(strategy_name)
+
+        return jsonify({
+            'success': True,
+            'strategy': strategy_name,
+            'results': result.to_dict(),
+            'frontendStats': result.to_frontend_format(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Real Backtest Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/real/all', methods=['POST'])
+def run_all_real_backtests_endpoint():
+    """Run real backtests for all strategies using historical market data."""
+    try:
+        from services.real_backtest_engine import run_all_real_backtests
+
+        data = request.get_json() or {}
+        days = data.get('days', 180)
+        initial_capital = data.get('initialCapital', 10000)
+
+        results = run_all_real_backtests(
+            initial_capital=initial_capital,
+            days=days
+        )
+
+        return jsonify({
+            'success': True,
+            'results': {name: result.to_dict() for name, result in results.items()},
+            'frontendStats': {name: result.to_frontend_format() for name, result in results.items()},
+            'count': len(results),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Real Backtest Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/real/refresh', methods=['POST'])
+def refresh_real_backtest_data():
+    """Refresh historical data and re-run all backtests."""
+    try:
+        from services.historical_data_collector import HistoricalDataCollector
+        from services.real_backtest_engine import run_all_real_backtests
+        import json
+
+        # Clear cache and fetch fresh data
+        collector = HistoricalDataCollector(cache_enabled=False)
+        data = collector.fetch_all_historical_data(days=180)
+
+        # Run backtests on fresh data
+        results = run_all_real_backtests(initial_capital=10000, days=180)
+
+        # Save results to file
+        import os
+        filepath = os.path.join(
+            os.path.dirname(__file__), 'data',
+            'real_backtest_results.json'
+        )
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        export_data = {
+            'generated_at': datetime.now().isoformat(),
+            'days_analyzed': 180,
+            'markets_fetched': {
+                'kalshi': len(data['kalshi']),
+                'manifold': len(data['manifold']),
+                'total': len(data['all']),
+            },
+            'results': {name: result.to_dict() for name, result in results.items()},
+            'frontend_stats': {name: result.to_frontend_format() for name, result in results.items()},
+        }
+
+        with open(filepath, 'w') as f:
+            json.dump(export_data, f, indent=2)
+
+        return jsonify({
+            'success': True,
+            'message': 'Backtest data refreshed successfully',
+            'marketsFetched': export_data['markets_fetched'],
+            'frontendStats': export_data['frontend_stats'],
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Refresh Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/real/cached', methods=['GET'])
+def get_cached_real_backtest():
+    """Get cached real backtest results from file."""
+    try:
+        import json
+        import os
+
+        filepath = os.path.join(
+            os.path.dirname(__file__), 'data',
+            'real_backtest_results.json'
+        )
+
+        if not os.path.exists(filepath):
+            return jsonify({
+                'success': False,
+                'message': 'No cached results. Call /api/backtest/real/refresh first.',
+            }), 404
+
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+
+        return jsonify({
+            'success': True,
+            'generatedAt': data.get('generated_at'),
+            'daysAnalyzed': data.get('days_analyzed'),
+            'marketsFetched': data.get('markets_fetched'),
+            'frontendStats': data.get('frontend_stats'),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Cache Error',
             'message': str(e)
         }), 500
 
