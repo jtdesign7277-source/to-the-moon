@@ -56,9 +56,18 @@ export default function Landing({ onEnterApp, onLegal }) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [errorMessage, setErrorMessage] = useState('')
+  const [realWaitlistCount, setRealWaitlistCount] = useState(500)
+
+  // Fetch real waitlist count on mount
+  useEffect(() => {
+    fetch(`${API_URL}/api/waitlist/count`)
+      .then(res => res.json())
+      .then(data => setRealWaitlistCount(data.count || 500))
+      .catch(() => {}) // Fallback to default on error
+  }, [])
 
   // Animated stats
-  const waitlistCount = useAnimatedCounter(500)
+  const waitlistCount = useAnimatedCounter(realWaitlistCount)
   const volumeCount = useAnimatedCounter(2)
   const templatesCount = useAnimatedCounter(50)
 
