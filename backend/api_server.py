@@ -1379,6 +1379,556 @@ def get_strategy_stats(strategy_name):
 
 
 # --------------------------------------------
+# Strategy Execution Routes
+# --------------------------------------------
+
+# In-memory storage for running strategies
+running_executors = {}
+
+
+@app.route('/api/executor/strategy-types', methods=['GET'])
+def get_strategy_types():
+    """Get available strategy types with descriptions."""
+    strategy_types = [
+        {
+            'id': 'arbitrage',
+            'name': 'Arbitrage',
+            'icon': '🔄',
+            'description': 'Find price differences across platforms',
+            'details': 'Scans for price discrepancies between Kalshi and Manifold Markets, executing offsetting trades to lock in risk-free profits.',
+            'features': [
+                'Cross-platform price scanning',
+                'Automatic market matching',
+                'Risk-free profit when both legs fill',
+                'Best for: Low-risk, consistent returns',
+            ],
+            'risk_level': 'low',
+            'recommended_settings': {
+                'minEdge': 2.0,
+                'maxPosition': 200,
+                'kellyFraction': 0.5,
+            },
+        },
+        {
+            'id': 'momentum',
+            'name': 'Momentum',
+            'icon': '📈',
+            'description': 'Follow market trends and momentum',
+            'details': 'Identifies and follows price trends using rate of change and volume analysis. Enters when strong momentum is confirmed.',
+            'features': [
+                'Trend detection with lookback periods',
+                'Volume spike confirmation',
+                'Moving average crossovers',
+                'Best for: Trending markets',
+            ],
+            'risk_level': 'medium',
+            'recommended_settings': {
+                'minEdge': 1.5,
+                'maxPosition': 300,
+                'kellyFraction': 0.4,
+                'lookbackPeriods': 10,
+            },
+        },
+        {
+            'id': 'mean-reversion',
+            'name': 'Mean Reversion',
+            'icon': '🎯',
+            'description': 'Trade when prices deviate from average',
+            'details': 'Uses Z-score and Bollinger Band analysis to identify overbought/oversold conditions, betting on price returning to historical mean.',
+            'features': [
+                'Statistical deviation detection',
+                'Z-score based entries',
+                'Bollinger Band analysis',
+                'Best for: Range-bound markets',
+            ],
+            'risk_level': 'medium',
+            'recommended_settings': {
+                'minEdge': 2.0,
+                'maxPosition': 250,
+                'kellyFraction': 0.35,
+                'zScoreThreshold': 2.0,
+            },
+        },
+        {
+            'id': 'news-based',
+            'name': 'News Based',
+            'icon': '📰',
+            'description': 'React to news and events',
+            'details': 'Monitors news feeds and analyzes sentiment to trade on market-moving events. Speed is critical for first-mover advantage.',
+            'features': [
+                'Real-time news monitoring',
+                'Sentiment analysis',
+                'Keyword and topic matching',
+                'Best for: Event-driven markets',
+            ],
+            'risk_level': 'high',
+            'recommended_settings': {
+                'minEdge': 1.0,
+                'maxPosition': 200,
+                'kellyFraction': 0.3,
+                'sentimentThreshold': 0.6,
+            },
+        },
+        {
+            'id': 'market-making',
+            'name': 'Market Making',
+            'icon': '💹',
+            'description': 'Provide liquidity and capture spreads',
+            'details': 'Places both buy and sell orders around fair value, earning the spread when both orders fill. Requires active inventory management.',
+            'features': [
+                'Bid-ask spread capture',
+                'Fair value estimation',
+                'Inventory risk management',
+                'Best for: High-frequency, liquid markets',
+            ],
+            'risk_level': 'medium-high',
+            'recommended_settings': {
+                'minEdge': 0.5,
+                'maxPosition': 100,
+                'kellyFraction': 0.25,
+                'targetSpread': 3.0,
+            },
+        },
+    ]
+
+    return jsonify({
+        'success': True,
+        'strategyTypes': strategy_types,
+    })
+
+
+@app.route('/api/executor/create', methods=['POST'])
+@require_pro
+def create_executor():
+    """Create and start a new strategy executor."""
+    try:
+        from services.strategies import StrategyExecutor
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'Strategy configuration is required'
+            }), 400
+
+        # Create executor from user config
+        paper_trading = data.get('paperTrading', True)
+        executor = StrategyExecutor.from_user_config(data, paper_trading=paper_trading)
+
+        # Generate executor ID
+        executor_id = f'exec_{uuid.uuid4().hex[:12]}'
+
+        # Store executor
+        running_executors[executor_id] = {
+            'executor': executor,
+            'user_id': g.user['id'],
+            'created_at': datetime.now().isoformat(),
+            'config': data,
+        }
+
+        return jsonify({
+            'success': True,
+            'message': 'Strategy executor created',
+            'executorId': executor_id,
+            'status': executor.get_status(),
+        }), 201
+
+    except ValueError as e:
+        return jsonify({
+            'error': 'Configuration Error',
+            'message': str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            'error': 'Server Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/start', methods=['POST'])
+@require_pro
+def start_executor(executor_id):
+    """Start a strategy executor."""
+    try:
+        import asyncio
+
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only control your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+
+        # Start the executor (would use asyncio in production)
+        # For now, just update status
+        executor.status = executor.status.__class__('running')
+        executor.started_at = datetime.utcnow()
+        executor.strategy.is_running = True
+
+        return jsonify({
+            'success': True,
+            'message': 'Executor started',
+            'status': executor.get_status(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Start Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/stop', methods=['POST'])
+@require_pro
+def stop_executor(executor_id):
+    """Stop a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only control your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+        executor.status = executor.status.__class__('stopped')
+        executor.stopped_at = datetime.utcnow()
+        executor.strategy.is_running = False
+
+        return jsonify({
+            'success': True,
+            'message': 'Executor stopped',
+            'status': executor.get_status(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Stop Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/pause', methods=['POST'])
+@require_pro
+def pause_executor(executor_id):
+    """Pause a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only control your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+        executor.status = executor.status.__class__('paused')
+        executor.strategy.is_running = False
+
+        return jsonify({
+            'success': True,
+            'message': 'Executor paused',
+            'status': executor.get_status(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Pause Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/resume', methods=['POST'])
+@require_pro
+def resume_executor(executor_id):
+    """Resume a paused strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only control your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+
+        if executor.status.value != 'paused':
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'Executor is not paused'
+            }), 400
+
+        executor.status = executor.status.__class__('running')
+        executor.strategy.is_running = True
+
+        return jsonify({
+            'success': True,
+            'message': 'Executor resumed',
+            'status': executor.get_status(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Resume Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/status', methods=['GET'])
+@require_auth
+def get_executor_status(executor_id):
+    """Get status of a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only view your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+
+        return jsonify({
+            'success': True,
+            'executorId': executor_id,
+            'status': executor.get_status(),
+            'performance': executor.get_performance_summary(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Status Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>', methods=['DELETE'])
+@require_auth
+def delete_executor(executor_id):
+    """Delete a strategy executor (keeps trade history)."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only delete your own executors'
+            }), 403
+
+        # Get final status before deletion
+        executor = executor_data['executor']
+        final_status = executor.get_status()
+        trade_history = executor.strategy.trade_history
+
+        # Remove from running executors
+        del running_executors[executor_id]
+
+        return jsonify({
+            'success': True,
+            'message': 'Executor deleted',
+            'finalStatus': final_status,
+            'tradeHistory': trade_history,
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Delete Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/list', methods=['GET'])
+@require_auth
+def list_executors():
+    """List all executors for the current user."""
+    try:
+        user_executors = []
+
+        for executor_id, executor_data in running_executors.items():
+            if executor_data['user_id'] == g.user['id']:
+                executor = executor_data['executor']
+                user_executors.append({
+                    'executorId': executor_id,
+                    'name': executor.config.name,
+                    'strategyType': executor.config.strategy_type,
+                    'status': executor.status.value,
+                    'paperTrading': executor.paper_trading,
+                    'createdAt': executor_data['created_at'],
+                    'totalPnl': executor.total_pnl,
+                    'totalTrades': executor.total_trades,
+                    'openPositions': len(executor.strategy.positions),
+                })
+
+        return jsonify({
+            'success': True,
+            'executors': user_executors,
+            'count': len(user_executors),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'List Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/signals', methods=['GET'])
+@require_auth
+def get_executor_signals(executor_id):
+    """Get recent signals from a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only view your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+        signals = [s.to_dict() for s in executor.strategy.signals[-50:]]
+
+        return jsonify({
+            'success': True,
+            'signals': signals,
+            'count': len(signals),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Signals Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/positions', methods=['GET'])
+@require_auth
+def get_executor_positions(executor_id):
+    """Get open positions from a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only view your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+        positions = [p.to_dict() for p in executor.strategy.positions.values()]
+
+        return jsonify({
+            'success': True,
+            'positions': positions,
+            'count': len(positions),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Positions Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/executor/<executor_id>/trades', methods=['GET'])
+@require_auth
+def get_executor_trades(executor_id):
+    """Get trade history from a strategy executor."""
+    try:
+        executor_data = running_executors.get(executor_id)
+
+        if not executor_data:
+            return jsonify({
+                'error': 'Not Found',
+                'message': f'Executor {executor_id} not found'
+            }), 404
+
+        if executor_data['user_id'] != g.user['id']:
+            return jsonify({
+                'error': 'Forbidden',
+                'message': 'You can only view your own executors'
+            }), 403
+
+        executor = executor_data['executor']
+        trades = executor.strategy.trade_history
+
+        # Pagination
+        limit = min(int(request.args.get('limit', 100)), 500)
+        offset = int(request.args.get('offset', 0))
+
+        paginated_trades = trades[offset:offset + limit]
+
+        return jsonify({
+            'success': True,
+            'trades': paginated_trades,
+            'total': len(trades),
+            'limit': limit,
+            'offset': offset,
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Trades Error',
+            'message': str(e)
+        }), 500
+
+
+# --------------------------------------------
 # Error Handlers
 # --------------------------------------------
 

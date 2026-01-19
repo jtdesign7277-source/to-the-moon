@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch } from 'lucide-react'
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 
 // Transform strategy templates to the format expected by the UI
@@ -30,6 +30,134 @@ const STRATEGY_TYPES = IMPORTED_STRATEGY_TYPES
 const AVAILABLE_MARKETS = IMPORTED_MARKETS.map(m => ({ ...m, icon: m.icon || '🎲' }))
 const ENTRY_CONDITIONS = IMPORTED_ENTRY
 const EXIT_CONDITIONS = IMPORTED_EXIT
+
+// Advanced Exit Conditions with customizable parameters
+const ADVANCED_EXIT_CONDITIONS = [
+  {
+    id: 'take-profit',
+    name: 'Take Profit',
+    icon: '🎯',
+    description: 'Exit when profit reaches target percentage',
+    hasValue: true,
+    valueType: 'percent',
+    valueSuffix: '%',
+    valueLabel: 'Take profit at',
+    defaultValue: 15,
+    min: 1,
+    max: 100,
+  },
+  {
+    id: 'stop-loss',
+    name: 'Stop Loss',
+    icon: '🛑',
+    description: 'Exit when loss exceeds limit',
+    hasValue: true,
+    valueType: 'percent',
+    valueSuffix: '%',
+    valueLabel: 'Stop loss at',
+    defaultValue: 10,
+    min: 1,
+    max: 50,
+  },
+  {
+    id: 'trailing-stop',
+    name: 'Trailing Stop',
+    icon: '📉',
+    description: 'Dynamic stop that follows price up',
+    hasValue: true,
+    valueType: 'percent',
+    valueSuffix: '%',
+    valueLabel: 'Trail distance',
+    defaultValue: 5,
+    min: 0.5,
+    max: 25,
+  },
+  {
+    id: 'time-exit',
+    name: 'Time-Based Exit',
+    icon: '⏰',
+    description: 'Exit after holding for a set duration',
+    hasValue: true,
+    valueType: 'duration',
+    valueSuffix: '',
+    valueLabel: 'Exit after',
+    defaultValue: 60,
+    options: [
+      { value: 15, label: '15 minutes' },
+      { value: 30, label: '30 minutes' },
+      { value: 60, label: '1 hour' },
+      { value: 120, label: '2 hours' },
+      { value: 240, label: '4 hours' },
+      { value: 480, label: '8 hours' },
+      { value: 1440, label: '24 hours' },
+      { value: 4320, label: '3 days' },
+      { value: 10080, label: '1 week' },
+    ],
+  },
+  {
+    id: 'market-close',
+    name: 'Market Close',
+    icon: '🔔',
+    description: 'Exit before market resolution',
+    hasValue: true,
+    valueType: 'duration',
+    valueSuffix: '',
+    valueLabel: 'Exit before close',
+    defaultValue: 60,
+    options: [
+      { value: 15, label: '15 minutes before' },
+      { value: 30, label: '30 minutes before' },
+      { value: 60, label: '1 hour before' },
+      { value: 120, label: '2 hours before' },
+      { value: 1440, label: '1 day before' },
+    ],
+  },
+  {
+    id: 'edge-collapse',
+    name: 'Edge Collapse',
+    icon: '📊',
+    description: 'Exit when edge drops below threshold',
+    hasValue: true,
+    valueType: 'percent',
+    valueSuffix: '%',
+    valueLabel: 'Exit when edge below',
+    defaultValue: 1,
+    min: 0.5,
+    max: 10,
+  },
+]
+
+// Conditional triggers for "if-then" rules
+const RULE_TRIGGERS = [
+  { id: 'profit-reaches', label: 'Profit reaches', valueType: 'percent', icon: '📈' },
+  { id: 'loss-reaches', label: 'Loss reaches', valueType: 'percent', icon: '📉' },
+  { id: 'time-elapsed', label: 'Time in trade exceeds', valueType: 'duration', icon: '⏱️' },
+  { id: 'price-stagnant', label: 'Price sideways for', valueType: 'duration', icon: '➡️' },
+  { id: 'edge-drops', label: 'Edge drops below', valueType: 'percent', icon: '📊' },
+  { id: 'volume-spike', label: 'Volume spikes by', valueType: 'percent', icon: '📶' },
+]
+
+// Actions that can be triggered
+const RULE_ACTIONS = [
+  { id: 'set-stop-loss', label: 'Set stop loss at', valueType: 'percent', icon: '🛑' },
+  { id: 'set-trailing-stop', label: 'Activate trailing stop of', valueType: 'percent', icon: '📉' },
+  { id: 'set-take-profit', label: 'Set take profit at', valueType: 'percent', icon: '🎯' },
+  { id: 'exit-position', label: 'Exit position immediately', valueType: 'none', icon: '🚪' },
+  { id: 'reduce-position', label: 'Reduce position by', valueType: 'percent', icon: '➖' },
+  { id: 'wait-then-exit', label: 'Wait then exit after', valueType: 'duration', icon: '⏰' },
+]
+
+// Duration options for dropdowns
+const DURATION_OPTIONS = [
+  { value: 5, label: '5 min' },
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 60, label: '1 hour' },
+  { value: 120, label: '2 hours' },
+  { value: 240, label: '4 hours' },
+  { value: 480, label: '8 hours' },
+  { value: 1440, label: '24 hours' },
+]
 
 // Generate backtest chart data from template stats
 const generateBacktestData = (config) => {
@@ -88,7 +216,9 @@ const StrategyBuilder = () => {
     type: null,
     markets: [],
     entryConditions: [],
-    exitConditions: [],
+    exitConditions: [], // Basic exit condition IDs
+    advancedExitConditions: {}, // { conditionId: { enabled: true, value: 15 } }
+    conditionalRules: [], // Array of { id, trigger, triggerValue, action, actionValue }
     settings: {
       minEdge: 3,
       maxPosition: 200,
@@ -150,13 +280,27 @@ const StrategyBuilder = () => {
 
   const stopStrategy = (id) => {
     setDeployedStrategies(deployedStrategies.map(s =>
-      s.id === id ? { ...s, status: 'stopped' } : s
+      s.id === id ? { ...s, status: 'stopped', stoppedAt: new Date().toISOString() } : s
     ))
+  }
+
+  // Resume a stopped strategy
+  const resumeStrategy = (id) => {
+    setDeployedStrategies(deployedStrategies.map(s =>
+      s.id === id ? { ...s, status: 'running', resumedAt: new Date().toISOString() } : s
+    ))
+  }
+
+  // Remove deployed strategy (doesn't delete the strategy config, just removes from running)
+  const removeDeployedStrategy = (id) => {
+    setDeployedStrategies(deployedStrategies.filter(s => s.id !== id))
+    setShowRemoveDeployedConfirm(null)
   }
 
   // State for edit mode and delete confirmation
   const [editingStrategyId, setEditingStrategyId] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
+  const [showRemoveDeployedConfirm, setShowRemoveDeployedConfirm] = useState(null)
 
   // Calculate realistic stats based on strategy configuration
   const calculateStrategyStats = (strategy) => {
@@ -166,29 +310,56 @@ const StrategyBuilder = () => {
       'momentum': { winRate: 0.68, trades: 1.0, sharpe: 0.9 },
       'mean-reversion': { winRate: 0.72, trades: 0.9, sharpe: 1.0 },
       'news-based': { winRate: 0.75, trades: 0.6, sharpe: 1.05 },
+      'market-making': { winRate: 0.80, trades: 1.5, sharpe: 1.0 },
     }
     const typeMult = typeMultipliers[strategy.type] || { winRate: 0.70, trades: 1.0, sharpe: 1.0 }
 
+    // Get exit condition values from advanced config or fallback to settings
+    const advancedExits = strategy.advancedExitConditions || {}
+    const takeProfit = advancedExits['take-profit']?.enabled
+      ? advancedExits['take-profit'].value
+      : (strategy.settings?.takeProfit || 15)
+    const stopLoss = advancedExits['stop-loss']?.enabled
+      ? advancedExits['stop-loss'].value
+      : (strategy.settings?.stopLoss || 10)
+    const hasTrailingStop = advancedExits['trailing-stop']?.enabled
+    const trailingStopValue = advancedExits['trailing-stop']?.value || 5
+
+    // Conditional rules boost performance slightly
+    const ruleCount = strategy.conditionalRules?.length || 0
+    const ruleBonus = 1 + (ruleCount * 0.02) // 2% boost per rule
+
     // Higher minEdge = higher win rate but fewer trades
-    const edgeFactor = Math.min(strategy.settings.minEdge / 3, 1.5)
+    const edgeFactor = Math.min(strategy.settings?.minEdge / 3 || 1, 1.5)
     const baseWinRate = 65 + (edgeFactor * 15)
-    const winRate = Math.min(95, Math.round(baseWinRate * typeMult.winRate))
+    let winRate = Math.min(95, Math.round(baseWinRate * typeMult.winRate * ruleBonus))
+
+    // Trailing stop can improve win rate
+    if (hasTrailingStop) {
+      winRate = Math.min(95, winRate + 3)
+    }
 
     // More markets = more trades
-    const marketFactor = strategy.markets.length
+    const marketFactor = (strategy.markets?.length || 1)
     const baseTrades = 80 + (marketFactor * 40)
     const totalTrades = Math.round(baseTrades * typeMult.trades * (1 + Math.random() * 0.2))
 
     // Calculate P&L based on win rate and position sizing
-    const avgWin = Math.round(strategy.settings.maxPosition * (strategy.settings.takeProfit / 100) * 0.8)
-    const avgLoss = -Math.round(strategy.settings.maxPosition * (strategy.settings.stopLoss / 100) * 0.7)
+    const maxPosition = strategy.settings?.maxPosition || 200
+    const avgWin = Math.round(maxPosition * (takeProfit / 100) * 0.8)
+    const avgLoss = -Math.round(maxPosition * (stopLoss / 100) * 0.7)
     const winningTrades = Math.round(totalTrades * (winRate / 100))
     const losingTrades = totalTrades - winningTrades
-    const profitLoss = Math.round((winningTrades * avgWin) + (losingTrades * avgLoss))
+    let profitLoss = Math.round((winningTrades * avgWin) + (losingTrades * avgLoss))
+
+    // Trailing stop can capture more profit
+    if (hasTrailingStop) {
+      profitLoss = Math.round(profitLoss * 1.15)
+    }
 
     // Risk metrics
-    const maxDrawdown = Math.round(strategy.settings.stopLoss * (1.5 + Math.random() * 0.5))
-    const sharpeRatio = Math.round((1.2 + (edgeFactor * 0.8) * typeMult.sharpe) * 10) / 10
+    const maxDrawdown = Math.round(stopLoss * (1.5 + Math.random() * 0.5))
+    const sharpeRatio = Math.round((1.2 + (edgeFactor * 0.8) * typeMult.sharpe * ruleBonus) * 10) / 10
     const sortinoRatio = Math.round((sharpeRatio * 1.3) * 10) / 10
 
     // Monthly returns (6 months)
@@ -224,6 +395,8 @@ const StrategyBuilder = () => {
       markets: [],
       entryConditions: [],
       exitConditions: [],
+      advancedExitConditions: {},
+      conditionalRules: [],
       settings: {
         minEdge: 3,
         maxPosition: 200,
@@ -233,12 +406,72 @@ const StrategyBuilder = () => {
     })
   }
 
+  // Toggle advanced exit condition
+  const toggleAdvancedExitCondition = (conditionId) => {
+    const condition = ADVANCED_EXIT_CONDITIONS.find(c => c.id === conditionId)
+    setCustomStrategy(prev => ({
+      ...prev,
+      advancedExitConditions: {
+        ...prev.advancedExitConditions,
+        [conditionId]: prev.advancedExitConditions[conditionId]?.enabled
+          ? { ...prev.advancedExitConditions[conditionId], enabled: false }
+          : { enabled: true, value: condition?.defaultValue || 10 }
+      }
+    }))
+  }
+
+  // Update advanced exit condition value
+  const updateAdvancedExitValue = (conditionId, value) => {
+    setCustomStrategy(prev => ({
+      ...prev,
+      advancedExitConditions: {
+        ...prev.advancedExitConditions,
+        [conditionId]: { ...prev.advancedExitConditions[conditionId], value: Number(value) }
+      }
+    }))
+  }
+
+  // Add a new conditional rule
+  const addConditionalRule = () => {
+    const newRule = {
+      id: Date.now(),
+      trigger: 'profit-reaches',
+      triggerValue: 15,
+      action: 'set-trailing-stop',
+      actionValue: 5,
+    }
+    setCustomStrategy(prev => ({
+      ...prev,
+      conditionalRules: [...prev.conditionalRules, newRule]
+    }))
+  }
+
+  // Update a conditional rule
+  const updateConditionalRule = (ruleId, field, value) => {
+    setCustomStrategy(prev => ({
+      ...prev,
+      conditionalRules: prev.conditionalRules.map(rule =>
+        rule.id === ruleId ? { ...rule, [field]: value } : rule
+      )
+    }))
+  }
+
+  // Remove a conditional rule
+  const removeConditionalRule = (ruleId) => {
+    setCustomStrategy(prev => ({
+      ...prev,
+      conditionalRules: prev.conditionalRules.filter(rule => rule.id !== ruleId)
+    }))
+  }
+
   // Edit existing custom strategy
   const editCustomStrategy = (strategy, e) => {
     e.stopPropagation()
     setEditingStrategyId(strategy.id)
     setCustomStrategy({
       ...strategy,
+      advancedExitConditions: strategy.advancedExitConditions || {},
+      conditionalRules: strategy.conditionalRules || [],
       settings: strategy.settings || {
         minEdge: 3,
         maxPosition: 200,
@@ -313,7 +546,10 @@ const StrategyBuilder = () => {
       case 1: return customStrategy.name.length > 0 && customStrategy.type
       case 2: return customStrategy.markets.length > 0
       case 3: return customStrategy.entryConditions.length > 0
-      case 4: return customStrategy.exitConditions.length > 0
+      case 4:
+        // Check if at least one advanced exit condition is enabled
+        const hasAdvancedExit = Object.values(customStrategy.advancedExitConditions || {}).some(c => c.enabled)
+        return hasAdvancedExit
       default: return true
     }
   }
@@ -392,14 +628,32 @@ const StrategyBuilder = () => {
                       <span className="text-sm text-green-600 font-medium">+$42.50 (4.2%)</span>
                       <button
                         onClick={() => stopStrategy(strategy.id)}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        title="Pause strategy"
                       >
                         <Pause className="w-4 h-4" />
                       </button>
                     </>
                   ) : (
-                    <span className="text-sm text-gray-500">Stopped</span>
+                    <>
+                      <span className="text-sm text-gray-500">Paused</span>
+                      <button
+                        onClick={() => resumeStrategy(strategy.id)}
+                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Resume strategy"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                    </>
                   )}
+                  {/* Remove from deployed (doesn't delete the strategy itself) */}
+                  <button
+                    onClick={() => setShowRemoveDeployedConfirm(strategy.id)}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Remove from active"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -488,6 +742,37 @@ const StrategyBuilder = () => {
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Deployed Strategy Confirmation Modal */}
+      {showRemoveDeployedConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Remove Active Strategy?</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                This will stop and remove the strategy from your active list. Your strategy configuration and backtest data will be preserved - you can redeploy it anytime.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRemoveDeployedConfirm(null)}
+                  className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => removeDeployedStrategy(showRemoveDeployedConfirm)}
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  Remove
                 </button>
               </div>
             </div>
@@ -937,37 +1222,243 @@ const StrategyBuilder = () => {
                 </div>
               )}
 
-              {/* Step 4: Exit Conditions */}
+              {/* Step 4: Exit Conditions (Advanced) */}
               {builderStep === 4 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    When should the bot exit a trade?
-                  </label>
-                  <div className="space-y-3">
-                    {EXIT_CONDITIONS.map((condition) => (
+                <div className="space-y-6">
+                  {/* Basic Exit Conditions with Customizable Values */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Exit Conditions
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">Select conditions and customize their values</p>
+                    <div className="space-y-3">
+                      {ADVANCED_EXIT_CONDITIONS.map((condition) => {
+                        const isEnabled = customStrategy.advancedExitConditions?.[condition.id]?.enabled
+                        const currentValue = customStrategy.advancedExitConditions?.[condition.id]?.value ?? condition.defaultValue
+
+                        return (
+                          <div
+                            key={condition.id}
+                            className={`p-4 rounded-xl border-2 transition-all ${
+                              isEnabled
+                                ? 'border-indigo-500 bg-indigo-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <button
+                                onClick={() => toggleAdvancedExitCondition(condition.id)}
+                                className="flex items-start gap-3 text-left flex-1"
+                              >
+                                <span className="text-xl mt-0.5">{condition.icon}</span>
+                                <div>
+                                  <p className="font-medium text-gray-900">{condition.name}</p>
+                                  <p className="text-sm text-gray-500">{condition.description}</p>
+                                </div>
+                              </button>
+                              {isEnabled && (
+                                <Check className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                              )}
+                            </div>
+
+                            {/* Value Input - only show when enabled */}
+                            {isEnabled && condition.hasValue && (
+                              <div className="mt-3 ml-9">
+                                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                                  {condition.valueLabel}
+                                </label>
+                                {condition.options ? (
+                                  <select
+                                    value={currentValue}
+                                    onChange={(e) => updateAdvancedExitValue(condition.id, e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                                  >
+                                    {condition.options.map(opt => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="number"
+                                      value={currentValue}
+                                      onChange={(e) => updateAdvancedExitValue(condition.id, e.target.value)}
+                                      onClick={(e) => e.stopPropagation()}
+                                      min={condition.min}
+                                      max={condition.max}
+                                      step={condition.valueType === 'percent' ? 0.5 : 1}
+                                      className="w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-sm text-gray-500">{condition.valueSuffix}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Conditional Rules Section */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <GitBranch className="w-4 h-4" />
+                          Conditional Rules (If-Then)
+                        </label>
+                        <p className="text-xs text-gray-500 mt-0.5">Create advanced logic: "If X happens, then do Y"</p>
+                      </div>
                       <button
-                        key={condition.id}
-                        onClick={() => toggleCondition('exit', condition.id)}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
-                          customStrategy.exitConditions.includes(condition.id)
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        onClick={addConditionalRule}
+                        className="px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors flex items-center gap-1"
                       >
-                        <div>
-                          <p className="font-medium text-gray-900">{condition.name}</p>
-                          <p className="text-sm text-gray-500">{condition.description}</p>
-                        </div>
-                        {customStrategy.exitConditions.includes(condition.id) && (
-                          <Check className="w-5 h-5 text-indigo-600" />
-                        )}
+                        <Plus className="w-4 h-4" />
+                        Add Rule
                       </button>
-                    ))}
+                    </div>
+
+                    {/* Existing Rules */}
+                    {customStrategy.conditionalRules?.length > 0 ? (
+                      <div className="space-y-3">
+                        {customStrategy.conditionalRules.map((rule, index) => {
+                          const trigger = RULE_TRIGGERS.find(t => t.id === rule.trigger)
+                          const action = RULE_ACTIONS.find(a => a.id === rule.action)
+
+                          return (
+                            <div
+                              key={rule.id}
+                              className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200"
+                            >
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                                  Rule {index + 1}
+                                </span>
+                                <button
+                                  onClick={() => removeConditionalRule(rule.id)}
+                                  className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+
+                              {/* IF Section */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded">IF</span>
+                                <select
+                                  value={rule.trigger}
+                                  onChange={(e) => updateConditionalRule(rule.id, 'trigger', e.target.value)}
+                                  className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                  {RULE_TRIGGERS.map(t => (
+                                    <option key={t.id} value={t.id}>{t.icon} {t.label}</option>
+                                  ))}
+                                </select>
+
+                                {trigger?.valueType === 'percent' && (
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="number"
+                                      value={rule.triggerValue}
+                                      onChange={(e) => updateConditionalRule(rule.id, 'triggerValue', Number(e.target.value))}
+                                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                      min={0}
+                                      max={100}
+                                    />
+                                    <span className="text-sm text-gray-500">%</span>
+                                  </div>
+                                )}
+
+                                {trigger?.valueType === 'duration' && (
+                                  <select
+                                    value={rule.triggerValue}
+                                    onChange={(e) => updateConditionalRule(rule.id, 'triggerValue', Number(e.target.value))}
+                                    className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                  >
+                                    {DURATION_OPTIONS.map(opt => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+
+                              {/* Arrow */}
+                              <div className="flex justify-center my-2">
+                                <ArrowRight className="w-5 h-5 text-purple-400 rotate-90" />
+                              </div>
+
+                              {/* THEN Section */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-semibold text-indigo-700 bg-indigo-100 px-2 py-1 rounded">THEN</span>
+                                <select
+                                  value={rule.action}
+                                  onChange={(e) => updateConditionalRule(rule.id, 'action', e.target.value)}
+                                  className="flex-1 min-w-[160px] px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                  {RULE_ACTIONS.map(a => (
+                                    <option key={a.id} value={a.id}>{a.icon} {a.label}</option>
+                                  ))}
+                                </select>
+
+                                {action?.valueType === 'percent' && (
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="number"
+                                      value={rule.actionValue}
+                                      onChange={(e) => updateConditionalRule(rule.id, 'actionValue', Number(e.target.value))}
+                                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                      min={0}
+                                      max={100}
+                                    />
+                                    <span className="text-sm text-gray-500">%</span>
+                                  </div>
+                                )}
+
+                                {action?.valueType === 'duration' && (
+                                  <select
+                                    value={rule.actionValue}
+                                    onChange={(e) => updateConditionalRule(rule.id, 'actionValue', Number(e.target.value))}
+                                    className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  >
+                                    {DURATION_OPTIONS.map(opt => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl text-center">
+                        <GitBranch className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">No conditional rules yet</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Example: "If profit reaches 17%, then activate trailing stop of 2%"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Rule Examples */}
+                    {customStrategy.conditionalRules?.length === 0 && (
+                      <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                        <p className="text-xs font-medium text-gray-600 mb-2">Example strategies you can create:</p>
+                        <ul className="text-xs text-gray-500 space-y-1">
+                          <li>• If profit reaches 17% → Set stop loss at 10% (lock in gains)</li>
+                          <li>• If profit reaches 20% → Activate trailing stop of 2%</li>
+                          <li>• If price sideways for 60min after profit goal → Exit position</li>
+                          <li>• If loss reaches 5% → Reduce position by 50%</li>
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* Step 5: Risk Settings */}
+              {/* Step 5: Risk & Position Settings */}
               {builderStep === 5 && (
                 <div className="space-y-6">
                   <div>
@@ -982,9 +1473,13 @@ const StrategyBuilder = () => {
                         settings: { ...customStrategy.settings, minEdge: Number(e.target.value) }
                       })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      min={0.5}
+                      max={20}
+                      step={0.5}
                     />
                     <p className="text-xs text-gray-500 mt-1">Only enter trades with at least this much edge</p>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Max Position Size ($)
@@ -997,37 +1492,77 @@ const StrategyBuilder = () => {
                         settings: { ...customStrategy.settings, maxPosition: Number(e.target.value) }
                       })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      min={10}
+                      max={10000}
+                      step={10}
                     />
                     <p className="text-xs text-gray-500 mt-1">Maximum amount to risk per trade</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Stop Loss (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={customStrategy.settings.stopLoss}
-                        onChange={(e) => setCustomStrategy({
-                          ...customStrategy,
-                          settings: { ...customStrategy.settings, stopLoss: Number(e.target.value) }
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Max Concurrent Positions
+                    </label>
+                    <input
+                      type="number"
+                      value={customStrategy.settings.maxConcurrent || 5}
+                      onChange={(e) => setCustomStrategy({
+                        ...customStrategy,
+                        settings: { ...customStrategy.settings, maxConcurrent: Number(e.target.value) }
+                      })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      min={1}
+                      max={20}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Maximum number of open positions at once</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Daily Loss Limit ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={customStrategy.settings.dailyLossLimit || 500}
+                      onChange={(e) => setCustomStrategy({
+                        ...customStrategy,
+                        settings: { ...customStrategy.settings, dailyLossLimit: Number(e.target.value) }
+                      })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      min={50}
+                      max={10000}
+                      step={50}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Stop trading for the day if losses exceed this amount</p>
+                  </div>
+
+                  {/* Summary of Exit Conditions */}
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Exit Conditions Summary</h4>
+                    <div className="space-y-2">
+                      {Object.entries(customStrategy.advancedExitConditions || {})
+                        .filter(([_, config]) => config.enabled)
+                        .map(([condId, config]) => {
+                          const cond = ADVANCED_EXIT_CONDITIONS.find(c => c.id === condId)
+                          if (!cond) return null
+                          const displayValue = cond.options
+                            ? cond.options.find(o => o.value === config.value)?.label
+                            : `${config.value}${cond.valueSuffix}`
+                          return (
+                            <div key={condId} className="flex items-center gap-2 text-sm">
+                              <span>{cond.icon}</span>
+                              <span className="text-gray-600">{cond.name}:</span>
+                              <span className="font-medium text-gray-900">{displayValue}</span>
+                            </div>
+                          )
                         })}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Take Profit (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={customStrategy.settings.takeProfit}
-                        onChange={(e) => setCustomStrategy({
-                          ...customStrategy,
-                          settings: { ...customStrategy.settings, takeProfit: Number(e.target.value) }
-                        })}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
+                      {customStrategy.conditionalRules?.length > 0 && (
+                        <div className="pt-2 mt-2 border-t border-gray-200">
+                          <span className="text-xs font-medium text-purple-600">
+                            + {customStrategy.conditionalRules.length} conditional rule{customStrategy.conditionalRules.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
