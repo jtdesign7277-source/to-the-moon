@@ -318,18 +318,9 @@ const Accounts = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your connected trading platforms.</p>
-        </div>
-        <button
-          onClick={openAddAccount}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25"
-        >
-          <Plus className="w-4 h-4" />
-          Add Account
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
+        <p className="text-gray-500 text-sm mt-1">Manage your connected trading platforms.</p>
       </div>
 
       {/* Paper Trading Notice */}
@@ -526,7 +517,7 @@ const Accounts = () => {
           >
             <div className="flex items-center justify-center gap-3 text-gray-500 group-hover:text-indigo-600">
               <Plus className="w-5 h-5" />
-              <span className="font-medium">Connect Another Account</span>
+              <span className="font-medium">Connect Account</span>
             </div>
           </button>
         )}
