@@ -2405,22 +2405,22 @@ def internal_error(e):
 # ============================================
 
 @app.route('/api/paper/portfolio', methods=['GET'])
-@token_required
+@require_auth
 def get_paper_portfolio():
     """Get user's paper trading portfolio."""
     try:
-        summary = PaperTradingService.get_portfolio_summary(g.current_user.id)
+        summary = PaperTradingService.get_portfolio_summary(g.user.id)
         return jsonify(summary), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/paper/portfolio/reset', methods=['POST'])
-@token_required
+@require_auth
 def reset_paper_portfolio():
     """Reset paper trading portfolio to starting balance."""
     try:
-        portfolio = PaperTradingService.reset_portfolio(g.current_user.id)
+        portfolio = PaperTradingService.reset_portfolio(g.user.id)
         return jsonify({
             'message': 'Portfolio reset to $100,000',
             'portfolio': portfolio.to_dict()
@@ -2430,7 +2430,7 @@ def reset_paper_portfolio():
 
 
 @app.route('/api/paper/trade', methods=['POST'])
-@token_required
+@require_auth
 def execute_paper_trade():
     """
     Execute a paper trade.
@@ -2466,7 +2466,7 @@ def execute_paper_trade():
             return jsonify({'error': 'Quantity must be a positive integer'}), 400
         
         success, message, trade = PaperTradingService.execute_trade(
-            user_id=g.current_user.id,
+            user_id=g.user.id,
             platform=data['platform'],
             market_id=data['marketId'],
             market_title=data['marketTitle'],
@@ -2478,7 +2478,7 @@ def execute_paper_trade():
         )
         
         if success:
-            summary = PaperTradingService.get_portfolio_summary(g.current_user.id)
+            summary = PaperTradingService.get_portfolio_summary(g.user.id)
             return jsonify({
                 'message': message,
                 'trade': trade.to_dict() if trade else None,
@@ -2492,25 +2492,25 @@ def execute_paper_trade():
 
 
 @app.route('/api/paper/positions', methods=['GET'])
-@token_required
+@require_auth
 def get_paper_positions():
     """Get all open positions."""
     try:
-        positions = PaperTradingService.get_open_positions(g.current_user.id)
+        positions = PaperTradingService.get_open_positions(g.user.id)
         return jsonify({'positions': positions}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/paper/positions/<position_id>/close', methods=['POST'])
-@token_required
+@require_auth
 def close_paper_position(position_id):
     """Close an open position at current market price."""
     try:
-        success, message = PaperTradingService.close_position(g.current_user.id, position_id)
+        success, message = PaperTradingService.close_position(g.user.id, position_id)
         
         if success:
-            summary = PaperTradingService.get_portfolio_summary(g.current_user.id)
+            summary = PaperTradingService.get_portfolio_summary(g.user.id)
             return jsonify({
                 'message': message,
                 'portfolio': summary['portfolio'],
@@ -2523,19 +2523,19 @@ def close_paper_position(position_id):
 
 
 @app.route('/api/paper/trades', methods=['GET'])
-@token_required
+@require_auth
 def get_paper_trades():
     """Get paper trade history."""
     try:
         limit = request.args.get('limit', 50, type=int)
-        trades = PaperTradingService.get_trade_history(g.current_user.id, limit=limit)
+        trades = PaperTradingService.get_trade_history(g.user.id, limit=limit)
         return jsonify({'trades': trades}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/paper/quick-buy', methods=['POST'])
-@token_required
+@require_auth
 def paper_quick_buy():
     """
     Quick buy for strategy execution.
@@ -2568,7 +2568,7 @@ def paper_quick_buy():
             return jsonify({'error': 'Amount too small for trade'}), 400
         
         success, message, trade = PaperTradingService.execute_trade(
-            user_id=g.current_user.id,
+            user_id=g.user.id,
             platform=data.get('platform', 'kalshi'),
             market_id=data.get('marketId'),
             market_title=data.get('marketTitle', 'Unknown Market'),
@@ -2580,7 +2580,7 @@ def paper_quick_buy():
         )
         
         if success:
-            summary = PaperTradingService.get_portfolio_summary(g.current_user.id)
+            summary = PaperTradingService.get_portfolio_summary(g.user.id)
             return jsonify({
                 'message': message,
                 'trade': trade.to_dict() if trade else None,
