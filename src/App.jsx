@@ -18,6 +18,7 @@ import UpgradeModal from './components/UpgradeModal'
 import DevTools from './components/DevTools'
 
 // Pages
+import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Accounts from './pages/Accounts'
 import StrategyBuilder from './pages/StrategyBuilder'
@@ -83,9 +84,15 @@ const PageRenderer = ({ currentPage }) => {
 
 // Main app content (needs to be inside AppProvider)
 const AppContent = () => {
+  const [showLanding, setShowLanding] = useState(true)
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isPro, openUpgradeModal } = useApp()
+
+  // Show landing page by default
+  if (showLanding) {
+    return <Landing onEnterApp={() => setShowLanding(false)} />
+  }
 
   // Handle navigation with paywall check
   const handleNavigation = useCallback((pageId) => {

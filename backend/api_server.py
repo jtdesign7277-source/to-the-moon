@@ -74,6 +74,7 @@ users_by_email['demo@example.com'] = demo_user
 
 strategies_db = {}
 backtest_results_db = {}
+waitlist_db = {}  # Email waitlist storage
 
 # Sample leaderboard data
 leaderboard_data = [
@@ -290,6 +291,70 @@ def health_check():
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'version': '1.0.0'
+    })
+
+
+# --------------------------------------------
+# Waitlist Routes
+# --------------------------------------------
+
+@app.route('/api/waitlist', methods=['POST'])
+def join_waitlist():
+    """Add email to beta waitlist."""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'Request body is required'
+            }), 400
+
+        email = data.get('email', '').strip().lower()
+
+        # Validate email
+        if not email:
+            return jsonify({
+                'error': 'Validation Error',
+                'message': 'Email is required'
+            }), 400
+
+        if not validate_email(email):
+            return jsonify({
+                'error': 'Validation Error',
+                'message': 'Invalid email format'
+            }), 400
+
+        # Check if already on waitlist
+        if email in waitlist_db:
+            return jsonify({
+                'success': True,
+                'message': 'You are already on the waitlist!'
+            })
+
+        # Add to waitlist
+        waitlist_db[email] = {
+            'email': email,
+            'joined_at': datetime.now().isoformat(),
+        }
+
+        return jsonify({
+            'success': True,
+            'message': 'Successfully joined the waitlist!'
+        }), 201
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Server Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/waitlist/count', methods=['GET'])
+def get_waitlist_count():
+    """Get total number of waitlist signups."""
+    return jsonify({
+        'count': len(waitlist_db) + 500  # Add base count for social proof
     })
 
 
