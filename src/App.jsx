@@ -119,10 +119,14 @@ const AppContent = () => {
   const [legalTab, setLegalTab] = useState('terms')
   const { isPro, openUpgradeModal, setIsPro } = useApp()
 
-  // Check for admin route on mount
+  // Check for admin route or reset-password route on mount
   useEffect(() => {
     if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
       setView('admin')
+    }
+    // Check for password reset token in URL
+    if (window.location.pathname === '/reset-password' || window.location.search.includes('token=')) {
+      setView('auth')
     }
   }, [])
 
