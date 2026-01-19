@@ -1161,6 +1161,224 @@ def get_backtest_results(backtest_id):
 
 
 # --------------------------------------------
+# Market Data Routes
+# --------------------------------------------
+
+@app.route('/api/markets/kalshi', methods=['POST'])
+def get_kalshi_markets():
+    """Fetch markets from Kalshi API."""
+    try:
+        from services.market_data_service import fetch_kalshi_markets
+
+        data = request.get_json() or {}
+        category = data.get('category')
+        limit = data.get('limit', 100)
+        status = data.get('status', 'open')
+
+        markets = fetch_kalshi_markets(category=category, limit=limit, status=status)
+
+        return jsonify({
+            'success': True,
+            'markets': markets,
+            'count': len(markets),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Market Data Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/markets/manifold', methods=['POST'])
+def get_manifold_markets():
+    """Fetch markets from Manifold Markets API."""
+    try:
+        from services.market_data_service import fetch_manifold_markets
+
+        data = request.get_json() or {}
+        category = data.get('category')
+        limit = data.get('limit', 100)
+        sort = data.get('sort', 'liquidity')
+
+        markets = fetch_manifold_markets(category=category, limit=limit, sort=sort)
+
+        return jsonify({
+            'success': True,
+            'markets': markets,
+            'count': len(markets),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Market Data Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/markets/history', methods=['POST'])
+def get_market_history():
+    """Get historical price data for a market."""
+    try:
+        from services.market_data_service import get_historical_prices
+
+        data = request.get_json() or {}
+        market_id = data.get('marketId')
+        platform = data.get('platform')
+        days = data.get('days', 180)
+
+        if not market_id or not platform:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'marketId and platform are required'
+            }), 400
+
+        history = get_historical_prices(market_id, platform, days)
+
+        return jsonify({
+            'success': True,
+            **history,
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Market Data Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/markets/arbitrage', methods=['GET'])
+def find_arbitrage():
+    """Find arbitrage opportunities between platforms."""
+    try:
+        from services.market_data_service import find_arbitrage_opportunities
+
+        min_edge = float(request.args.get('min_edge', 0.02))
+        opportunities = find_arbitrage_opportunities(min_edge=min_edge)
+
+        return jsonify({
+            'success': True,
+            'opportunities': opportunities,
+            'count': len(opportunities),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Arbitrage Error',
+            'message': str(e)
+        }), 500
+
+
+# --------------------------------------------
+# Historical Backtest Routes
+# --------------------------------------------
+
+@app.route('/api/backtest/strategy/<strategy_name>', methods=['POST'])
+def run_strategy_backtest(strategy_name):
+    """Run backtest for a specific strategy template."""
+    try:
+        from services.backtest_runner import BacktestRunner
+
+        data = request.get_json() or {}
+        days = data.get('days', 180)
+        initial_capital = data.get('initialCapital', 10000)
+
+        runner = BacktestRunner(initial_capital=initial_capital, days=days)
+        result = runner.run_backtest(strategy_name)
+
+        return jsonify({
+            'success': True,
+            'strategy': strategy_name,
+            'results': result.to_dict(),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Backtest Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/all', methods=['POST'])
+def run_all_backtests():
+    """Run backtests for all strategy templates."""
+    try:
+        from services.backtest_runner import run_all_strategy_backtests
+
+        data = request.get_json() or {}
+        days = data.get('days', 180)
+        initial_capital = data.get('initialCapital', 10000)
+
+        results = run_all_strategy_backtests(
+            initial_capital=initial_capital,
+            days=days
+        )
+
+        return jsonify({
+            'success': True,
+            'results': {name: result.to_dict() for name, result in results.items()},
+            'count': len(results),
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Backtest Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/cached', methods=['GET'])
+def get_cached_backtests():
+    """Get pre-computed backtest statistics for all strategies."""
+    try:
+        from services.backtest_runner import PRECOMPUTED_BACKTEST_STATS
+
+        return jsonify({
+            'success': True,
+            'strategies': PRECOMPUTED_BACKTEST_STATS,
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Cache Error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/api/backtest/stats/<strategy_name>', methods=['GET'])
+def get_strategy_stats(strategy_name):
+    """Get backtest statistics for a specific strategy."""
+    try:
+        from services.backtest_runner import PRECOMPUTED_BACKTEST_STATS, get_strategy_backtest_stats
+
+        # First check pre-computed stats
+        if strategy_name in PRECOMPUTED_BACKTEST_STATS:
+            return jsonify({
+                'success': True,
+                'strategy': strategy_name,
+                'stats': PRECOMPUTED_BACKTEST_STATS[strategy_name],
+                'source': 'cached',
+            })
+
+        # Otherwise, compute fresh
+        days = int(request.args.get('days', 180))
+        stats = get_strategy_backtest_stats(strategy_name, days=days)
+
+        return jsonify({
+            'success': True,
+            'strategy': strategy_name,
+            'stats': stats,
+            'source': 'computed',
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Stats Error',
+            'message': str(e)
+        }), 500
+
+
+# --------------------------------------------
 # Error Handlers
 # --------------------------------------------
 

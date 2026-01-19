@@ -1,119 +1,55 @@
-import { useState } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown } from 'lucide-react'
+import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 
-const templates = [
-  {
-    id: 1,
-    name: 'Conservative Arb Bot',
-    description: 'Low-risk arbitrage between prediction markets. Targets 3% minimum edge before executing.',
-    difficulty: 'Beginner',
-    winRate: 87,
-    monthlyReturn: 4.2,
-    maxDrawdown: 5,
-    icon: '🛡️',
-    markets: ['Kalshi', 'Polymarket'],
-    settings: { minEdge: 3, maxPosition: 100, stopLoss: 10 }
+// Transform strategy templates to the format expected by the UI
+const templates = STRATEGY_TEMPLATES.map(s => ({
+  id: s.id,
+  name: s.name,
+  description: s.description,
+  difficulty: s.difficulty,
+  winRate: s.backtestStats.winRate,
+  monthlyReturn: s.expectedMonthlyReturn,
+  maxDrawdown: Math.abs(s.backtestStats.maxDrawdown),
+  icon: s.icon,
+  markets: s.markets,
+  settings: {
+    minEdge: s.settings.minEdge,
+    maxPosition: s.settings.maxPosition,
+    stopLoss: s.settings.stopLoss,
   },
-  {
-    id: 2,
-    name: 'Sports High Volume',
-    description: 'High-frequency sports betting with volume-based edge detection.',
-    difficulty: 'Intermediate',
-    winRate: 74,
-    monthlyReturn: 8.5,
-    maxDrawdown: 15,
-    icon: '⚽',
-    markets: ['Kalshi'],
-    settings: { minEdge: 2, maxPosition: 250, stopLoss: 15 }
-  },
-  {
-    id: 3,
-    name: 'Crypto Volatility Play',
-    description: 'Capitalizes on crypto market volatility with momentum-based entries.',
-    difficulty: 'Advanced',
-    winRate: 61,
-    monthlyReturn: 15.3,
-    maxDrawdown: 25,
-    icon: '📈',
-    markets: ['Polymarket', 'Binance'],
-    settings: { minEdge: 5, maxPosition: 500, stopLoss: 20 }
-  },
-  {
-    id: 4,
-    name: 'Political Momentum',
-    description: 'Event-driven strategy targeting political prediction markets.',
-    difficulty: 'Intermediate',
-    winRate: 68,
-    monthlyReturn: 6.8,
-    maxDrawdown: 12,
-    icon: '🏛️',
-    markets: ['Kalshi', 'Polymarket'],
-    settings: { minEdge: 4, maxPosition: 200, stopLoss: 12 }
-  },
-  {
-    id: 5,
-    name: 'Multi-Platform Arb Pro',
-    description: 'Cross-platform arbitrage scanning with automated execution.',
-    difficulty: 'Advanced',
-    winRate: 79,
-    monthlyReturn: 7.2,
-    maxDrawdown: 8,
-    icon: '🔄',
-    markets: ['Kalshi', 'Polymarket', 'Binance'],
-    settings: { minEdge: 2.5, maxPosition: 300, stopLoss: 8 }
-  },
-  {
-    id: 6,
-    name: 'Fed News Scalper',
-    description: 'Ultra-fast execution on Federal Reserve news and economic data.',
-    difficulty: 'Expert',
-    winRate: 92,
-    monthlyReturn: 3.5,
-    maxDrawdown: 4,
-    icon: '📰',
-    markets: ['Kalshi'],
-    settings: { minEdge: 1.5, maxPosition: 150, stopLoss: 5 }
-  },
-]
+  backtestStats: s.backtestStats,
+  monthlyReturns: s.monthlyReturns,
+  categories: s.categories,
+  riskLevel: s.riskLevel,
+}))
 
-const STRATEGY_TYPES = [
-  { id: 'arbitrage', name: 'Arbitrage', icon: '🔄', description: 'Find price differences across markets' },
-  { id: 'momentum', name: 'Momentum', icon: '📈', description: 'Follow market trends and momentum' },
-  { id: 'mean-reversion', name: 'Mean Reversion', icon: '🎯', description: 'Trade when prices deviate from average' },
-  { id: 'news-based', name: 'News Based', icon: '📰', description: 'React to news and events' },
-]
+// Use imported constants
+const STRATEGY_TYPES = IMPORTED_STRATEGY_TYPES
+const AVAILABLE_MARKETS = IMPORTED_MARKETS.map(m => ({ ...m, icon: m.icon || '🎲' }))
+const ENTRY_CONDITIONS = IMPORTED_ENTRY
+const EXIT_CONDITIONS = IMPORTED_EXIT
 
-const AVAILABLE_MARKETS = [
-  { id: 'kalshi', name: 'Kalshi', icon: '🎲' },
-  { id: 'polymarket', name: 'Polymarket', icon: '🔮' },
-  { id: 'binance', name: 'Binance', icon: '💰' },
-]
-
-const ENTRY_CONDITIONS = [
-  { id: 'edge-threshold', name: 'Edge Threshold', description: 'Enter when edge exceeds minimum' },
-  { id: 'volume-spike', name: 'Volume Spike', description: 'Enter on unusual volume' },
-  { id: 'price-movement', name: 'Price Movement', description: 'Enter after price moves X%' },
-  { id: 'time-based', name: 'Time Based', description: 'Enter at specific times' },
-]
-
-const EXIT_CONDITIONS = [
-  { id: 'take-profit', name: 'Take Profit', description: 'Exit at target profit' },
-  { id: 'stop-loss', name: 'Stop Loss', description: 'Exit to limit losses' },
-  { id: 'time-exit', name: 'Time Exit', description: 'Exit after time period' },
-  { id: 'trailing-stop', name: 'Trailing Stop', description: 'Dynamic stop that follows profit' },
-]
-
+// Generate backtest chart data from template stats
 const generateBacktestData = (config) => {
+  // Use real monthly returns if available
+  if (config?.monthlyReturns && config.monthlyReturns.length > 0) {
+    return config.monthlyReturns.map(m => ({
+      month: m.month,
+      pnl: m.pnl,
+    }))
+  }
+  // Fallback to generated data
   const baseReturn = config?.monthlyReturn || 8
   const volatility = (config?.maxDrawdown || 15) / 10
   return [
-    { month: 'Jan', pnl: Math.round((baseReturn * 0.8 + (Math.random() - 0.5) * volatility) * 100) },
-    { month: 'Feb', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
-    { month: 'Mar', pnl: Math.round((baseReturn * 0.9 + (Math.random() - 0.5) * volatility) * 100) },
-    { month: 'Apr', pnl: Math.round((baseReturn * 1.2 + (Math.random() - 0.5) * volatility) * 100) },
-    { month: 'May', pnl: Math.round((baseReturn * 1.4 + (Math.random() - 0.5) * volatility) * 100) },
-    { month: 'Jun', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Jul', pnl: Math.round((baseReturn * 0.8 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Aug', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Sep', pnl: Math.round((baseReturn * 0.9 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Oct', pnl: Math.round((baseReturn * 1.2 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Nov', pnl: Math.round((baseReturn * 1.4 + (Math.random() - 0.5) * volatility) * 100) },
+    { month: 'Dec', pnl: Math.round((baseReturn * 1.1 + (Math.random() - 0.5) * volatility) * 100) },
   ]
 }
 
@@ -546,16 +482,38 @@ const StrategyBuilder = () => {
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Est. Win Rate</span>
-              <span className="font-medium text-gray-900">{template?.winRate || customStrategy.winRate || 74}%</span>
+              <span className="text-gray-500">Win Rate</span>
+              <span className="font-medium text-gray-900">{template?.backtestStats?.winRate || template?.winRate || customStrategy.winRate || 74}%</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Est. Monthly Return</span>
-              <span className="font-medium text-green-600">+{template?.monthlyReturn || customStrategy.monthlyReturn || 8.5}%</span>
+              <span className="text-gray-500">Total P&L (6mo)</span>
+              <span className={`font-medium ${(template?.backtestStats?.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {(template?.backtestStats?.profitLoss || 0) >= 0 ? '+' : ''}${template?.backtestStats?.profitLoss?.toLocaleString() || '0'}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Total Trades</span>
+              <span className="font-medium text-gray-900">{template?.backtestStats?.totalTrades || '-'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Avg Win / Loss</span>
+              <span className="font-medium text-gray-900">
+                <span className="text-green-600">${template?.backtestStats?.avgWin || 0}</span>
+                {' / '}
+                <span className="text-red-600">${Math.abs(template?.backtestStats?.avgLoss || 0)}</span>
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Max Drawdown</span>
-              <span className="font-medium text-red-600">-{template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
+              <span className="font-medium text-red-600">{template?.backtestStats?.maxDrawdown || template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Sharpe Ratio</span>
+              <span className="font-medium text-indigo-600">{template?.backtestStats?.sharpeRatio || '-'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Sortino Ratio</span>
+              <span className="font-medium text-indigo-600">{template?.backtestStats?.sortinoRatio || '-'}</span>
             </div>
           </div>
         </div>
