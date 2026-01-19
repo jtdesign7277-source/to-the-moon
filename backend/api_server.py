@@ -22,12 +22,13 @@ app = Flask(__name__)
 ALLOWED_ORIGINS = [
     'http://localhost:5173',      # Vite dev server
     'http://localhost:3000',      # Alternative dev server
-    'https://to-the-moon-yoursite.com',  # Production frontend
+    'https://to-the-moon-three.vercel.app',  # Production frontend (Vercel)
 ]
 
 # Add any origins from environment variable
 if os.environ.get('ALLOWED_ORIGINS'):
-    ALLOWED_ORIGINS.extend(os.environ.get('ALLOWED_ORIGINS').split(','))
+    env_origins = [o.strip() for o in os.environ.get('ALLOWED_ORIGINS').split(',') if o.strip()]
+    ALLOWED_ORIGINS.extend(env_origins)
 
 CORS(app,
      origins=ALLOWED_ORIGINS,
