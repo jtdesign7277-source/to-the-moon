@@ -5,6 +5,7 @@ import {
   Wrench,
   Trophy,
   ShoppingCart,
+  BookOpen,
 } from 'lucide-react'
 
 // Context
@@ -26,6 +27,7 @@ import StrategyBuilder from './pages/StrategyBuilder'
 import Leaderboard from './pages/Leaderboard'
 import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
+import Education from './pages/Education'
 
 // Navigation configuration
 const NAV_ITEMS = [
@@ -64,6 +66,13 @@ const NAV_ITEMS = [
     icon: ShoppingCart,
     requiresPro: false,
   },
+  {
+    id: 'education',
+    label: 'Education',
+    shortLabel: 'Learn',
+    icon: BookOpen,
+    requiresPro: false,
+  },
 ]
 
 // Page renderer component
@@ -79,6 +88,8 @@ const PageRenderer = ({ currentPage }) => {
       return <Leaderboard />
     case 'marketplace':
       return <Marketplace />
+    case 'education':
+      return <Education />
     default:
       return <Dashboard />
   }
@@ -104,7 +115,7 @@ const AppContent = () => {
     const token = localStorage.getItem('ttm_access_token')
     if (token) {
       // Verify token and get user info
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
       fetch(`${API_URL}/api/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
