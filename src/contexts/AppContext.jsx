@@ -36,11 +36,9 @@ export function AppProvider({ children }) {
   // Check if a feature requires Pro
   const requiresProAccess = useCallback((featureId) => {
     const proFeatures = [
-      'strategy-builder',
       'live-trading',
       'advanced-analytics',
       'custom-alerts',
-      'backtesting',
       'api-access',
     ]
     return proFeatures.includes(featureId)

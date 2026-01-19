@@ -53,7 +53,7 @@ const NAV_ITEMS = [
     label: 'Strategy Builder',
     shortLabel: 'Strategy',
     icon: Wrench,
-    requiresPro: true,
+    requiresPro: false,
   },
   {
     id: 'leaderboard',
