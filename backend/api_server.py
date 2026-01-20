@@ -454,9 +454,8 @@ RESPONSE STYLE:
 If the user asks something you can't help with or needs human assistance, tell them to click "Talk to Human" to email the support team."""
 
 @app.route('/api/support/chat', methods=['POST'])
-@token_required
 def ai_support_chat():
-    """AI-powered support chat for website help."""
+    """AI-powered support chat for website help. No auth required for easy access."""
     try:
         # Check for OpenAI API key
         openai_api_key = os.environ.get('OPENAI_API_KEY')
