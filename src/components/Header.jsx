@@ -691,24 +691,25 @@ const Header = ({
                     {/* Suggest Tab */}
                     {activeTab === 'suggest' && (
                       <div className="space-y-3 animate-in fade-in duration-200">
-                        <div className="bg-amber-50 rounded-lg p-3">
-                          <div className="flex items-start gap-2">
-                            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Lightbulb className="w-4 h-4 text-amber-600" />
+                        {/* Suggest Header - matches Support header style */}
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-3 -mt-1">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                              <Lightbulb className="w-6 h-6 text-white" />
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-amber-900">Feature Suggestions</p>
-                              <p className="text-xs text-amber-700 mt-0.5">Help us build what you need!</p>
+                            <div className="flex-1">
+                              <h3 className="text-white font-bold text-base">Feature Suggestions</h3>
+                              <p className="text-amber-100 text-xs">Help us build what you need!</p>
                             </div>
                           </div>
                         </div>
                         
-                        <p className="text-xs text-gray-600">
+                        <p className="text-sm text-gray-600 leading-relaxed">
                           Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of To The Moon.
                         </p>
 
                         {suggestionSent && (
-                          <div className="bg-green-50 text-green-700 text-xs p-2 rounded-lg text-center">
+                          <div className="bg-green-50 text-green-700 text-sm p-3 rounded-xl text-center font-medium">
                             ✓ Opening email client...
                           </div>
                         )}
@@ -717,14 +718,14 @@ const Header = ({
                           value={suggestionMessage}
                           onChange={(e) => setSuggestionMessage(e.target.value)}
                           placeholder="Describe your feature idea..."
-                          rows={3}
-                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                          rows={6}
+                          className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm"
                         />
                         
                         <button
                           onClick={handleSendSuggestion}
                           disabled={!suggestionMessage.trim()}
-                          className="w-full py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                         >
                           <Send className="w-4 h-4" />
                           Submit Suggestion
