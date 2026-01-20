@@ -10,6 +10,7 @@ import {
 import { useApp } from '../hooks/useApp'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 import LiveScanner from '../components/LiveScanner'
+import TradeSlipViewer from '../components/TradeSlipViewer'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [performanceData, setPerformanceData] = useState([])
   const [portfolioData, setPortfolioData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedTrade, setSelectedTrade] = useState(null)
 
   // Track page view when dashboard loads
   useEffect(() => {
@@ -395,8 +397,14 @@ const Dashboard = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {recentTrades.map((trade, i) => (
-                  <tr key={i} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{trade.pair}</td>
+                  <tr 
+                    key={i} 
+                    onClick={() => setSelectedTrade(trade)}
+                    className="hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                      <span className="hover:text-indigo-600">{trade.pair}</span>
+                    </td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
                         trade.type === 'Long' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -412,9 +420,13 @@ const Dashboard = () => {
                     }`}>{trade.pnl}</td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                        trade.status === 'Won' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        trade.status === 'Won' ? 'bg-green-100 text-green-700' : 
+                        trade.status === 'Open' ? 'bg-indigo-100 text-indigo-700' :
+                        'bg-red-100 text-red-700'
                       }`}>
-                        {trade.status === 'Won' ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                        {trade.status === 'Won' ? <Check className="w-3 h-3" /> : 
+                         trade.status === 'Open' ? <Activity className="w-3 h-3" /> :
+                         <X className="w-3 h-3" />}
                         {trade.status}
                       </span>
                     </td>
@@ -422,9 +434,20 @@ const Dashboard = () => {
                 ))}
               </tbody>
             </table>
+            <p className="text-xs text-gray-400 text-center py-2 border-t border-gray-100">
+              Click any trade to view bet slip
+            </p>
           </div>
         )}
       </div>
+
+      {/* Trade Slip Viewer Modal */}
+      {selectedTrade && (
+        <TradeSlipViewer
+          trade={selectedTrade}
+          onClose={() => setSelectedTrade(null)}
+        />
+      )}
     </div>
   )
 }

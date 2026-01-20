@@ -301,62 +301,68 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete }) =
           </div>
         </div>
 
-        {/* Scanner Feed */}
+        {/* Scanner Feed - Light Theme */}
         {isExpanded && (
           <div 
             ref={scrollRef}
             onScroll={handleScroll}
-            className="max-h-64 overflow-y-auto bg-gray-900 font-mono text-xs"
+            className="max-h-64 overflow-y-auto bg-gray-50 text-sm"
           >
             {events.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <Radio className="w-8 h-8 mx-auto mb-2 animate-pulse" />
+              <div className="p-8 text-center text-gray-400">
+                <Radio className="w-8 h-8 mx-auto mb-2 animate-pulse text-indigo-400" />
                 <p>Initializing scanner...</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-800">
+              <div className="divide-y divide-gray-100">
                 {events.map((event) => {
                   const Icon = event.action.icon
                   return (
                     <div
                       key={event.id}
                       onClick={() => handleEventClick(event)}
-                      className={`px-3 py-2 flex items-start gap-3 transition-colors ${
+                      className={`px-4 py-3 flex items-start gap-3 transition-colors ${
                         event.isClickable 
-                          ? 'hover:bg-gray-800 cursor-pointer' 
-                          : ''
+                          ? 'hover:bg-indigo-50 cursor-pointer' 
+                          : 'hover:bg-gray-100'
                       } ${
                         event.action.type === 'opportunity' 
-                          ? 'bg-green-900/20 border-l-2 border-green-500' 
+                          ? 'bg-green-50 border-l-3 border-green-500' 
                           : ''
                       }`}
                     >
                       {/* Timestamp */}
-                      <span className="text-gray-600 shrink-0 tabular-nums">
+                      <span className="text-gray-400 shrink-0 tabular-nums text-xs font-medium">
                         {formatTime(event.timestamp)}
                       </span>
 
                       {/* Icon */}
-                      <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${event.action.color}`} />
+                      <div className={`p-1.5 rounded-full ${event.action.bgColor}`}>
+                        <Icon className={`w-3.5 h-3.5 ${event.action.color}`} />
+                      </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`font-medium ${getPlatformColor(event.platform)}`}>
-                            [{event.platform}]
+                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                            event.platform === 'Kalshi' ? 'bg-blue-100 text-blue-700' :
+                            event.platform === 'Polymarket' ? 'bg-purple-100 text-purple-700' :
+                            'bg-orange-100 text-orange-700'
+                          }`}>
+                            {event.platform}
                           </span>
-                          <span className="text-gray-400 truncate">
-                            {event.market.length > 45 ? event.market.substring(0, 45) + '...' : event.market}
+                          <span className="text-gray-700 text-sm">
+                            {event.market.length > 50 ? event.market.substring(0, 50) + '...' : event.market}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-gray-500">
-                          <span>{event.strategy}</span>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                          <span className="font-medium">{event.strategy}</span>
                           <span>•</span>
-                          <span>{event.price}¢</span>
+                          <span className="font-semibold text-gray-700">{event.price}¢</span>
                           {event.edge > 0 && (
                             <>
                               <span>•</span>
-                              <span className="text-green-400 font-medium flex items-center gap-1">
+                              <span className="text-green-600 font-semibold flex items-center gap-1">
                                 <Zap className="w-3 h-3" />
                                 +{event.edge}% edge
                               </span>
@@ -367,12 +373,12 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete }) =
 
                       {/* Action Badge */}
                       {event.action.type === 'opportunity' && (
-                        <span className="shrink-0 px-2 py-0.5 text-[10px] font-bold bg-green-500 text-white rounded">
-                          CLICK TO TRADE
+                        <span className="shrink-0 px-2 py-1 text-[10px] font-bold bg-green-500 text-white rounded-full shadow-sm">
+                          TRADE
                         </span>
                       )}
                       {event.action.type === 'watching' && (
-                        <span className="shrink-0 px-2 py-0.5 text-[10px] font-medium bg-yellow-500/20 text-yellow-400 rounded">
+                        <span className="shrink-0 px-2 py-1 text-[10px] font-medium bg-yellow-100 text-yellow-700 rounded-full">
                           WATCHING
                         </span>
                       )}
