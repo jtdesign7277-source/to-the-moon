@@ -35,6 +35,7 @@ const TradeSlipViewer = ({ trade, onClose }) => {
   const isWin = trade.status === 'Won'
   const isOpen = trade.status === 'Open' || trade.exit === 'Pending'
   const isPnlPositive = trade.pnl?.startsWith('+')
+  const isPaperTrade = trade.is_paper !== false  // Default to paper if not specified
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -56,6 +57,11 @@ const TradeSlipViewer = ({ trade, onClose }) => {
             <div className="flex items-center gap-2">
               <Receipt className="w-5 h-5" />
               <span className="font-semibold">Bet Slip</span>
+              <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                isPaperTrade ? 'bg-yellow-400 text-yellow-900' : 'bg-green-400 text-green-900'
+              }`}>
+                {isPaperTrade ? 'PAPER' : 'LIVE'}
+              </span>
             </div>
             <button
               onClick={onClose}
@@ -137,13 +143,22 @@ const TradeSlipViewer = ({ trade, onClose }) => {
             )}
           </div>
 
-          {/* Paper Trade Notice */}
-          <div className="flex items-center gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
-            <DollarSign className="w-4 h-4 flex-shrink-0" />
-            <p className="text-xs">
-              This is a <span className="font-medium">paper trade</span> — no real money involved.
-            </p>
-          </div>
+          {/* Trade Mode Notice */}
+          {isPaperTrade ? (
+            <div className="flex items-center gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
+              <DollarSign className="w-4 h-4 flex-shrink-0" />
+              <p className="text-xs">
+                This is a <span className="font-medium">paper trade</span> — no real money involved.
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg p-3 border border-green-200">
+              <DollarSign className="w-4 h-4 flex-shrink-0" />
+              <p className="text-xs">
+                This is a <span className="font-semibold">live trade</span> executed on {platform}.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

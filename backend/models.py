@@ -155,7 +155,12 @@ class Trade(db.Model):
     entry = db.Column(db.String(50), default='$0.00')
     exit = db.Column(db.String(50), default='$0.00')
     pnl = db.Column(db.String(50), default='+$0')
-    status = db.Column(db.String(20), default='Won')  # Won, Lost
+    status = db.Column(db.String(20), default='Won')  # Won, Lost, Open
+    
+    # Paper vs Live trading
+    is_paper = db.Column(db.Boolean, default=True)  # True = paper trade, False = live trade
+    platform = db.Column(db.String(50), nullable=True)  # Kalshi, Polymarket, Manifold
+    amount = db.Column(db.Float, nullable=True)  # Trade amount in dollars
 
     # Timestamps
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
@@ -171,6 +176,9 @@ class Trade(db.Model):
             'exit': self.exit,
             'pnl': self.pnl,
             'status': self.status,
+            'is_paper': self.is_paper if self.is_paper is not None else True,
+            'platform': self.platform,
+            'amount': self.amount,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
         }
 

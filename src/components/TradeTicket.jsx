@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle } from 'lucide-react'
+import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle, ShieldCheck } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
-const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
+const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', isPro = false }) => {
   const [position, setPosition] = useState('yes') // 'yes' or 'no'
   const [amount, setAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  
+  const isLiveMode = tradingMode === 'live'
 
   // Close on escape key
   useEffect(() => {
@@ -23,6 +25,12 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
 
   const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) return
+    
+    // For live mode, require Pro subscription
+    if (isLiveMode && !isPro) {
+      setSubmitError('Pro subscription required for live trading')
+      return
+    }
     
     setIsSubmitting(true)
     setSubmitError(null)
@@ -47,7 +55,8 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
       status: 'Open',
       platform: opportunity.platform,
       strategy: opportunity.strategy,
-      amount: parseFloat(amount)
+      amount: parseFloat(amount),
+      is_paper: !isLiveMode  // Track paper vs live
     }
 
     try {
@@ -250,14 +259,24 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
             </div>
           )}
 
-          {/* Paper Trading Warning */}
-          <div className="flex items-start gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <p className="text-xs">
-              This is a <span className="font-medium">paper trade</span>. No real money will be used. 
-              Connect a real account to place live trades.
-            </p>
-          </div>
+          {/* Trading Mode Notice */}
+          {isLiveMode ? (
+            <div className="flex items-start gap-2 text-green-700 bg-green-50 rounded-lg p-3 border border-green-200">
+              <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <p className="text-xs">
+                <span className="font-semibold">Live Trade</span> — This will execute with real money on {opportunity.platform}. 
+                Make sure your account is connected and funded.
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <p className="text-xs">
+                <span className="font-medium">Paper Trade</span> — No real money will be used. 
+                Switch to Live mode in settings to place real trades.
+              </p>
+            </div>
+          )}
 
           {/* Error Display */}
           {submitError && (
@@ -271,9 +290,9 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
         {/* Footer */}
         <div className="p-4 bg-gray-50 border-t border-gray-100 flex gap-3">
           {submitSuccess ? (
-            <div className="flex-1 py-3 px-4 bg-green-500 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+            <div className={`flex-1 py-3 px-4 ${isLiveMode ? 'bg-green-600' : 'bg-green-500'} text-white font-medium rounded-xl flex items-center justify-center gap-2`}>
               <CheckCircle className="w-5 h-5" />
-              Trade Placed Successfully!
+              {isLiveMode ? 'Live Trade Placed!' : 'Paper Trade Placed!'}
             </div>
           ) : (
             <>

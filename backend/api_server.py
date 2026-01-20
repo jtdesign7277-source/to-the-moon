@@ -693,6 +693,10 @@ def get_user_dashboard():
     """Get user's dashboard data including stats, trades, and performance."""
     import random
     user = g.user
+    
+    # Get trading mode from query params (defaults to paper)
+    trading_mode = request.args.get('mode', 'paper')
+    is_paper = trading_mode != 'live'
 
     # Get user's stats from database (or create defaults for new users)
     stats = user.stats
@@ -709,8 +713,10 @@ def get_user_dashboard():
         simulate_strategy_activity(strategy)
     db.session.commit()
     
-    # Get manual trades from database
-    manual_trades = Trade.query.filter_by(user_id=user.id).order_by(Trade.created_at.desc()).limit(20).all()
+    # Get manual trades from database - filter by paper/live mode
+    manual_trades = Trade.query.filter_by(user_id=user.id).filter(
+        (Trade.is_paper == is_paper) | (Trade.is_paper == None)
+    ).order_by(Trade.created_at.desc()).limit(20).all()
     
     # Calculate totals from deployed strategies
     strategy_pnl = sum(s.total_pnl or 0 for s in deployed_strategies)
@@ -871,7 +877,7 @@ def update_user_stats():
 @app.route('/api/user/trades', methods=['POST'])
 @require_auth
 def add_user_trade():
-    """Add a trade to user's history."""
+    """Add a trade to user's history (paper or live)."""
     user = g.user
 
     data = request.get_json()
@@ -882,6 +888,18 @@ def add_user_trade():
             'message': 'Trade data is required'
         }), 400
 
+    # Determine if this is a paper or live trade
+    is_paper = data.get('is_paper', True)
+    
+    # For live trades, verify user has Pro subscription
+    if not is_paper:
+        subscription = user.subscription
+        if not subscription or not subscription.is_pro:
+            return jsonify({
+                'error': 'Pro Required',
+                'message': 'Live trading requires a Pro subscription'
+            }), 403
+
     # Create new trade in database
     trade = Trade(
         user_id=user.id,
@@ -891,6 +909,9 @@ def add_user_trade():
         exit=data.get('exit', '$0.00'),
         pnl=data.get('pnl', '+$0'),
         status=data.get('status', 'Won'),
+        is_paper=is_paper,
+        platform=data.get('platform'),
+        amount=data.get('amount'),
     )
     db.session.add(trade)
 

@@ -38,7 +38,7 @@ const Dashboard = () => {
     trackPageView('Dashboard')
   }, [])
 
-  // Fetch user data from API
+  // Fetch user data from API - filtered by trading mode
   const fetchUserData = async () => {
     const token = localStorage.getItem('ttm_access_token')
     if (!token) {
@@ -47,7 +47,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/user/dashboard`, {
+      const response = await fetch(`${API_URL}/api/user/dashboard?mode=${tradingMode}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -76,9 +76,10 @@ const Dashboard = () => {
     }
   }
 
+  // Refetch when trading mode changes
   useEffect(() => {
     fetchUserData()
-  }, [user])
+  }, [user, tradingMode])
 
   // Callback when a trade is placed from the scanner
   const handleTradeComplete = (trade) => {
@@ -265,7 +266,13 @@ const Dashboard = () => {
       </div>
 
       {/* Live Market Scanner */}
-      <LiveScanner maxEvents={50} scanInterval={3000} onTradeComplete={handleTradeComplete} />
+      <LiveScanner 
+        maxEvents={50} 
+        scanInterval={3000} 
+        onTradeComplete={handleTradeComplete}
+        tradingMode={tradingMode}
+        isPro={isPro}
+      />
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">

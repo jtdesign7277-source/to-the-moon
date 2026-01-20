@@ -172,7 +172,7 @@ const formatTime = (date) => {
   })
 }
 
-const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete }) => {
+const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tradingMode = 'paper', isPro = false }) => {
   const [events, setEvents] = useState([])
   const [isExpanded, setIsExpanded] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
@@ -413,6 +413,8 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete }) =
           opportunity={selectedOpportunity}
           onClose={() => setSelectedOpportunity(null)}
           onSubmit={handleTradeSubmit}
+          tradingMode={tradingMode}
+          isPro={isPro}
         />
       )}
     </>
