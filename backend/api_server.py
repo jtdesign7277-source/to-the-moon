@@ -691,6 +691,7 @@ def refresh_token():
 @require_auth
 def get_user_dashboard():
     """Get user's dashboard data including stats, trades, and performance."""
+    import random
     user = g.user
 
     # Get user's stats from database (or create defaults for new users)
@@ -700,27 +701,105 @@ def get_user_dashboard():
         db.session.add(stats)
         db.session.commit()
 
-    stats_dict = stats.to_dict()
-
-    # Get user's recent trades from database
-    trades = Trade.query.filter_by(user_id=user.id).order_by(
-        Trade.timestamp.desc()
-    ).limit(10).all()
-
-    # Get performance data (empty for new users)
+    # Get deployed strategies and aggregate their data
+    deployed_strategies = DeployedStrategy.query.filter_by(user_id=user.id).all()
+    
+    # Simulate activity for running strategies
+    for strategy in deployed_strategies:
+        simulate_strategy_activity(strategy)
+    db.session.commit()
+    
+    # Calculate totals from deployed strategies
+    total_pnl = sum(s.total_pnl or 0 for s in deployed_strategies)
+    total_trades = sum(s.total_trades or 0 for s in deployed_strategies)
+    total_wins = sum(s.winning_trades or 0 for s in deployed_strategies)
+    active_strategies = len([s for s in deployed_strategies if s.status == 'running'])
+    total_capital = sum(s.allocated_capital or 0 for s in deployed_strategies)
+    
+    # Calculate win rate
+    win_rate = (total_wins / total_trades * 100) if total_trades > 0 else 0
+    
+    # Generate recent trades from deployed strategies
+    recent_trades = []
+    markets = ['Bitcoin YES/NO', 'ETH > $4000', 'Trump 2028', 'Fed Rate Cut', 'Super Bowl', 'S&P 500 Up', 'Gold > $2500']
+    
+    for strategy in deployed_strategies:
+        if (strategy.total_trades or 0) > 0:
+            # Generate simulated trade history for this strategy
+            num_trades_to_show = min(strategy.total_trades or 0, 5)
+            strategy_markets = strategy.markets or ['Kalshi', 'Polymarket']
+            
+            for i in range(num_trades_to_show):
+                is_win = random.random() < (strategy.win_rate / 100 if strategy.win_rate else 0.6)
+                market = random.choice(markets)
+                platform = random.choice(strategy_markets)
+                
+                if is_win:
+                    pnl_amount = random.uniform(5, 80)
+                    pnl_str = f'+${pnl_amount:.2f}'
+                    status = 'Won'
+                else:
+                    pnl_amount = random.uniform(3, 40)
+                    pnl_str = f'-${pnl_amount:.2f}'
+                    status = 'Lost'
+                
+                entry_price = random.uniform(0.30, 0.70)
+                if is_win:
+                    exit_price = entry_price + random.uniform(0.05, 0.25)
+                else:
+                    exit_price = entry_price - random.uniform(0.03, 0.15)
+                exit_price = max(0.01, min(0.99, exit_price))
+                
+                trade_type = random.choice(['Long', 'Short'])
+                hours_ago = i * random.uniform(2, 8)
+                
+                recent_trades.append({
+                    'id': f'trade_{strategy.id}_{i}',
+                    'pair': f'{market} ({platform})',
+                    'type': trade_type,
+                    'entry': f'${entry_price:.2f}',
+                    'exit': f'${exit_price:.2f}',
+                    'pnl': pnl_str,
+                    'status': status,
+                    'strategy': strategy.name,
+                    'hoursAgo': hours_ago,
+                })
+    
+    # Sort by recency and limit
+    recent_trades.sort(key=lambda x: x.get('hoursAgo', 0))
+    recent_trades = recent_trades[:10]
+    
+    # Generate performance data (last 7 days)
     performance_data = []
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    cumulative = 0
+    for day in days:
+        if total_trades > 0:
+            daily_change = random.uniform(-50, 100) * (total_capital / 10000)
+            cumulative += daily_change
+            performance_data.append({'day': day, 'value': round(cumulative, 2)})
+        else:
+            performance_data.append({'day': day, 'value': 0})
+    
+    # Portfolio allocation
     portfolio_data = []
+    if deployed_strategies:
+        for strategy in deployed_strategies[:5]:  # Top 5 strategies
+            portfolio_data.append({
+                'name': strategy.name[:15] + ('...' if len(strategy.name) > 15 else ''),
+                'value': round((strategy.allocated_capital / total_capital * 100) if total_capital > 0 else 0),
+            })
 
     return jsonify({
         'success': True,
-        'totalPnl': stats_dict.get('totalPnl', 0),
-        'winRate': stats_dict.get('winRate', 0),
-        'activeStrategies': stats_dict.get('activeStrategies', 0),
-        'totalTrades': stats_dict.get('totalTrades', 0),
-        'connectedAccounts': stats_dict.get('connectedAccounts', 0),
-        'totalBalance': stats_dict.get('totalBalance', 0),
-        'monthlyChange': stats_dict.get('monthlyChange', 0),
-        'recentTrades': [t.to_dict() for t in trades],
+        'totalPnl': round(total_pnl, 2),
+        'winRate': round(win_rate, 1),
+        'activeStrategies': active_strategies,
+        'totalTrades': total_trades,
+        'connectedAccounts': 0,  # Paper trading doesn't need connected accounts
+        'totalBalance': round(total_capital + total_pnl, 2),
+        'monthlyChange': round((total_pnl / total_capital * 100) if total_capital > 0 else 0, 1),
+        'recentTrades': recent_trades,
         'performanceData': performance_data,
         'portfolioData': portfolio_data,
     })
