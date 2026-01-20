@@ -59,6 +59,9 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 300,
 }
 
+# API Version - update this to force Railway redeploy
+API_VERSION = "1.1.0-luna"
+
 # Import and initialize database models
 from models import (
     db, User, Subscription, UserStats, Trade, Strategy,
@@ -361,9 +364,10 @@ def health_check():
     return jsonify({
         'status': 'healthy' if db_status == 'healthy' else 'degraded',
         'timestamp': datetime.now().isoformat(),
-        'version': '1.0.0',
+        'version': API_VERSION,
         'database': db_status,
-        'sentry': 'enabled' if SENTRY_DSN else 'disabled'
+        'sentry': 'enabled' if SENTRY_DSN else 'disabled',
+        'luna': 'enabled'
     })
 
 

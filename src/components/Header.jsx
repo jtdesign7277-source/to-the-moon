@@ -3,7 +3,7 @@ import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, 
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
-// Custom Luna Avatar - Sleek AI assistant with cosmic glow
+// Luna Avatar - Modern 3D robot head, sleek and professional
 const LunaAvatar = ({ size = 'md', className = '' }) => {
   const sizes = {
     sm: 'w-7 h-7',
@@ -15,59 +15,63 @@ const LunaAvatar = ({ size = 'md', className = '' }) => {
     <div className={`${sizes[size]} ${className} relative`}>
       <svg viewBox="0 0 100 100" className="w-full h-full">
         <defs>
-          {/* Outer glow */}
-          <filter id="lunaGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          {/* Metallic gradient for robot head */}
+          <linearGradient id="metalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#64748b" />
+            <stop offset="30%" stopColor="#94a3b8" />
+            <stop offset="70%" stopColor="#64748b" />
+            <stop offset="100%" stopColor="#475569" />
+          </linearGradient>
+          {/* Face plate gradient */}
+          <linearGradient id="faceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#1e293b" />
+            <stop offset="100%" stopColor="#0f172a" />
+          </linearGradient>
+          {/* Glow for eyes */}
+          <filter id="eyeGlow">
+            <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          {/* Main gradient - purple to pink */}
-          <linearGradient id="lunaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#a855f7" />
-            <stop offset="50%" stopColor="#ec4899" />
-            <stop offset="100%" stopColor="#8b5cf6" />
-          </linearGradient>
-          {/* Inner shine */}
-          <radialGradient id="lunaShine" cx="30%" cy="30%" r="50%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-          </radialGradient>
-          {/* Ring gradient */}
-          <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#c084fc" />
-            <stop offset="50%" stopColor="#f472b6" />
-            <stop offset="100%" stopColor="#c084fc" />
+          {/* Accent gradient - cyan/blue tech color */}
+          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="#3b82f6" />
           </linearGradient>
         </defs>
         
-        {/* Outer rotating ring */}
-        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#ringGradient)" strokeWidth="2" strokeDasharray="8 4" opacity="0.6" className="animate-spin" style={{ animationDuration: '8s', transformOrigin: 'center' }} />
+        {/* Outer ring - tech accent */}
+        <circle cx="50" cy="50" r="48" fill="none" stroke="url(#accentGradient)" strokeWidth="1.5" opacity="0.5" />
         
-        {/* Main orb */}
-        <circle cx="50" cy="50" r="38" fill="url(#lunaGradient)" filter="url(#lunaGlow)" />
+        {/* Robot head base - rounded rectangle shape */}
+        <rect x="15" y="18" width="70" height="64" rx="18" ry="18" fill="url(#metalGradient)" />
         
-        {/* Shine overlay */}
-        <circle cx="50" cy="50" r="38" fill="url(#lunaShine)" />
+        {/* Face plate - dark screen area */}
+        <rect x="22" y="28" width="56" height="40" rx="10" ry="10" fill="url(#faceGradient)" />
         
-        {/* Abstract AI face - minimalist */}
-        {/* Left eye - sleek oval */}
-        <ellipse cx="38" cy="45" rx="4" ry="6" fill="white" opacity="0.95" />
-        <ellipse cx="38" cy="46" rx="2" ry="3" fill="#1e1b4b" />
+        {/* Left eye - glowing cyan */}
+        <rect x="30" y="40" width="14" height="8" rx="2" fill="#06b6d4" filter="url(#eyeGlow)" />
+        <rect x="32" y="42" width="4" height="4" rx="1" fill="#ffffff" opacity="0.8" />
         
-        {/* Right eye - sleek oval */}
-        <ellipse cx="62" cy="45" rx="4" ry="6" fill="white" opacity="0.95" />
-        <ellipse cx="62" cy="46" rx="2" ry="3" fill="#1e1b4b" />
+        {/* Right eye - glowing cyan */}
+        <rect x="56" y="40" width="14" height="8" rx="2" fill="#06b6d4" filter="url(#eyeGlow)" />
+        <rect x="58" y="42" width="4" height="4" rx="1" fill="#ffffff" opacity="0.8" />
         
-        {/* Gentle smile arc */}
-        <path d="M 42 60 Q 50 66 58 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9" />
+        {/* Mouth - horizontal line indicator */}
+        <rect x="38" y="56" width="24" height="3" rx="1.5" fill="#06b6d4" opacity="0.8" />
         
-        {/* Floating particles */}
-        <circle cx="22" cy="25" r="2" fill="#f9a8d4" className="animate-pulse" />
-        <circle cx="78" cy="30" r="1.5" fill="#c4b5fd" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <circle cx="75" cy="72" r="2" fill="#fbcfe8" className="animate-pulse" style={{ animationDelay: '1s' }} />
-        <circle cx="25" cy="70" r="1.5" fill="#ddd6fe" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
+        {/* Antenna detail on top */}
+        <circle cx="50" cy="14" r="4" fill="url(#accentGradient)" />
+        <rect x="48" y="14" width="4" height="6" fill="#64748b" />
+        
+        {/* Side vents/details */}
+        <rect x="12" y="42" width="3" height="16" rx="1" fill="#475569" />
+        <rect x="85" y="42" width="3" height="16" rx="1" fill="#475569" />
+        
+        {/* Subtle reflection on head */}
+        <rect x="22" y="22" width="30" height="4" rx="2" fill="white" opacity="0.15" />
       </svg>
     </div>
   )
