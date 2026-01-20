@@ -159,7 +159,7 @@ const generateScanEvent = () => {
     price,
     edge,
     volume,
-    isClickable: action.type === 'opportunity' || action.type === 'watching'
+    isClickable: true  // All items are clickable to place wagers
   }
 }
 
@@ -222,8 +222,6 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
   }, [events, isAutoScroll])
 
   const handleEventClick = (event) => {
-    if (!event.isClickable) return
-    
     setSelectedOpportunity({
       market: event.market,
       platform: event.platform,
@@ -321,11 +319,7 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
                     <div
                       key={event.id}
                       onClick={() => handleEventClick(event)}
-                      className={`px-4 py-3 flex items-start gap-3 transition-colors ${
-                        event.isClickable 
-                          ? 'hover:bg-indigo-50 cursor-pointer' 
-                          : 'hover:bg-gray-100'
-                      } ${
+                      className={`px-4 py-3 flex items-start gap-3 transition-colors cursor-pointer hover:bg-indigo-50 ${
                         event.action.type === 'opportunity' 
                           ? 'bg-green-50 border-l-3 border-green-500' 
                           : ''
@@ -393,12 +387,10 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
         {/* Footer with info */}
         {isExpanded && (
           <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 space-y-1">
-            {events.some(e => e.isClickable) && (
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <Zap className="w-3 h-3 text-green-500" />
-                Click any <span className="text-green-600 font-medium">opportunity</span> or <span className="text-yellow-600 font-medium">watching</span> item to open trade ticket
-              </p>
-            )}
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-indigo-500" />
+              Click any market to place a wager — <span className="text-green-600 font-medium">green</span> = high-edge opportunity
+            </p>
             <p className="text-xs text-gray-400 flex items-center gap-1">
               <ExternalLink className="w-3 h-3" />
               Real markets from <a href="https://kalshi.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Kalshi</a>, <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer" className="text-purple-500 hover:underline">Polymarket</a> & <a href="https://manifold.markets" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">Manifold</a> — trades execute on those platforms
