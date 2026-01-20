@@ -3,7 +3,7 @@ import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, 
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
-// Custom Luna Avatar - Cute moon character
+// Custom Luna Avatar - Sleek AI assistant with cosmic glow
 const LunaAvatar = ({ size = 'md', className = '' }) => {
   const sizes = {
     sm: 'w-7 h-7',
@@ -13,52 +13,61 @@ const LunaAvatar = ({ size = 'md', className = '' }) => {
   
   return (
     <div className={`${sizes[size]} ${className} relative`}>
-      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
-        {/* Glow effect */}
+      <svg viewBox="0 0 100 100" className="w-full h-full">
         <defs>
-          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#fef3c7" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+          {/* Outer glow */}
+          <filter id="lunaGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          {/* Main gradient - purple to pink */}
+          <linearGradient id="lunaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a855f7" />
+            <stop offset="50%" stopColor="#ec4899" />
+            <stop offset="100%" stopColor="#8b5cf6" />
+          </linearGradient>
+          {/* Inner shine */}
+          <radialGradient id="lunaShine" cx="30%" cy="30%" r="50%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
           </radialGradient>
-          <linearGradient id="moonFace" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fef9c3" />
-            <stop offset="50%" stopColor="#fde047" />
-            <stop offset="100%" stopColor="#facc15" />
+          {/* Ring gradient */}
+          <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#c084fc" />
+            <stop offset="50%" stopColor="#f472b6" />
+            <stop offset="100%" stopColor="#c084fc" />
           </linearGradient>
         </defs>
         
-        {/* Outer glow */}
-        <circle cx="50" cy="50" r="48" fill="url(#moonGlow)" />
+        {/* Outer rotating ring */}
+        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#ringGradient)" strokeWidth="2" strokeDasharray="8 4" opacity="0.6" className="animate-spin" style={{ animationDuration: '8s', transformOrigin: 'center' }} />
         
-        {/* Moon face */}
-        <circle cx="50" cy="50" r="38" fill="url(#moonFace)" stroke="#eab308" strokeWidth="2" />
+        {/* Main orb */}
+        <circle cx="50" cy="50" r="38" fill="url(#lunaGradient)" filter="url(#lunaGlow)" />
         
-        {/* Cute crater details */}
-        <circle cx="35" cy="60" r="6" fill="#fcd34d" opacity="0.5" />
-        <circle cx="62" cy="68" r="4" fill="#fcd34d" opacity="0.5" />
-        <circle cx="55" cy="38" r="3" fill="#fcd34d" opacity="0.4" />
+        {/* Shine overlay */}
+        <circle cx="50" cy="50" r="38" fill="url(#lunaShine)" />
         
-        {/* Left eye */}
-        <ellipse cx="38" cy="45" rx="6" ry="7" fill="#1f2937" />
-        <circle cx="40" cy="43" r="2" fill="white" />
+        {/* Abstract AI face - minimalist */}
+        {/* Left eye - sleek oval */}
+        <ellipse cx="38" cy="45" rx="4" ry="6" fill="white" opacity="0.95" />
+        <ellipse cx="38" cy="46" rx="2" ry="3" fill="#1e1b4b" />
         
-        {/* Right eye */}
-        <ellipse cx="62" cy="45" rx="6" ry="7" fill="#1f2937" />
-        <circle cx="64" cy="43" r="2" fill="white" />
+        {/* Right eye - sleek oval */}
+        <ellipse cx="62" cy="45" rx="4" ry="6" fill="white" opacity="0.95" />
+        <ellipse cx="62" cy="46" rx="2" ry="3" fill="#1e1b4b" />
         
-        {/* Cute smile */}
-        <path d="M 40 58 Q 50 68 60 58" stroke="#1f2937" strokeWidth="3" fill="none" strokeLinecap="round" />
+        {/* Gentle smile arc */}
+        <path d="M 42 60 Q 50 66 58 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9" />
         
-        {/* Rosy cheeks */}
-        <circle cx="28" cy="52" r="5" fill="#fca5a5" opacity="0.6" />
-        <circle cx="72" cy="52" r="5" fill="#fca5a5" opacity="0.6" />
-        
-        {/* Sparkles */}
-        <g fill="#fef3c7">
-          <polygon points="15,20 17,25 22,25 18,28 20,33 15,30 10,33 12,28 8,25 13,25" className="animate-pulse" />
-          <polygon points="80,15 81.5,19 86,19 82.5,21.5 84,26 80,23 76,26 77.5,21.5 74,19 78.5,19" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
-          <polygon points="85,70 86,73 89,73 86.5,75 87.5,78 85,76 82.5,78 83.5,75 81,73 84,73" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
-        </g>
+        {/* Floating particles */}
+        <circle cx="22" cy="25" r="2" fill="#f9a8d4" className="animate-pulse" />
+        <circle cx="78" cy="30" r="1.5" fill="#c4b5fd" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <circle cx="75" cy="72" r="2" fill="#fbcfe8" className="animate-pulse" style={{ animationDelay: '1s' }} />
+        <circle cx="25" cy="70" r="1.5" fill="#ddd6fe" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
       </svg>
     </div>
   )
