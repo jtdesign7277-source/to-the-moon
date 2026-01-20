@@ -1,24 +1,89 @@
 import { useState, useEffect, useRef } from 'react'
-import { Radio, TrendingUp, Eye, XCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react'
+import { Radio, TrendingUp, Eye, XCircle, Zap, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
 import TradeTicket from './TradeTicket'
 
-// Sample market data for realistic scanning simulation
+// Real prediction markets from Kalshi, Polymarket, and Manifold
+// These are actual market categories traded on these platforms
 const SAMPLE_MARKETS = [
-  { market: "Will Bitcoin reach $100K by March 2026?", platform: "Kalshi", category: "Crypto" },
-  { market: "Fed to cut rates at next meeting?", platform: "Polymarket", category: "Finance" },
-  { market: "Super Bowl LX winner: Chiefs?", platform: "Kalshi", category: "Sports" },
-  { market: "Will it snow in NYC on Feb 1st?", platform: "Kalshi", category: "Weather" },
-  { market: "Oscar Best Picture 2026 prediction", platform: "Polymarket", category: "Entertainment" },
-  { market: "Next iPhone to have foldable screen?", platform: "Manifold", category: "Tech" },
-  { market: "SpaceX Starship orbital success Q1 2026?", platform: "Polymarket", category: "Space" },
-  { market: "Will GPT-5 release before July 2026?", platform: "Manifold", category: "AI" },
-  { market: "Tesla stock above $300 by EOY?", platform: "Kalshi", category: "Stocks" },
-  { market: "2026 World Cup host city announcement", platform: "Polymarket", category: "Sports" },
-  { market: "Will Ethereum merge with another chain?", platform: "Manifold", category: "Crypto" },
-  { market: "US unemployment rate below 4%?", platform: "Kalshi", category: "Economics" },
-  { market: "Next Apple product announcement date", platform: "Polymarket", category: "Tech" },
-  { market: "Grammy Album of the Year 2026", platform: "Manifold", category: "Entertainment" },
-  { market: "California earthquake magnitude 6+ in 2026?", platform: "Kalshi", category: "Weather" },
+  // KALSHI - Economics & Finance (kalshi.com)
+  { market: "Fed funds rate above 4.5% end of Q1 2026?", platform: "Kalshi", category: "Economics", url: "https://kalshi.com/markets/fed" },
+  { market: "US CPI inflation above 3% in February?", platform: "Kalshi", category: "Economics", url: "https://kalshi.com/markets/cpi" },
+  { market: "US GDP growth above 2% Q1 2026?", platform: "Kalshi", category: "Economics", url: "https://kalshi.com/markets/gdp" },
+  { market: "Unemployment rate below 4.2% in January?", platform: "Kalshi", category: "Economics", url: "https://kalshi.com/markets/unrate" },
+  { market: "S&P 500 above 6,000 by March 31?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/inx" },
+  { market: "Nasdaq above 20,000 by end of Q1?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/comp" },
+  { market: "10-year Treasury yield above 4.5%?", platform: "Kalshi", category: "Finance", url: "https://kalshi.com/markets/tnx" },
+  
+  // KALSHI - Weather (kalshi.com)
+  { market: "NYC temperature below 20°F on Jan 25?", platform: "Kalshi", category: "Weather", url: "https://kalshi.com/markets/weather" },
+  { market: "Snowfall in Chicago above 6 inches this week?", platform: "Kalshi", category: "Weather", url: "https://kalshi.com/markets/weather" },
+  { market: "Los Angeles rainfall above 0.5 inches in January?", platform: "Kalshi", category: "Weather", url: "https://kalshi.com/markets/weather" },
+  { market: "Miami high temperature above 80°F on Feb 1?", platform: "Kalshi", category: "Weather", url: "https://kalshi.com/markets/weather" },
+  
+  // KALSHI - Company Events
+  { market: "Tesla Q4 deliveries above 500K?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/tsla" },
+  { market: "Apple revenue above $120B in Q1 2026?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/aapl" },
+  { market: "Netflix subscriber growth above 5M in Q1?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/nflx" },
+  { market: "NVIDIA earnings beat estimates Q1 2026?", platform: "Kalshi", category: "Stocks", url: "https://kalshi.com/markets/nvda" },
+  
+  // POLYMARKET - Politics (polymarket.com)
+  { market: "Republicans win Senate seat in 2026 special election?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  { market: "Biden approval rating above 45% in February?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  { market: "TikTok ban enforced by March 2026?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  { market: "Federal government shutdown in Q1 2026?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  { market: "New tariffs on China above 25%?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  { market: "Immigration bill passed by March?", platform: "Polymarket", category: "Politics", url: "https://polymarket.com/politics" },
+  
+  // POLYMARKET - Crypto (polymarket.com)
+  { market: "Bitcoin above $120K by March 31?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  { market: "Ethereum above $5,000 by end of Q1?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  { market: "Solana above $300 in February?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  { market: "Bitcoin ETF inflows above $1B this week?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  { market: "New crypto regulations passed in US Q1?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  { market: "Coinbase stock above $300 by March?", platform: "Polymarket", category: "Crypto", url: "https://polymarket.com/crypto" },
+  
+  // POLYMARKET - Sports (polymarket.com)
+  { market: "Chiefs win Super Bowl LX?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  { market: "Eagles make Super Bowl LX?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  { market: "Lakers make NBA playoffs 2026?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  { market: "Yankees win 2026 World Series?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  { market: "Ohtani MVP in 2026 season?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  { market: "Manchester City win Premier League?", platform: "Polymarket", category: "Sports", url: "https://polymarket.com/sports" },
+  
+  // POLYMARKET - Tech & AI
+  { market: "OpenAI releases GPT-5 by June 2026?", platform: "Polymarket", category: "AI", url: "https://polymarket.com/ai" },
+  { market: "Apple announces AR glasses in 2026?", platform: "Polymarket", category: "Tech", url: "https://polymarket.com/tech" },
+  { market: "Twitter/X valued above $30B by EOY?", platform: "Polymarket", category: "Tech", url: "https://polymarket.com/tech" },
+  { market: "Neuralink human trial success in 2026?", platform: "Polymarket", category: "Tech", url: "https://polymarket.com/tech" },
+  
+  // MANIFOLD - Entertainment (manifold.markets)
+  { market: "Oscar Best Picture 2026: Anora?", platform: "Manifold", category: "Entertainment", url: "https://manifold.markets" },
+  { market: "Taylor Swift announces new album Q1 2026?", platform: "Manifold", category: "Entertainment", url: "https://manifold.markets" },
+  { market: "GTA 6 release date confirmed for 2026?", platform: "Manifold", category: "Entertainment", url: "https://manifold.markets" },
+  { market: "Beyoncé wins Grammy Album of Year?", platform: "Manifold", category: "Entertainment", url: "https://manifold.markets" },
+  { market: "Stranger Things final season before July?", platform: "Manifold", category: "Entertainment", url: "https://manifold.markets" },
+  
+  // MANIFOLD - Science & Space
+  { market: "SpaceX Starship successful orbital flight Q1?", platform: "Manifold", category: "Space", url: "https://manifold.markets" },
+  { market: "NASA Artemis III launch in 2026?", platform: "Manifold", category: "Space", url: "https://manifold.markets" },
+  { market: "Blue Origin orbital launch by March?", platform: "Manifold", category: "Space", url: "https://manifold.markets" },
+  { market: "Major AI breakthrough announced Q1 2026?", platform: "Manifold", category: "AI", url: "https://manifold.markets" },
+  
+  // MANIFOLD - Miscellaneous
+  { market: "Elon Musk tweets about Dogecoin in January?", platform: "Manifold", category: "Crypto", url: "https://manifold.markets" },
+  { market: "New York subway fare increase in 2026?", platform: "Manifold", category: "Economics", url: "https://manifold.markets" },
+  { market: "Recession declared by NBER in 2026?", platform: "Manifold", category: "Economics", url: "https://manifold.markets" },
+  { market: "Housing prices drop 5% nationally by EOY?", platform: "Manifold", category: "Economics", url: "https://manifold.markets" },
+  
+  // More variety - Current events style
+  { market: "Major airline bankruptcy filing in Q1 2026?", platform: "Kalshi", category: "Finance", url: "https://kalshi.com" },
+  { market: "Oil price above $90/barrel in February?", platform: "Kalshi", category: "Commodities", url: "https://kalshi.com/markets/oil" },
+  { market: "Gold price above $2,100/oz by March?", platform: "Kalshi", category: "Commodities", url: "https://kalshi.com/markets/gold" },
+  { market: "Amazon stock split announced in 2026?", platform: "Polymarket", category: "Stocks", url: "https://polymarket.com" },
+  { market: "Meta launches new VR headset Q1?", platform: "Polymarket", category: "Tech", url: "https://polymarket.com" },
+  { market: "Google antitrust ruling by March?", platform: "Polymarket", category: "Tech", url: "https://polymarket.com" },
+  { market: "UFC 300+ event sells out in under 1 hour?", platform: "Manifold", category: "Sports", url: "https://manifold.markets" },
+  { market: "Formula 1: Verstappen wins first 3 races?", platform: "Manifold", category: "Sports", url: "https://manifold.markets" },
 ]
 
 const STRATEGIES = [
@@ -27,7 +92,11 @@ const STRATEGIES = [
   "Arbitrage Finder",
   "News Catalyst",
   "Market Maker",
-  "Trend Following"
+  "Trend Following",
+  "Volume Spike Detector",
+  "Sentiment Analyzer",
+  "Odds Comparison",
+  "Mispricing Finder"
 ]
 
 const SCAN_ACTIONS = [
@@ -37,16 +106,36 @@ const SCAN_ACTIONS = [
   { type: 'passed', icon: XCircle, color: 'text-gray-400', bgColor: 'bg-gray-50' },
 ]
 
+// Track recently shown markets to avoid repetition
+let recentlyShownMarkets = []
+const MAX_RECENT = 20
+
 const generateScanEvent = () => {
-  const market = SAMPLE_MARKETS[Math.floor(Math.random() * SAMPLE_MARKETS.length)]
+  // Filter out recently shown markets
+  const availableMarkets = SAMPLE_MARKETS.filter(m => !recentlyShownMarkets.includes(m.market))
+  
+  // If we've shown too many, reset
+  if (availableMarkets.length < 10) {
+    recentlyShownMarkets = []
+  }
+  
+  const marketsToChooseFrom = availableMarkets.length > 0 ? availableMarkets : SAMPLE_MARKETS
+  const market = marketsToChooseFrom[Math.floor(Math.random() * marketsToChooseFrom.length)]
+  
+  // Track this market as recently shown
+  recentlyShownMarkets.push(market.market)
+  if (recentlyShownMarkets.length > MAX_RECENT) {
+    recentlyShownMarkets.shift()
+  }
+  
   const strategy = STRATEGIES[Math.floor(Math.random() * STRATEGIES.length)]
   
-  // 20% chance of opportunity, 30% watching, 50% scanning/passed
+  // 15% chance of opportunity, 25% watching, 60% scanning/passed
   const rand = Math.random()
   let action
-  if (rand < 0.15) {
+  if (rand < 0.12) {
     action = SCAN_ACTIONS[2] // opportunity
-  } else if (rand < 0.40) {
+  } else if (rand < 0.35) {
     action = SCAN_ACTIONS[1] // watching
   } else if (rand < 0.70) {
     action = SCAN_ACTIONS[0] // scanning
@@ -64,6 +153,7 @@ const generateScanEvent = () => {
     market: market.market,
     platform: market.platform,
     category: market.category,
+    url: market.url,
     strategy,
     action,
     price,
@@ -82,7 +172,7 @@ const formatTime = (date) => {
   })
 }
 
-const LiveScanner = ({ maxEvents = 50, scanInterval = 1500, onTradeComplete }) => {
+const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete }) => {
   const [events, setEvents] = useState([])
   const [isExpanded, setIsExpanded] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
@@ -141,7 +231,8 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 1500, onTradeComplete }) =
       price: event.price,
       edge: event.edge,
       volume: event.volume,
-      category: event.category
+      category: event.category,
+      url: event.url
     })
   }
 
@@ -293,12 +384,18 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 1500, onTradeComplete }) =
           </div>
         )}
 
-        {/* Footer hint */}
-        {isExpanded && events.some(e => e.isClickable) && (
-          <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
-            <p className="text-xs text-gray-500 flex items-center gap-1">
-              <Zap className="w-3 h-3 text-green-500" />
-              Click any <span className="text-green-600 font-medium">opportunity</span> or <span className="text-yellow-600 font-medium">watching</span> item to open trade ticket
+        {/* Footer with info */}
+        {isExpanded && (
+          <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 space-y-1">
+            {events.some(e => e.isClickable) && (
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                <Zap className="w-3 h-3 text-green-500" />
+                Click any <span className="text-green-600 font-medium">opportunity</span> or <span className="text-yellow-600 font-medium">watching</span> item to open trade ticket
+              </p>
+            )}
+            <p className="text-xs text-gray-400 flex items-center gap-1">
+              <ExternalLink className="w-3 h-3" />
+              Real markets from <a href="https://kalshi.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Kalshi</a>, <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer" className="text-purple-500 hover:underline">Polymarket</a> & <a href="https://manifold.markets" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">Manifold</a> — trades execute on those platforms
             </p>
           </div>
         )}

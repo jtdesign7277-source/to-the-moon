@@ -263,7 +263,7 @@ const Dashboard = () => {
       </div>
 
       {/* Live Market Scanner */}
-      <LiveScanner maxEvents={50} scanInterval={1200} onTradeComplete={handleTradeComplete} />
+      <LiveScanner maxEvents={50} scanInterval={3000} onTradeComplete={handleTradeComplete} />
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">
