@@ -1,61 +1,110 @@
 """
 Kalshi API Service
 Handles authentication and account operations with the Kalshi trading API.
+Uses RSA-PSS signatures for authentication as required by Kalshi API.
 """
 import os
 import time
-import hmac
-import hashlib
 import base64
 from datetime import datetime
 from typing import Optional, Dict, Any, Tuple
 
 import requests
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import InvalidSignature
 
 # Kalshi API endpoints
 KALSHI_API_BASE = 'https://api.elections.kalshi.com/trade-api/v2'
-# For demo/testing (use sandbox if available)
-# KALSHI_DEMO_API_BASE = 'https://demo-api.kalshi.co/trade-api/v2'
+KALSHI_DEMO_API_BASE = 'https://demo-api.kalshi.co/trade-api/v2'
 
 
 class KalshiService:
     """Service for interacting with Kalshi trading API."""
     
-    def __init__(self, api_key_id: str, api_secret: str, use_demo: bool = False):
+    def __init__(self, api_key_id: str, private_key_pem: str, use_demo: bool = False):
         """
         Initialize Kalshi service with API credentials.
         
         Args:
-            api_key_id: The Kalshi API Key ID
-            api_secret: The Kalshi API Secret Key (private key)
-            use_demo: Whether to use demo/sandbox API (not yet available)
+            api_key_id: The Kalshi API Key ID (UUID format)
+            private_key_pem: The Kalshi RSA Private Key in PEM format
+            use_demo: Whether to use demo/sandbox API
         """
         self.api_key_id = api_key_id
-        self.api_secret = api_secret
-        self.base_url = KALSHI_API_BASE
+        self.private_key_pem = private_key_pem
+        self.private_key = None
+        self.base_url = KALSHI_DEMO_API_BASE if use_demo else KALSHI_API_BASE
         self.session = requests.Session()
         
-    def _generate_signature(self, timestamp: str, method: str, path: str) -> str:
+        # Load the private key
+        self._load_private_key()
+    
+    def _load_private_key(self):
+        """Load the RSA private key from PEM format."""
+        try:
+            # Handle both raw PEM and escaped newlines
+            key_pem = self.private_key_pem
+            if '\\n' in key_pem:
+                key_pem = key_pem.replace('\\n', '\n')
+            
+            # Ensure proper PEM format
+            if not key_pem.startswith('-----BEGIN'):
+                # Try to reconstruct PEM format
+                key_pem = f"-----BEGIN RSA PRIVATE KEY-----\n{key_pem}\n-----END RSA PRIVATE KEY-----"
+            
+            self.private_key = serialization.load_pem_private_key(
+                key_pem.encode('utf-8'),
+                password=None,
+                backend=default_backend()
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to load RSA private key: {str(e)}")
+    
+    def _sign_pss(self, message: str) -> str:
         """
-        Generate HMAC signature for Kalshi API request.
+        Sign a message using RSA-PSS with SHA256.
         
-        Kalshi uses HMAC-SHA256 signatures for authentication.
-        The signature is generated from: timestamp + method + path
+        Args:
+            message: The string to sign
+            
+        Returns:
+            Base64-encoded signature
         """
-        message = f"{timestamp}{method}{path}"
-        signature = hmac.new(
-            self.api_secret.encode('utf-8'),
-            message.encode('utf-8'),
-            hashlib.sha256
-        ).digest()
-        return base64.b64encode(signature).decode('utf-8')
+        if not self.private_key:
+            raise ValueError("Private key not loaded")
+        
+        try:
+            signature = self.private_key.sign(
+                message.encode('utf-8'),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.AUTO
+                ),
+                hashes.SHA256()
+            )
+            return base64.b64encode(signature).decode('utf-8')
+        except InvalidSignature as e:
+            raise ValueError("RSA sign PSS failed") from e
     
     def _get_headers(self, method: str, path: str) -> Dict[str, str]:
         """
         Generate authenticated headers for Kalshi API request.
+        
+        Kalshi requires:
+        - KALSHI-ACCESS-KEY: The API Key ID
+        - KALSHI-ACCESS-TIMESTAMP: Current timestamp in milliseconds
+        - KALSHI-ACCESS-SIGNATURE: RSA-PSS signature of (timestamp + method + path)
         """
         timestamp = str(int(time.time() * 1000))
-        signature = self._generate_signature(timestamp, method, path)
+        
+        # Strip query parameters from path for signing
+        path_without_query = path.split('?')[0]
+        
+        # Message to sign: timestamp + method + path (without query params)
+        message = f"{timestamp}{method.upper()}{path_without_query}"
+        signature = self._sign_pss(message)
         
         return {
             'Content-Type': 'application/json',
@@ -86,7 +135,7 @@ class KalshiService:
             if response.status_code == 200:
                 return True, response.json()
             elif response.status_code == 401:
-                return False, "Invalid API credentials. Please check your API Key ID and Secret."
+                return False, "Invalid API credentials. Please check your API Key ID and Private Key."
             elif response.status_code == 403:
                 return False, "Access forbidden. Your API key may not have the required permissions."
             else:
@@ -192,18 +241,21 @@ class KalshiService:
         }
 
 
-def connect_kalshi_account(api_key_id: str, api_secret: str) -> Tuple[bool, Dict[str, Any]]:
+def connect_kalshi_account(api_key_id: str, private_key_pem: str) -> Tuple[bool, Dict[str, Any]]:
     """
     Connect and verify a Kalshi account.
     
     Args:
-        api_key_id: Kalshi API Key ID
-        api_secret: Kalshi API Secret Key
+        api_key_id: Kalshi API Key ID (UUID format)
+        private_key_pem: Kalshi RSA Private Key in PEM format
         
     Returns:
         Tuple of (success: bool, result: dict with balance or error)
     """
-    service = KalshiService(api_key_id, api_secret)
+    try:
+        service = KalshiService(api_key_id, private_key_pem)
+    except ValueError as e:
+        return False, {'error': str(e)}
     
     # First verify credentials
     verified, verify_data = service.verify_credentials()
@@ -218,16 +270,20 @@ def connect_kalshi_account(api_key_id: str, api_secret: str) -> Tuple[bool, Dict
         return False, portfolio
 
 
-def refresh_kalshi_balance(api_key_id: str, api_secret: str) -> Tuple[bool, Dict[str, Any]]:
+def refresh_kalshi_balance(api_key_id: str, private_key_pem: str) -> Tuple[bool, Dict[str, Any]]:
     """
     Refresh balance for an existing Kalshi connection.
     
     Args:
         api_key_id: Kalshi API Key ID
-        api_secret: Kalshi API Secret Key
+        private_key_pem: Kalshi RSA Private Key in PEM format
         
     Returns:
         Tuple of (success: bool, result: dict with balance or error)
     """
-    service = KalshiService(api_key_id, api_secret)
+    try:
+        service = KalshiService(api_key_id, private_key_pem)
+    except ValueError as e:
+        return False, {'error': str(e)}
+    
     return service.get_portfolio_summary()

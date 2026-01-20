@@ -14,17 +14,17 @@ const AVAILABLE_PLATFORMS = [
     type: 'Prediction Market',
     description: 'CFTC-regulated prediction market for trading on real-world events.',
     features: ['Regulated in US', 'Real USD trading', 'Event contracts'],
-    apiDocsUrl: 'https://trading-api.readme.io/reference/getting-started',
+    apiDocsUrl: 'https://docs.kalshi.com/getting_started/api_keys',
     setupSteps: [
       'Log in to your Kalshi account at kalshi.com',
       'Navigate to Settings → API Keys',
       'Click "Create New API Key"',
-      'Copy your API Key ID and Secret Key (store secret safely, it won\'t be shown again)',
+      'Copy your API Key ID and Private Key (store safely, it won\'t be shown again)',
       'Paste both keys below to connect your account'
     ],
     fields: [
-      { id: 'apiKeyId', label: 'API Key ID', placeholder: 'Enter your Kalshi API Key ID' },
-      { id: 'apiSecret', label: 'API Secret Key', placeholder: 'Enter your Kalshi API Secret', isSecret: true }
+      { id: 'apiKeyId', label: 'API Key ID', placeholder: 'ab1ed02f-24c4-4a81-aef0-c411cf939762' },
+      { id: 'apiSecret', label: 'RSA Private Key', placeholder: '-----BEGIN RSA PRIVATE KEY-----\nMIIEow...\n-----END RSA PRIVATE KEY-----', isSecret: true, isMultiline: true }
     ],
     color: 'indigo'
   },
@@ -804,24 +804,37 @@ const Accounts = () => {
                                     {field.label}
                                   </label>
                                   <div className="relative">
-                                    <input
-                                      type={field.isSecret && !showSecrets[field.id] ? 'password' : 'text'}
-                                      value={apiCredentials[field.id] || ''}
-                                      onChange={(e) => handleCredentialChange(field.id, e.target.value)}
-                                      placeholder={field.placeholder}
-                                      className="w-full px-4 py-3 pr-16 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
-                                    />
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                      {field.isSecret && (
-                                        <button
-                                          type="button"
-                                          onClick={() => toggleSecretVisibility(field.id)}
-                                          className="p-1.5 text-gray-400 hover:text-gray-600"
-                                        >
-                                          {showSecrets[field.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                      )}
-                                    </div>
+                                    {field.isMultiline ? (
+                                      <textarea
+                                        value={apiCredentials[field.id] || ''}
+                                        onChange={(e) => handleCredentialChange(field.id, e.target.value)}
+                                        placeholder={field.placeholder}
+                                        rows={6}
+                                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white font-mono text-xs resize-none"
+                                        style={{ whiteSpace: 'pre-wrap' }}
+                                      />
+                                    ) : (
+                                      <input
+                                        type={field.isSecret && !showSecrets[field.id] ? 'password' : 'text'}
+                                        value={apiCredentials[field.id] || ''}
+                                        onChange={(e) => handleCredentialChange(field.id, e.target.value)}
+                                        placeholder={field.placeholder}
+                                        className="w-full px-4 py-3 pr-16 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                                      />
+                                    )}
+                                    {!field.isMultiline && (
+                                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                        {field.isSecret && (
+                                          <button
+                                            type="button"
+                                            onClick={() => toggleSecretVisibility(field.id)}
+                                            className="p-1.5 text-gray-400 hover:text-gray-600"
+                                          >
+                                            {showSecrets[field.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               ))}
