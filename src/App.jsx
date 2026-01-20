@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   BookOpen,
   Compass,
+  History,
 } from 'lucide-react'
 
 // Context
@@ -31,6 +32,7 @@ import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
 import Education from './pages/Education'
 import StrategyDiscovery from './pages/StrategyDiscovery'
+import TradeHistory from './pages/TradeHistory'
 import Legal from './pages/Legal'
 
 // Navigation configuration
@@ -40,6 +42,13 @@ const NAV_ITEMS = [
     label: 'Dashboard',
     shortLabel: 'Home',
     icon: LayoutDashboard,
+    requiresPro: false,
+  },
+  {
+    id: 'history',
+    label: 'Trade History',
+    shortLabel: 'History',
+    icon: History,
     requiresPro: false,
   },
   {
@@ -91,6 +100,8 @@ const PageRenderer = ({ currentPage, legalTab }) => {
   switch (currentPage) {
     case 'dashboard':
       return <Dashboard />
+    case 'history':
+      return <TradeHistory />
     case 'accounts':
       return <Accounts />
     case 'strategy':

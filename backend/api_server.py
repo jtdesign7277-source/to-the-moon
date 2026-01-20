@@ -982,6 +982,79 @@ def add_user_trade():
         }), 500
 
 
+@app.route('/api/user/trades/history', methods=['GET'])
+@require_auth
+def get_trade_history():
+    """Get user's complete trade history with stats."""
+    user = g.user
+    mode = request.args.get('mode', 'paper')
+    is_paper = mode == 'paper'
+
+    try:
+        # Fetch all trades for user filtered by mode
+        trades_query = Trade.query.filter_by(user_id=user.id)
+        
+        # Filter by paper/live mode if column exists
+        try:
+            trades_query = trades_query.filter_by(is_paper=is_paper)
+        except Exception:
+            pass  # Column might not exist yet
+        
+        trades = trades_query.order_by(Trade.timestamp.desc()).all()
+
+        # Calculate stats
+        total_trades = len(trades)
+        won_trades = len([t for t in trades if t.status == 'Won'])
+        lost_trades = len([t for t in trades if t.status == 'Lost'])
+        open_trades = len([t for t in trades if t.status == 'Open'])
+        
+        # Calculate P&L from trades
+        def parse_pnl(pnl_str):
+            if not pnl_str:
+                return 0
+            try:
+                cleaned = pnl_str.replace('$', '').replace(',', '').replace('+', '')
+                return float(cleaned)
+            except:
+                return 0
+        
+        pnls = [parse_pnl(t.pnl) for t in trades]
+        total_pnl = sum(pnls)
+        
+        winning_pnls = [p for p in pnls if p > 0]
+        losing_pnls = [p for p in pnls if p < 0]
+        
+        avg_win = sum(winning_pnls) / len(winning_pnls) if winning_pnls else 0
+        avg_loss = sum(losing_pnls) / len(losing_pnls) if losing_pnls else 0
+        best_trade = max(pnls) if pnls else 0
+        worst_trade = min(pnls) if pnls else 0
+        
+        win_rate = (won_trades / total_trades * 100) if total_trades > 0 else 0
+
+        return jsonify({
+            'success': True,
+            'trades': [t.to_dict() for t in trades],
+            'stats': {
+                'totalTrades': total_trades,
+                'wonTrades': won_trades,
+                'lostTrades': lost_trades,
+                'openTrades': open_trades,
+                'winRate': win_rate,
+                'totalPnl': total_pnl,
+                'avgWin': avg_win,
+                'avgLoss': avg_loss,
+                'bestTrade': best_trade,
+                'worstTrade': worst_trade,
+            }
+        })
+    except Exception as e:
+        print(f"Error fetching trade history: {str(e)}")
+        return jsonify({
+            'error': 'Database Error',
+            'message': f'Failed to fetch trade history: {str(e)}'
+        }), 500
+
+
 # --------------------------------------------
 # Subscription Routes
 # --------------------------------------------
