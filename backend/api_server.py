@@ -901,42 +901,50 @@ def add_user_trade():
             }), 403
 
     # Create new trade in database
-    trade = Trade(
-        user_id=user.id,
-        pair=data.get('pair', 'Unknown'),
-        trade_type=data.get('type', 'Long'),
-        entry=data.get('entry', '$0.00'),
-        exit=data.get('exit', '$0.00'),
-        pnl=data.get('pnl', '+$0'),
-        status=data.get('status', 'Won'),
-        is_paper=is_paper,
-        platform=data.get('platform'),
-        amount=data.get('amount'),
-    )
-    db.session.add(trade)
+    try:
+        trade = Trade(
+            user_id=user.id,
+            pair=data.get('pair', 'Unknown')[:200],  # Truncate to fit column
+            trade_type=data.get('type', 'Long'),
+            entry=data.get('entry', '$0.00'),
+            exit=data.get('exit', '$0.00'),
+            pnl=data.get('pnl', '+$0'),
+            status=data.get('status', 'Won'),
+            is_paper=is_paper,
+            platform=data.get('platform'),
+            amount=data.get('amount'),
+        )
+        db.session.add(trade)
 
-    # Get or create user stats
-    stats = user.stats
-    if not stats:
-        stats = UserStats(user_id=user.id)
-        db.session.add(stats)
+        # Get or create user stats
+        stats = user.stats
+        if not stats:
+            stats = UserStats(user_id=user.id)
+            db.session.add(stats)
 
-    # Update stats
-    total_trades = Trade.query.filter_by(user_id=user.id).count() + 1  # +1 for the new trade
-    wins = Trade.query.filter_by(user_id=user.id, status='Won').count()
-    if data.get('status') == 'Won':
-        wins += 1
+        # Update stats
+        total_trades = Trade.query.filter_by(user_id=user.id).count() + 1  # +1 for the new trade
+        wins = Trade.query.filter_by(user_id=user.id, status='Won').count()
+        if data.get('status') == 'Won':
+            wins += 1
 
-    stats.total_trades = total_trades
-    stats.win_rate = round((wins / total_trades) * 100) if total_trades else 0
+        stats.total_trades = total_trades
+        stats.win_rate = round((wins / total_trades) * 100) if total_trades else 0
 
-    db.session.commit()
+        db.session.commit()
 
-    return jsonify({
-        'success': True,
-        'trade': trade.to_dict(),
-        'stats': stats.to_dict(),
-    }), 201
+        return jsonify({
+            'success': True,
+            'trade': trade.to_dict(),
+            'stats': stats.to_dict(),
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating trade: {str(e)}")
+        return jsonify({
+            'error': 'Database Error',
+            'message': f'Failed to save trade: {str(e)}'
+        }), 500
 
 
 # --------------------------------------------

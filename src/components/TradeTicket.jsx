@@ -47,7 +47,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
       : (parseFloat(amount) - shares * 0).toFixed(2)
 
     const tradeData = {
-      pair: `${opportunity.market.substring(0, 40)}${opportunity.market.length > 40 ? '...' : ''} (${opportunity.platform})`,
+      pair: `${opportunity.market} (${opportunity.platform})`,
       type: position === 'yes' ? 'Long' : 'Short',
       entry: `$${entryPrice}`,
       exit: 'Pending',

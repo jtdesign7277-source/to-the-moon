@@ -150,7 +150,7 @@ class Trade(db.Model):
     strategy_id = db.Column(db.String(50), db.ForeignKey('strategies.id', ondelete='SET NULL'), nullable=True)
 
     # Trade details (stored as strings for frontend compatibility)
-    pair = db.Column(db.String(50), default='Unknown')
+    pair = db.Column(db.String(200), default='Unknown')  # Extended for prediction market names
     trade_type = db.Column(db.String(20), default='Long')  # Long, Short
     entry = db.Column(db.String(50), default='$0.00')
     exit = db.Column(db.String(50), default='$0.00')
