@@ -86,7 +86,12 @@ class Subscription(db.Model):
             return False
         if self.expires_at and self.expires_at < datetime.utcnow():
             return False
-        return True
+        return True 
+
+@property
+    def is_pro(self):
+        """Check if subscription is Pro tier."""
+        return self.is_active
 
     def to_dict(self):
         """Serialize subscription to dictionary."""
