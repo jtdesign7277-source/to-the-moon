@@ -208,7 +208,14 @@ const StrategyBuilder = () => {
   const [isBacktesting, setIsBacktesting] = useState(false)
   const [backtestComplete, setBacktestComplete] = useState(false)
   const [backtestData, setBacktestData] = useState([])
-  const [deployedStrategies, setDeployedStrategies] = useState([])
+  const [deployedStrategies, setDeployedStrategies] = useState(() => {
+    // Initialize from localStorage
+    try {
+      return JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+    } catch {
+      return []
+    }
+  })
   const [isLoadingDeployed, setIsLoadingDeployed] = useState(false)
   const [showDeployModal, setShowDeployModal] = useState(false)
   const [deploySettings, setDeploySettings] = useState({
@@ -486,6 +493,13 @@ const StrategyBuilder = () => {
     return `${hours}h ago`
   }
 
+  // Sync deployedStrategies to localStorage whenever it changes
+  useEffect(() => {
+    if (deployedStrategies.length > 0) {
+      localStorage.setItem('ttm_deployed_strategies', JSON.stringify(deployedStrategies))
+    }
+  }, [deployedStrategies])
+
   // Fetch deployed strategies on mount
   useEffect(() => {
     if (user) {
@@ -500,7 +514,7 @@ const StrategyBuilder = () => {
       // Handle response - axios puts data in response.data
       const strategies = response.data?.strategies || response.strategies || []
       if (strategies.length > 0) {
-        setDeployedStrategies(strategies.map(s => ({
+        const mapped = strategies.map(s => ({
           id: s.id,
           name: s.name,
           capital: s.allocatedCapital,
@@ -516,10 +530,24 @@ const StrategyBuilder = () => {
           losingTrades: s.losingTrades || 0,
           markets: s.markets || ['Kalshi', 'Polymarket'],
           lastTradeAt: s.lastTradeAt,
-        })))
+        }))
+        setDeployedStrategies(mapped)
+        // Sync to localStorage for Dashboard
+        localStorage.setItem('ttm_deployed_strategies', JSON.stringify(mapped))
+      } else {
+        // Check localStorage for any strategies
+        const local = JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+        if (local.length > 0) {
+          setDeployedStrategies(local)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch deployed strategies:', error)
+      // Fallback to localStorage
+      const local = JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+      if (local.length > 0) {
+        setDeployedStrategies(local)
+      }
     } finally {
       setIsLoadingDeployed(false)
     }
@@ -697,17 +725,24 @@ const StrategyBuilder = () => {
 
         if (response.data?.strategy) {
           const s = response.data.strategy
-          setDeployedStrategies([...deployedStrategies, {
+          const newStrategy = {
             id: s.id,
             name: s.name,
-            capital: s.allocatedCapital,
+            capital: s.allocatedCapital || deploySettings.capital,
             mode: s.mode,
-            status: s.status,
+            status: s.status || 'running',
             startedAt: s.deployedAt,
             icon: s.icon || '⚡',
             pnl: 0,
             trades: 0,
-          }])
+            markets: deployMarkets,
+          }
+          setDeployedStrategies([...deployedStrategies, newStrategy])
+          
+          // Save to localStorage for Dashboard to read
+          const existing = JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+          existing.push(newStrategy)
+          localStorage.setItem('ttm_deployed_strategies', JSON.stringify(existing))
         }
       } catch (error) {
         console.error('Failed to deploy strategy:', error)
@@ -737,8 +772,14 @@ const StrategyBuilder = () => {
         icon: template?.icon || '⚡',
         pnl: 0,
         trades: 0,
+        markets: deployMarkets,
       }
       setDeployedStrategies([...deployedStrategies, newStrategy])
+      
+      // Save to localStorage for Dashboard to read
+      const existing = JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+      existing.push(newStrategy)
+      localStorage.setItem('ttm_deployed_strategies', JSON.stringify(existing))
     }
 
     setShowDeployModal(false)
@@ -748,11 +789,18 @@ const StrategyBuilder = () => {
     setBacktestComplete(false)
   }
 
+  // Helper to sync deployed strategies to localStorage
+  const syncToLocalStorage = (strategies) => {
+    localStorage.setItem('ttm_deployed_strategies', JSON.stringify(strategies))
+  }
+
   const stopStrategy = async (id) => {
     // Update UI immediately
-    setDeployedStrategies(deployedStrategies.map(s =>
+    const updated = deployedStrategies.map(s =>
       s.id === id ? { ...s, status: 'stopped', stoppedAt: new Date().toISOString() } : s
-    ))
+    )
+    setDeployedStrategies(updated)
+    syncToLocalStorage(updated)
     
     // Call backend if user is logged in and ID is a string (backend ID)
     if (user && typeof id === 'string') {

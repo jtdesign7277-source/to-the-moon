@@ -48,36 +48,75 @@ const Dashboard = ({ onNavigate }) => {
     trackPageView('Dashboard')
   }, [])
 
-  // Fetch active strategies
+  // Fetch active strategies - check localStorage FIRST, then API
   useEffect(() => {
     const fetchActiveStrategies = async () => {
-      if (!user) {
-        setIsLoadingStrategies(false)
-        return
-      }
+      // ALWAYS check localStorage first - this is our source of truth for deployed strategies
+      let allStrategies = []
+      
       try {
-        const response = await strategyApi.getDeployed()
-        const strategies = response.data?.strategies || []
-        const running = strategies.filter(s => s.status === 'running')
-        setActiveStrategies(running)
-        
-        // Initialize activity state for each strategy
-        const activity = {}
-        running.forEach(s => {
-          activity[s.id] = {
-            message: { text: 'Monitoring markets...', icon: '🔍' },
-            marketsScanned: Math.floor(Math.random() * 30) + 10,
-            lastActive: new Date(),
-          }
-        })
-        setStrategyActivity(activity)
-      } catch (error) {
-        console.error('Failed to fetch strategies:', error)
-      } finally {
-        setIsLoadingStrategies(false)
+        const localStrategies = JSON.parse(localStorage.getItem('ttm_deployed_strategies') || '[]')
+        allStrategies = [...localStrategies]
+      } catch (e) {
+        console.error('Failed to parse local strategies:', e)
       }
+      
+      // If user is logged in, also try API and merge
+      if (user) {
+        try {
+          const response = await strategyApi.getDeployed()
+          const apiStrategies = response.data?.strategies || []
+          
+          // Merge - add API strategies not already in local
+          const localIds = new Set(allStrategies.map(s => String(s.id)))
+          apiStrategies.forEach(api => {
+            if (!localIds.has(String(api.id))) {
+              allStrategies.push({
+                id: api.id,
+                name: api.name,
+                capital: api.allocatedCapital,
+                mode: api.mode,
+                status: api.status,
+                startedAt: api.deployedAt,
+                icon: api.icon || '⚡',
+                pnl: api.totalPnl || 0,
+                trades: api.totalTrades || 0,
+                markets: api.markets || ['Kalshi'],
+              })
+            }
+          })
+        } catch (error) {
+          console.error('Failed to fetch strategies from API:', error)
+        }
+      }
+      
+      const running = allStrategies.filter(s => s.status === 'running')
+      setActiveStrategies(running)
+      
+      // Update stats with actual count
+      setUserData(prev => ({
+        ...prev,
+        activeStrategies: running.length
+      }))
+      
+      // Initialize activity state for each strategy
+      const activity = {}
+      running.forEach(s => {
+        activity[s.id] = {
+          message: { text: 'Monitoring markets...', icon: '🔍' },
+          marketsScanned: Math.floor(Math.random() * 30) + 10,
+          lastActive: new Date(),
+        }
+      })
+      setStrategyActivity(activity)
+      setIsLoadingStrategies(false)
     }
+    
     fetchActiveStrategies()
+    
+    // Poll for updates every 3 seconds (since storage events don't fire on same page)
+    const interval = setInterval(fetchActiveStrategies, 3000)
+    return () => clearInterval(interval)
   }, [user])
 
   // Simulate strategy activity updates
