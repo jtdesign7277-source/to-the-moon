@@ -1618,9 +1618,7 @@ def list_strategies():
 
     # Filter to public or user's own
     if user:
-        query = query.filter(
-            db.or_(Strategy.is_public == True, Strategy.user_id == user.id)
-        )
+        query = query.filter(Strategy.user_id == user.id)
     else:
         query = query.filter_by(is_public=True)
 
