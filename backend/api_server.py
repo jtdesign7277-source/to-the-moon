@@ -103,6 +103,10 @@ STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_placeholder')
 from routes.live_trading import live_trading_bp
 app.register_blueprint(live_trading_bp)
 
+# Register trades blueprint
+from routes.trades import trades_bp
+app.register_blueprint(trades_bp, url_prefix='/api/trades')
+
 # JWT Configuration
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
 JWT_ALGORITHM = 'HS256'
