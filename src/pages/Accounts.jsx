@@ -340,393 +340,423 @@ const Accounts = () => {
         </div>
       )}
 
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-5 gap-6">
-        {/* Left Column - Account Overview (3/5) */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Total Balance Card */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
+      {/* Paper Trading Mode Content */}
+      {tradingMode === 'paper' ? (
+        <div className="space-y-6">
+          {/* Paper Account Card */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-100 text-sm">Total Balance</p>
-                <p className="text-3xl font-bold mt-1">{isLoading ? '...' : totalBalance}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  {paperPortfolio.monthlyPnl >= 0 ? (
-                    <TrendingUp className="w-4 h-4" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4" />
-                  )}
-                  <span className="text-sm">
-                    {tradingMode === 'paper' 
-                      ? `${paperPortfolio.monthlyPnl >= 0 ? '+' : ''}${formatCurrency(paperPortfolio.monthlyPnl)} (${formatPercent(paperPortfolio.monthlyPnlPercent)}) this month`
-                      : '$0.00 (0.0%) this month'
-                    }
-                  </span>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center text-3xl">
+                  {paperAccount.icon}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-lg">{paperAccount.name}</h3>
+                  <p className="text-sm text-gray-500">{paperAccount.type}</p>
                 </div>
               </div>
-              {tradingMode === 'paper' && (
-                <button
-                  onClick={fetchPaperPortfolio}
-                  disabled={isLoading}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                  title="Refresh portfolio"
-                >
-                  <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-              )}
+              <div className="text-right">
+                <p className="text-2xl font-bold text-gray-900">{paperAccount.balance}</p>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                  <Check className="w-3 h-3" />
+                  {paperAccount.status}
+                </span>
+              </div>
+            </div>
+            
+            {/* Paper Trading Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
+              <div>
+                <p className="text-sm text-gray-500">Total P&L</p>
+                <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {paperPortfolio.totalPnl >= 0 ? '+' : ''}{formatCurrency(paperPortfolio.totalPnl)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Win Rate</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {paperPortfolio.totalTrades > 0 ? `${paperPortfolio.winRate.toFixed(1)}%` : '—'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Trades</p>
+                <p className="text-lg font-semibold text-gray-900">{paperPortfolio.totalTrades}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Open Positions</p>
+                <p className="text-lg font-semibold text-gray-900">{paperPositions.length}</p>
+              </div>
+            </div>
+            
+            {/* Reset Button */}
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+              <button
+                onClick={handleResetPortfolio}
+                disabled={isResetting}
+                className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+              >
+                {isResetting ? 'Resetting...' : 'Reset Paper Account to $100,000'}
+              </button>
+              <button
+                onClick={fetchPaperPortfolio}
+                disabled={isLoading}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Refresh portfolio"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
           </div>
 
-          {/* Connected Accounts */}
-          {tradingMode === 'paper' ? (
-            <>
-              {/* Paper Trading Account Card */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl">
-                      {paperAccount.icon}
+          {/* Open Positions */}
+          {paperPositions.length > 0 && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 mb-4">Open Positions</h3>
+              <div className="space-y-3">
+                {paperPositions.map((position) => (
+                  <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 text-sm">{position.marketTitle}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {position.quantity} {position.side.toUpperCase()} @ {formatCurrency(position.avgEntryPrice)}
+                      </p>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{paperAccount.name}</h3>
-                      <p className="text-sm text-gray-500">{paperAccount.type}</p>
+                    <div className="text-right">
+                      <p className={`text-sm font-semibold ${position.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {position.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(position.unrealizedPnl)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatPercent(position.unrealizedPnlPercent)}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-gray-900">{paperAccount.balance}</p>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                      <Check className="w-3 h-3" />
-                      {paperAccount.status}
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Paper Trading Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
-                  <div>
-                    <p className="text-sm text-gray-500">Total P&L</p>
-                    <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {paperPortfolio.totalPnl >= 0 ? '+' : ''}{formatCurrency(paperPortfolio.totalPnl)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Win Rate</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {paperPortfolio.totalTrades > 0 ? `${paperPortfolio.winRate.toFixed(1)}%` : '—'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Total Trades</p>
-                    <p className="text-lg font-semibold text-gray-900">{paperPortfolio.totalTrades}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Open Positions</p>
-                    <p className="text-lg font-semibold text-gray-900">{paperPositions.length}</p>
-                  </div>
-                </div>
-                
-                {/* Reset Button */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={handleResetPortfolio}
-                    disabled={isResetting}
-                    className="text-sm text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    {isResetting ? 'Resetting...' : 'Reset Paper Account to $100,000'}
-                  </button>
-                </div>
+                ))}
               </div>
-
-              {/* Open Positions */}
-              {paperPositions.length > 0 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                  <h3 className="font-semibold text-gray-900 mb-4">Open Positions</h3>
-                  <div className="space-y-3">
-                    {paperPositions.map((position) => (
-                      <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900 text-sm">{position.marketTitle}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {position.quantity} {position.side.toUpperCase()} @ {formatCurrency(position.avgEntryPrice)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-semibold ${position.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {position.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(position.unrealizedPnl)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatPercent(position.unrealizedPnlPercent)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Recent Trades */}
-              {recentTrades.length > 0 && (
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                  <h3 className="font-semibold text-gray-900 mb-4">Recent Trades</h3>
-                  <div className="space-y-2">
-                    {recentTrades.slice(0, 5).map((trade) => (
-                      <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                        <div>
-                          <p className="text-sm text-gray-900">{trade.action.toUpperCase()} {trade.quantity} {trade.side.toUpperCase()}</p>
-                          <p className="text-xs text-gray-500">{trade.marketTitle?.substring(0, 40)}...</p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {trade.status === 'closed' ? (trade.pnl >= 0 ? '+' : '') + formatCurrency(trade.pnl) : 'Open'}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {/* Live Connected Accounts */}
-              {accounts.length > 0 ? (
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900">Connected Accounts</h3>
-                  {accounts.map((account) => (
-                    <div
-                      key={account.id}
-                      className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl">
-                            {account.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{account.name}</h3>
-                            <p className="text-sm text-gray-500">{account.type}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-gray-900">{account.balance}</p>
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                            <Check className="w-3 h-3" />
-                            {account.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Key className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">No Accounts Connected</h3>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Connect a trading platform from the list to start live trading.
-                  </p>
-                </div>
-              )}
-            </>
+            </div>
           )}
-        </div>
 
-        {/* Right Column - Available Platforms (2/5) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">
-              {tradingMode === 'paper' ? 'Available Platforms' : 'Connect a Platform'}
-            </h3>
-            {tradingMode === 'paper' && (
+          {/* Recent Trades */}
+          {recentTrades.length > 0 && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 mb-4">Recent Trades</h3>
+              <div className="space-y-2">
+                {recentTrades.slice(0, 5).map((trade) => (
+                  <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                    <div>
+                      <p className="text-sm text-gray-900">{trade.action.toUpperCase()} {trade.quantity} {trade.side.toUpperCase()}</p>
+                      <p className="text-xs text-gray-500">{trade.marketTitle?.substring(0, 40)}...</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {trade.status === 'closed' ? (trade.pnl >= 0 ? '+' : '') + formatCurrency(trade.pnl) : 'Open'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Available Platforms Preview (Paper Mode) */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Available Platforms</h3>
               <span className="text-xs text-gray-500">Switch to Live to connect</span>
-            )}
-          </div>
-          
-          {/* Platform Cards - Stacked Vertically */}
-          <div className="space-y-3">
-            {AVAILABLE_PLATFORMS.map((platform) => {
-              const colors = getColorClasses(platform.color)
-              const isConnected = accounts.some(a => a.name === platform.name)
-              const isSelected = selectedPlatform?.id === platform.id
-
-              return (
-                <div key={platform.id} className="relative">
-                  {/* Platform Card */}
-                  <button
-                    onClick={() => {
-                      if (tradingMode === 'paper') return
-                      if (isConnected) return
-                      setSelectedPlatform(isSelected ? null : platform)
-                      setApiCredentials({})
-                      setShowSecrets({})
-                      setConnectionSuccess(false)
-                    }}
-                    disabled={tradingMode === 'paper' || isConnected}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      isConnected
-                        ? 'border-green-200 bg-green-50'
-                        : isSelected
-                        ? `${colors.border} ${colors.bg}`
-                        : tradingMode === 'paper'
-                        ? 'border-gray-100 bg-gray-50 opacity-75'
-                        : `border-gray-100 bg-white hover:border-gray-200 hover:shadow-md`
-                    }`}
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {AVAILABLE_PLATFORMS.map((platform) => {
+                const colors = getColorClasses(platform.color)
+                return (
+                  <div
+                    key={platform.id}
+                    className="p-4 rounded-xl border-2 border-gray-100 bg-gray-50 opacity-75"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{platform.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-gray-900">{platform.name}</h4>
-                          {isConnected && (
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
-                              Connected
-                            </span>
-                          )}
-                        </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{platform.name}</h4>
                         <p className="text-xs text-gray-500">{platform.type}</p>
                       </div>
-                      {!isConnected && tradingMode !== 'paper' && (
-                        <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
-                      )}
                     </div>
-                    
-                    {/* Features */}
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {platform.features.slice(0, 2).map((feature, i) => (
-                        <span key={i} className={`px-2 py-0.5 text-xs rounded ${
-                          isConnected ? 'bg-green-100 text-green-700' : `${colors.bg} ${colors.text}`
-                        }`}>
+                        <span key={i} className={`px-2 py-0.5 text-xs rounded ${colors.bg} ${colors.text}`}>
                           {feature}
                         </span>
                       ))}
                     </div>
-                  </button>
-
-                  {/* Expanded Setup Form */}
-                  {isSelected && !isConnected && tradingMode !== 'paper' && (
-                    <div className={`mt-2 p-4 rounded-xl border-2 ${colors.border} ${colors.bg} animate-in slide-in-from-top-2 duration-200`}>
-                      {connectionSuccess ? (
-                        <div className="text-center py-4">
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Check className="w-6 h-6 text-green-600" />
-                          </div>
-                          <p className="font-medium text-gray-900">Connected!</p>
-                        </div>
-                      ) : (
-                        <>
-                          {/* Setup Steps */}
-                          <div className="mb-4">
-                            <p className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
-                              <Key className="w-3 h-3" />
-                              How to get API keys:
-                            </p>
-                            <ol className="text-xs text-gray-500 space-y-1 ml-4">
-                              {platform.setupSteps.slice(0, 3).map((step, i) => (
-                                <li key={i}>{i + 1}. {step}</li>
-                              ))}
-                            </ol>
-                            <a
-                              href={platform.apiDocsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`inline-flex items-center gap-1 mt-2 text-xs ${colors.text} hover:underline`}
-                            >
-                              View full docs <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
-
-                          {/* Credential Fields */}
-                          <div className="space-y-3">
-                            {platform.fields.map((field) => (
-                              <div key={field.id}>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  {field.label}
-                                </label>
-                                <div className="relative">
-                                  <input
-                                    type={field.isSecret && !showSecrets[field.id] ? 'password' : 'text'}
-                                    value={apiCredentials[field.id] || ''}
-                                    onChange={(e) => handleCredentialChange(field.id, e.target.value)}
-                                    placeholder={field.placeholder}
-                                    className="w-full px-3 py-2 pr-16 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                  />
-                                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-                                    {field.isSecret && (
-                                      <button
-                                        type="button"
-                                        onClick={() => toggleSecretVisibility(field.id)}
-                                        className="p-1.5 text-gray-400 hover:text-gray-600"
-                                      >
-                                        {showSecrets[field.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Connect Button */}
-                          <button
-                            onClick={handleConnect}
-                            disabled={!isFormValid() || isConnecting}
-                            className={`w-full mt-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
-                              isFormValid() && !isConnecting
-                                ? `${colors.button} shadow-md`
-                                : 'bg-gray-300 cursor-not-allowed'
-                            }`}
-                          >
-                            {isConnecting ? (
-                              <>
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Connecting...
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="w-4 h-4" />
-                                Connect {platform.name}
-                              </>
-                            )}
-                          </button>
-
-                          {/* Security Note */}
-                          <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                            <Shield className="w-3 h-3 text-green-600" />
-                            Encrypted with AES-256
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Ready for Live Trading CTA (Paper Mode Only) */}
-          {tradingMode === 'paper' && (
-            <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">🚀</div>
+                  </div>
+                )
+              })}
+            </div>
+            
+            {/* Ready for Live Trading CTA */}
+            <div className="mt-6 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🚀</div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 text-sm">Ready for Live Trading?</h4>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {isPro ? 'Switch to live mode to connect accounts.' : 'Upgrade to Pro for live trading.'}
+                  <h4 className="font-semibold text-gray-900">Ready for Live Trading?</h4>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    {isPro ? 'Switch to live mode to connect real accounts.' : 'Upgrade to Pro ($9.99/mo) to connect real accounts.'}
                   </p>
                 </div>
+                <button
+                  onClick={() => isPro ? setTradingMode('live') : openUpgradeModal()}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+                >
+                  {isPro ? 'Switch to Live' : 'Upgrade to Pro'}
+                </button>
               </div>
-              <button
-                onClick={() => isPro ? setTradingMode('live') : openUpgradeModal()}
-                className="w-full mt-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {isPro ? 'Switch to Live' : 'Upgrade to Pro'}
-              </button>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Live Trading Mode Content */
+        <div className="space-y-6">
+          {/* Connected Accounts Section */}
+          {accounts.length > 0 && (
+            <>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">Connected Accounts</h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {accounts.map((account) => {
+                    const platform = AVAILABLE_PLATFORMS.find(p => p.name === account.name)
+                    const colors = platform ? getColorClasses(platform.color) : getColorClasses('indigo')
+                    return (
+                      <div
+                        key={account.id}
+                        className={`bg-white rounded-xl p-5 shadow-sm border-2 border-l-4 ${colors.border} hover:shadow-md transition-all`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{account.icon}</span>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{account.name}</h4>
+                              <p className="text-xs text-gray-500">{account.type}</p>
+                            </div>
+                          </div>
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded flex items-center gap-1">
+                            <Check className="w-3 h-3" />
+                            Live
+                          </span>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <p className="text-xs text-gray-500 mb-1">Balance</p>
+                          <p className="text-2xl font-bold text-gray-900">{account.balance}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Total Balance Summary */}
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-indigo-100 text-sm">Total Across All Platforms</p>
+                    <p className="text-3xl font-bold mt-1">{totalBalance}</p>
+                    <p className="text-sm text-indigo-200 mt-1">{accounts.length} platform{accounts.length !== 1 ? 's' : ''} connected</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      <span className="text-lg font-semibold">$0.00 (0.0%)</span>
+                    </div>
+                    <p className="text-indigo-200 text-sm mt-1">This month</p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Available Platforms Grid - 3 and 3 side by side */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">
+              {accounts.length > 0 ? 'Connect More Platforms' : 'Connect a Platform to Get Started'}
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {AVAILABLE_PLATFORMS.map((platform) => {
+                const colors = getColorClasses(platform.color)
+                const isConnected = accounts.some(a => a.name === platform.name)
+                const isSelected = selectedPlatform?.id === platform.id
+                const connectedAccount = accounts.find(a => a.name === platform.name)
+
+                return (
+                  <div key={platform.id} className="relative">
+                    {/* Platform Card */}
+                    <button
+                      onClick={() => {
+                        if (isConnected) return
+                        setSelectedPlatform(isSelected ? null : platform)
+                        setApiCredentials({})
+                        setShowSecrets({})
+                        setConnectionSuccess(false)
+                      }}
+                      disabled={isConnected}
+                      className={`w-full text-left p-5 rounded-xl border-2 transition-all ${
+                        isConnected
+                          ? 'border-green-300 bg-green-50'
+                          : isSelected
+                          ? `${colors.border} ${colors.bg}`
+                          : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">{platform.icon}</span>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{platform.name}</h4>
+                            <p className="text-xs text-gray-500">{platform.type}</p>
+                          </div>
+                        </div>
+                        {isConnected ? (
+                          <div className="text-right">
+                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+                              Connected
+                            </span>
+                            <p className="text-lg font-bold text-gray-900 mt-2">{connectedAccount?.balance}</p>
+                          </div>
+                        ) : (
+                          <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
+                        )}
+                      </div>
+                      
+                      {/* Description & Features */}
+                      {!isConnected && (
+                        <>
+                          <p className="text-sm text-gray-600 mt-3 line-clamp-2">{platform.description}</p>
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {platform.features.map((feature, i) => (
+                              <span key={i} className={`px-2 py-0.5 text-xs rounded ${colors.bg} ${colors.text}`}>
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Expanded Setup Form */}
+                    {isSelected && !isConnected && (
+                      <div className={`mt-3 p-5 rounded-xl border-2 ${colors.border} ${colors.bg} animate-in slide-in-from-top-2 duration-200`}>
+                        {connectionSuccess ? (
+                          <div className="text-center py-6">
+                            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <Check className="w-7 h-7 text-green-600" />
+                            </div>
+                            <p className="font-semibold text-gray-900">Connected Successfully!</p>
+                            <p className="text-sm text-gray-500 mt-1">Your {platform.name} account is now linked.</p>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Setup Steps */}
+                            <div className="mb-5">
+                              <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                                <Key className="w-4 h-4" />
+                                How to get your API keys
+                              </p>
+                              <ol className="text-sm text-gray-600 space-y-1.5">
+                                {platform.setupSteps.map((step, i) => (
+                                  <li key={i} className="flex items-start gap-2">
+                                    <span className="flex-shrink-0 w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
+                                      {i + 1}
+                                    </span>
+                                    <span className="pt-0.5">{step}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                              <a
+                                href={platform.apiDocsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`inline-flex items-center gap-1 mt-3 text-sm ${colors.text} hover:underline`}
+                              >
+                                View API Documentation <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+
+                            {/* Credential Fields */}
+                            <div className="space-y-4">
+                              <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <Shield className="w-4 h-4" />
+                                Enter your credentials
+                              </p>
+                              {platform.fields.map((field) => (
+                                <div key={field.id}>
+                                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                    {field.label}
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={field.isSecret && !showSecrets[field.id] ? 'password' : 'text'}
+                                      value={apiCredentials[field.id] || ''}
+                                      onChange={(e) => handleCredentialChange(field.id, e.target.value)}
+                                      placeholder={field.placeholder}
+                                      className="w-full px-4 py-3 pr-16 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                                    />
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                      {field.isSecret && (
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleSecretVisibility(field.id)}
+                                          className="p-1.5 text-gray-400 hover:text-gray-600"
+                                        >
+                                          {showSecrets[field.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Security Notice */}
+                            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-start gap-2">
+                                <Shield className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-xs font-medium text-green-800">Your credentials are secure</p>
+                                  <p className="text-xs text-green-700 mt-0.5">
+                                    Encrypted with AES-256. Never stored in plain text.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Connect Button */}
+                            <button
+                              onClick={handleConnect}
+                              disabled={!isFormValid() || isConnecting}
+                              className={`w-full mt-5 py-3 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                                isFormValid() && !isConnecting
+                                  ? `${colors.button} shadow-md hover:shadow-lg`
+                                  : 'bg-gray-300 cursor-not-allowed'
+                              }`}
+                            >
+                              {isConnecting ? (
+                                <>
+                                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                  Connecting...
+                                </>
+                              ) : (
+                                <>
+                                  <Shield className="w-5 h-5" />
+                                  Connect {platform.name}
+                                </>
+                              )}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
