@@ -401,6 +401,130 @@ def sentry_test():
 
 
 # --------------------------------------------
+# AI Support Chat Routes
+# --------------------------------------------
+
+# System prompt for the AI assistant
+AI_SYSTEM_PROMPT = """You are a friendly and helpful AI support assistant for "To The Moon", a paper trading platform for prediction markets.
+
+ABOUT THE PLATFORM:
+- To The Moon lets users practice trading on prediction markets like Kalshi, Polymarket, Manifold Markets, PredictIt, Betfair, and Metaculus
+- Users start with $100,000 in paper (simulated) money to practice trading
+- Pro users ($9.99/month) can connect real trading accounts for live trading
+
+KEY FEATURES:
+1. **Dashboard** - Shows portfolio balance, P&L, performance charts, and live market scanner
+2. **Trade History** - Full ledger of all trades with filtering and stats
+3. **Accounts** - Connect brokerage platforms (6 available: Kalshi, Polymarket, Manifold, PredictIt, Betfair, Metaculus)
+4. **Strategy Builder** - Create and backtest automated trading strategies
+5. **Marketplace** - Browse and purchase pre-built trading strategies
+6. **Leaderboard** - See top performing traders
+7. **Education** - Free learning resources about prediction markets
+
+HOW TO TRADE:
+1. Go to Dashboard
+2. Find a market in the Live Scanner
+3. Click on it to open the Trade Ticket
+4. Enter quantity and price
+5. Click Buy or Sell to execute
+
+PAPER vs LIVE MODE:
+- Paper Mode: Practice with fake money ($100k starting balance)
+- Live Mode: Trade with real money (requires Pro subscription and connected accounts)
+- Toggle between modes using the Paper/Live switch in the header
+
+COMMON QUESTIONS:
+- "How do I start?" → Go to Dashboard, browse Live Scanner, click a market, place a trade
+- "How do I connect an account?" → Go to Accounts page, switch to Live mode, click a platform, enter API keys
+- "How do I reset my balance?" → Go to Accounts, scroll down, click "Reset Paper Account to $100,000"
+- "What's a prediction market?" → Markets where you trade on the outcome of future events
+- "How do I upgrade?" → Click the purple "Upgrade" button in the header
+
+RESPONSE STYLE:
+- Be concise and helpful (2-3 sentences max)
+- Use emojis occasionally for friendliness
+- If unsure, suggest contacting human support
+- Always be encouraging about learning to trade
+
+If the user asks something you can't help with or needs human assistance, tell them to click "Talk to Human" to email the support team."""
+
+@app.route('/api/support/chat', methods=['POST'])
+@token_required
+def ai_support_chat():
+    """AI-powered support chat for website help."""
+    try:
+        # Check for OpenAI API key
+        openai_api_key = os.environ.get('OPENAI_API_KEY')
+        if not openai_api_key:
+            return jsonify({
+                'success': False,
+                'message': "I'm currently unavailable. Please click 'Talk to Human' to email our support team!",
+                'fallback': True
+            })
+
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        conversation_history = data.get('history', [])
+
+        if not user_message:
+            return jsonify({
+                'success': False,
+                'message': 'Message is required'
+            }), 400
+
+        # Import OpenAI here to avoid issues if not installed
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_api_key)
+        except ImportError:
+            return jsonify({
+                'success': False,
+                'message': "I'm having technical difficulties. Please click 'Talk to Human' for help!",
+                'fallback': True
+            })
+
+        # Build messages array
+        messages = [{"role": "system", "content": AI_SYSTEM_PROMPT}]
+        
+        # Add conversation history (limit to last 10 messages to save tokens)
+        for msg in conversation_history[-10:]:
+            messages.append({
+                "role": msg.get('role', 'user'),
+                "content": msg.get('content', '')
+            })
+        
+        # Add current user message
+        messages.append({"role": "user", "content": user_message})
+
+        # Call OpenAI API
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # Cost-effective model
+            messages=messages,
+            max_tokens=300,
+            temperature=0.7,
+        )
+
+        ai_response = response.choices[0].message.content
+
+        return jsonify({
+            'success': True,
+            'message': ai_response,
+            'usage': {
+                'prompt_tokens': response.usage.prompt_tokens,
+                'completion_tokens': response.usage.completion_tokens
+            }
+        })
+
+    except Exception as e:
+        print(f"AI chat error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': "I'm having trouble right now. Please click 'Talk to Human' to email our support team! 📧",
+            'fallback': True
+        })
+
+
+# --------------------------------------------
 # Waitlist Routes
 # --------------------------------------------
 

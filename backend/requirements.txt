@@ -26,6 +26,9 @@ stripe==7.8.0
 requests==2.31.0
 httpx==0.26.0
 
+# OpenAI for AI Chat Assistant
+openai==1.12.0
+
 # Validation & Serialization
 marshmallow==3.20.1
 email-validator==2.1.0

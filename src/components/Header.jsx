@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Sun, Moon } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { api } from '../utils/api'
 
 const Header = ({
   navItems,
@@ -22,11 +23,23 @@ const Header = ({
   const [profileOpen, setProfileOpen] = useState(false)
   const [supportMessage, setSupportMessage] = useState('')
   const [suggestionMessage, setSuggestionMessage] = useState('')
-  const [messageSent, setMessageSent] = useState(false)
   const [suggestionSent, setSuggestionSent] = useState(false)
   const [activeTab, setActiveTab] = useState('profile') // 'profile', 'support', 'suggest'
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'assistant', content: "Hi! 👋 I'm Luna, your AI assistant. Ask me anything about To The Moon!" }
+  ])
+  const [isAiTyping, setIsAiTyping] = useState(false)
+  const [talkToHuman, setTalkToHuman] = useState(false)
+  const chatContainerRef = useRef(null)
   const exploreRef = useRef(null)
   const profileRef = useRef(null)
+
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [chatMessages, isAiTyping])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -42,15 +55,52 @@ const Header = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleSendSupport = () => {
+  const handleSendAiMessage = async () => {
+    if (!supportMessage.trim() || isAiTyping) return
+    
+    const userMessage = supportMessage.trim()
+    setSupportMessage('')
+    
+    // Add user message to chat
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    setIsAiTyping(true)
+    
+    try {
+      const response = await api.post('/api/support/chat', {
+        message: userMessage,
+        history: chatMessages.slice(-10) // Send last 10 messages for context
+      })
+      
+      if (response.data.success) {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: response.data.message }])
+      } else {
+        // Fallback message
+        setChatMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: response.data.message || "I'm having trouble right now. Please click 'Talk to Human' for help! 📧"
+        }])
+      }
+    } catch (error) {
+      console.error('AI chat error:', error)
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "I'm temporarily unavailable. Please click 'Talk to Human' to email our support team! 📧"
+      }])
+    } finally {
+      setIsAiTyping(false)
+    }
+  }
+
+  const handleSendHumanMessage = () => {
     if (!supportMessage.trim()) return
-    // Send as email - opens mail client
     const subject = encodeURIComponent('Support Request - To The Moon')
     const body = encodeURIComponent(`From: ${user?.email}\n\nMessage:\n${supportMessage}`)
     window.open(`mailto:support@tothemoon.app?subject=${subject}&body=${body}`)
     setSupportMessage('')
-    setMessageSent(true)
-    setTimeout(() => setMessageSent(false), 3000)
+    setChatMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: "Opening your email client... Our team will get back to you within 24 hours! 📬"
+    }])
   }
 
   const handleSendSuggestion = () => {
@@ -400,48 +450,129 @@ const Header = ({
                     {/* Support Tab */}
                     {activeTab === 'support' && (
                       <div className="space-y-3 animate-in fade-in duration-200">
-                        <div className="bg-indigo-50 rounded-lg p-3">
-                          <div className="flex items-start gap-2">
-                            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                              <MessageCircle className="w-4 h-4 text-indigo-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-indigo-900">Support Chat</p>
-                              <p className="text-xs text-indigo-700 mt-0.5">We typically reply within 24 hours</p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <p className="text-xs text-gray-600 mb-2">
-                            <span className="font-medium">Hi! 👋</span> Welcome to To The Moon support. How can I help you today?
-                          </p>
-                          <p className="text-[10px] text-gray-400">Support Team</p>
-                        </div>
-
-                        {messageSent && (
-                          <div className="bg-green-50 text-green-700 text-xs p-2 rounded-lg text-center">
-                            ✓ Opening email client...
-                          </div>
-                        )}
-
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={supportMessage}
-                            onChange={(e) => setSupportMessage(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSendSupport()}
-                            placeholder="Type your message..."
-                            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          />
+                        {/* Toggle between AI and Human */}
+                        <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-lg">
                           <button
-                            onClick={handleSendSupport}
-                            disabled={!supportMessage.trim()}
-                            className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                            onClick={() => setTalkToHuman(false)}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                              !talkToHuman ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'
+                            }`}
                           >
-                            <Send className="w-4 h-4" />
+                            <Bot className="w-3.5 h-3.5" />
+                            AI Assistant
+                          </button>
+                          <button
+                            onClick={() => setTalkToHuman(true)}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                              talkToHuman ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'
+                            }`}
+                          >
+                            <UserCircle className="w-3.5 h-3.5" />
+                            Talk to Human
                           </button>
                         </div>
+
+                        {!talkToHuman ? (
+                          /* AI Chat Interface */
+                          <>
+                            {/* Chat Messages */}
+                            <div 
+                              ref={chatContainerRef}
+                              className="h-48 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg"
+                            >
+                              {chatMessages.map((msg, idx) => (
+                                <div
+                                  key={idx}
+                                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                  <div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                                    msg.role === 'user'
+                                      ? 'bg-indigo-600 text-white rounded-br-sm'
+                                      : 'bg-white border border-gray-200 text-gray-700 rounded-bl-sm'
+                                  }`}>
+                                    {msg.role === 'assistant' && (
+                                      <div className="flex items-center gap-1.5 mb-1">
+                                        <Bot className="w-3 h-3 text-indigo-500" />
+                                        <span className="text-[10px] font-medium text-indigo-500">Luna</span>
+                                      </div>
+                                    )}
+                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                  </div>
+                                </div>
+                              ))}
+                              {isAiTyping && (
+                                <div className="flex justify-start">
+                                  <div className="bg-white border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <Bot className="w-3 h-3 text-indigo-500" />
+                                      <span className="text-[10px] font-medium text-indigo-500">Luna</span>
+                                    </div>
+                                    <div className="flex gap-1">
+                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Input */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={supportMessage}
+                                onChange={(e) => setSupportMessage(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendAiMessage()}
+                                placeholder="Ask Luna anything..."
+                                disabled={isAiTyping}
+                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                              />
+                              <button
+                                onClick={handleSendAiMessage}
+                                disabled={!supportMessage.trim() || isAiTyping}
+                                className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <p className="text-[10px] text-gray-400 text-center">
+                              Luna is AI-powered. For complex issues, switch to "Talk to Human".
+                            </p>
+                          </>
+                        ) : (
+                          /* Human Support Interface */
+                          <>
+                            <div className="bg-indigo-50 rounded-lg p-3">
+                              <div className="flex items-start gap-2">
+                                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <Mail className="w-4 h-4 text-indigo-600" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-indigo-900">Email Support</p>
+                                  <p className="text-xs text-indigo-700 mt-0.5">We typically reply within 24 hours</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <textarea
+                              value={supportMessage}
+                              onChange={(e) => setSupportMessage(e.target.value)}
+                              placeholder="Describe your issue in detail..."
+                              rows={4}
+                              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                            />
+
+                            <button
+                              onClick={handleSendHumanMessage}
+                              disabled={!supportMessage.trim()}
+                              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Mail className="w-4 h-4" />
+                              Send Email to Support
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
 
