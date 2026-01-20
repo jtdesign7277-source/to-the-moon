@@ -3,7 +3,7 @@
  * Fetches real market data from Kalshi and Manifold Markets APIs
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Kalshi API endpoints
 const KALSHI_API = 'https://api.elections.kalshi.com/trade-api/v2';

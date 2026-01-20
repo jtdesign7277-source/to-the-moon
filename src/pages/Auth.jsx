@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   AlertCircle,
   CheckCircle,
+  Check,
 } from 'lucide-react'
 import { trackSignup } from '../utils/analytics'
 
@@ -16,6 +17,21 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 // Google OAuth Client ID - set this in your .env file
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
+// Avatar options - Using DiceBear API for consistent, stylish avatars
+const AVATAR_OPTIONS = [
+  { id: 'trader-1', seed: 'felix', style: 'adventurer', bg: 'from-indigo-500 to-purple-600' },
+  { id: 'trader-2', seed: 'aneka', style: 'adventurer', bg: 'from-pink-500 to-rose-600' },
+  { id: 'trader-3', seed: 'shadow', style: 'adventurer-neutral', bg: 'from-slate-600 to-slate-800' },
+  { id: 'trader-4', seed: 'zorro', style: 'avataaars', bg: 'from-amber-500 to-orange-600' },
+  { id: 'trader-5', seed: 'luna', style: 'bottts', bg: 'from-cyan-500 to-blue-600' },
+  { id: 'trader-6', seed: 'rocket', style: 'fun-emoji', bg: 'from-green-500 to-emerald-600' },
+]
+
+// Generate avatar URL from DiceBear
+const getAvatarUrl = (style, seed) => {
+  return `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=transparent`
+}
 
 export default function Auth({ onSuccess, onBack, onAdminAccess, initialMode }) {
   const [mode, setMode] = useState(initialMode || 'signup') // 'login' | 'signup' | 'forgot' | 'reset'
@@ -29,6 +45,7 @@ export default function Auth({ onSuccess, onBack, onAdminAccess, initialMode }) 
   const [isLoading, setIsLoading] = useState(false)
   const [resetToken, setResetToken] = useState('')
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0])
 
   // Check for reset token in URL
   useEffect(() => {
@@ -234,7 +251,13 @@ export default function Auth({ onSuccess, onBack, onAdminAccess, initialMode }) 
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup'
       const body = mode === 'login'
         ? { email, password }
-        : { email, password, username: username || email.split('@')[0] }
+        : { 
+            email, 
+            password, 
+            username: username || email.split('@')[0],
+            avatar: getAvatarUrl(selectedAvatar.style, selectedAvatar.seed),
+            avatarStyle: selectedAvatar.id,
+          }
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',

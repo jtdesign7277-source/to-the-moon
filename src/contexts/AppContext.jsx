@@ -11,6 +11,7 @@ export function AppProvider({ children }) {
 
   // UI state
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showLunaChat, setShowLunaChat] = useState(false)
 
   // Toggle Pro status (for development)
   const togglePro = useCallback(() => {
@@ -25,6 +26,16 @@ export function AppProvider({ children }) {
   // Close upgrade modal
   const closeUpgradeModal = useCallback(() => {
     setShowUpgradeModal(false)
+  }, [])
+
+  // Open Luna chat
+  const openLunaChat = useCallback(() => {
+    setShowLunaChat(true)
+  }, [])
+
+  // Close Luna chat
+  const closeLunaChat = useCallback(() => {
+    setShowLunaChat(false)
   }, [])
 
   // Handle successful upgrade
@@ -66,6 +77,11 @@ export function AppProvider({ children }) {
     closeUpgradeModal,
     handleUpgradeSuccess,
 
+    // Luna chat
+    showLunaChat,
+    openLunaChat,
+    closeLunaChat,
+
     // Feature access
     requiresProAccess,
     hasFeatureAccess,
@@ -77,6 +93,9 @@ export function AppProvider({ children }) {
     openUpgradeModal,
     closeUpgradeModal,
     handleUpgradeSuccess,
+    showLunaChat,
+    openLunaChat,
+    closeLunaChat,
     requiresProAccess,
     hasFeatureAccess,
   ])

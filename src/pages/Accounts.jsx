@@ -3,7 +3,7 @@ import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Ey
 import { useApp } from '../hooks/useApp'
 import { useAuth } from '../hooks/useAuth'
 import { trackAccountConnect } from '../utils/analytics'
-import { paperTradingApi } from '../utils/api'
+import { paperTradingApi, accountsApi } from '../utils/api'
 
 // Available platforms to connect
 const AVAILABLE_PLATFORMS = [
@@ -144,8 +144,10 @@ const Accounts = () => {
   const [showSecrets, setShowSecrets] = useState({})
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionSuccess, setConnectionSuccess] = useState(false)
+  const [connectionError, setConnectionError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [accounts, setAccounts] = useState([])
   
@@ -167,10 +169,73 @@ const Accounts = () => {
   useEffect(() => {
     if (user && tradingMode === 'paper') {
       fetchPaperPortfolio()
+    } else if (user && tradingMode === 'live') {
+      fetchConnectedAccounts()
     } else {
       setIsLoading(false)
     }
   }, [user, tradingMode])
+
+  const fetchConnectedAccounts = async () => {
+    try {
+      setIsLoading(true)
+      const response = await accountsApi.getAll()
+      const data = response.data
+      
+      if (data.accounts) {
+        // Transform backend accounts to frontend format
+        const transformedAccounts = data.accounts.map(acc => {
+          const platform = AVAILABLE_PLATFORMS.find(p => p.id === acc.platform)
+          return {
+            id: acc.id,
+            name: platform?.name || acc.platform,
+            balance: formatCurrency(acc.balance),
+            rawBalance: acc.balance,
+            status: acc.status === 'connected' ? 'Connected' : acc.status,
+            type: platform?.type?.split(' ')[0] || 'Platform',
+            icon: platform?.icon || '📊',
+            lastUpdate: acc.lastBalanceUpdate,
+            errorMessage: acc.errorMessage
+          }
+        })
+        setAccounts(transformedAccounts)
+      }
+    } catch (error) {
+      console.error('Failed to fetch connected accounts:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRefreshBalances = async () => {
+    try {
+      setIsRefreshing(true)
+      const response = await accountsApi.refreshAll()
+      const data = response.data
+      
+      if (data.accounts) {
+        const transformedAccounts = data.accounts.map(acc => {
+          const platform = AVAILABLE_PLATFORMS.find(p => p.id === acc.platform)
+          return {
+            id: acc.id,
+            name: platform?.name || acc.platform,
+            balance: formatCurrency(acc.balance),
+            rawBalance: acc.balance,
+            status: acc.status === 'connected' ? 'Connected' : acc.status,
+            type: platform?.type?.split(' ')[0] || 'Platform',
+            icon: platform?.icon || '📊',
+            lastUpdate: acc.lastBalanceUpdate,
+            errorMessage: acc.errorMessage
+          }
+        })
+        setAccounts(transformedAccounts)
+      }
+    } catch (error) {
+      console.error('Failed to refresh balances:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   const fetchPaperPortfolio = async () => {
     try {
@@ -234,9 +299,7 @@ const Accounts = () => {
 
   const totalBalance = tradingMode === 'paper' 
     ? formatCurrency(paperPortfolio.currentBalance)
-    : '$' + accounts.reduce((sum, acc) => {
-        return sum + parseFloat(acc.balance.replace(/[$,]/g, ''))
-      }, 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+    : formatCurrency(accounts.reduce((sum, acc) => sum + (acc.rawBalance || 0), 0))
 
   const openAddAccount = () => {
     setShowAddAccountModal(true)
@@ -244,6 +307,7 @@ const Accounts = () => {
     setApiCredentials({})
     setShowSecrets({})
     setConnectionSuccess(false)
+    setConnectionError(null)
   }
 
   const selectPlatform = (platform) => {
@@ -276,33 +340,61 @@ const Accounts = () => {
     if (!isFormValid()) return
 
     setIsConnecting(true)
+    setConnectionError(null)
 
-    // Simulate API connection
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      // Call the real API to connect the account
+      const response = await accountsApi.connect(selectedPlatform.id, apiCredentials)
+      const data = response.data
 
-    // Add the new account
-    const newAccount = {
-      id: Date.now(),
-      name: selectedPlatform.name,
-      balance: '$0.00',
-      status: 'Connected',
-      type: selectedPlatform.type.split(' ')[0],
-      icon: selectedPlatform.icon
+      if (data.success) {
+        // Add the new account from the API response
+        const accData = data.account
+        const newAccount = {
+          id: accData.id,
+          name: selectedPlatform.name,
+          balance: formatCurrency(accData.balance),
+          rawBalance: accData.balance,
+          status: 'Connected',
+          type: selectedPlatform.type.split(' ')[0],
+          icon: selectedPlatform.icon,
+          lastUpdate: accData.lastBalanceUpdate
+        }
+
+        setAccounts(prev => [...prev, newAccount])
+        setConnectionSuccess(true)
+
+        // Track account connection in Google Analytics
+        trackAccountConnect(selectedPlatform.name)
+
+        // Close modal after showing success
+        setTimeout(() => {
+          setShowAddAccountModal(false)
+          setSelectedPlatform(null)
+          setConnectionSuccess(false)
+          setApiCredentials({})
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('Failed to connect account:', error)
+      setConnectionError(error.message || 'Failed to connect. Please check your credentials.')
+    } finally {
+      setIsConnecting(false)
+    }
+  }
+
+  const handleDisconnect = async (accountId) => {
+    if (!confirm('Are you sure you want to disconnect this account?')) {
+      return
     }
 
-    setAccounts(prev => [...prev, newAccount])
-    setIsConnecting(false)
-    setConnectionSuccess(true)
-
-    // Track account connection in Google Analytics
-    trackAccountConnect(selectedPlatform.name)
-
-    // Close modal after showing success
-    setTimeout(() => {
-      setShowAddAccountModal(false)
-      setSelectedPlatform(null)
-      setConnectionSuccess(false)
-    }, 1500)
+    try {
+      await accountsApi.disconnect(accountId)
+      setAccounts(prev => prev.filter(acc => acc.id !== accountId))
+    } catch (error) {
+      console.error('Failed to disconnect account:', error)
+      alert('Failed to disconnect account. Please try again.')
+    }
   }
 
   const getColorClasses = (color) => {
@@ -517,7 +609,17 @@ const Accounts = () => {
           {accounts.length > 0 && (
             <>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Connected Accounts</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">Connected Accounts</h3>
+                  <button
+                    onClick={handleRefreshBalances}
+                    disabled={isRefreshing}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh All'}
+                  </button>
+                </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {accounts.map((account) => {
                     const platform = AVAILABLE_PLATFORMS.find(p => p.name === account.name)
@@ -535,14 +637,28 @@ const Accounts = () => {
                               <p className="text-xs text-gray-500">{account.type}</p>
                             </div>
                           </div>
-                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded flex items-center gap-1">
-                            <Check className="w-3 h-3" />
-                            Live
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded flex items-center gap-1">
+                              <Check className="w-3 h-3" />
+                              Live
+                            </span>
+                            <button
+                              onClick={() => handleDisconnect(account.id)}
+                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                              title="Disconnect account"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-100">
                           <p className="text-xs text-gray-500 mb-1">Balance</p>
                           <p className="text-2xl font-bold text-gray-900">{account.balance}</p>
+                          {account.lastUpdate && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              Updated {new Date(account.lastUpdate).toLocaleTimeString()}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )
@@ -723,6 +839,21 @@ const Accounts = () => {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Connection Error */}
+                            {connectionError && (
+                              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                                  <div>
+                                    <p className="text-xs font-medium text-red-800">Connection Failed</p>
+                                    <p className="text-xs text-red-700 mt-0.5">
+                                      {connectionError}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
 
                             {/* Connect Button */}
                             <button

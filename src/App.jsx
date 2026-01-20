@@ -20,6 +20,7 @@ import Header from './components/Header'
 import MobileNav from './components/MobileNav'
 import UpgradeModal from './components/UpgradeModal'
 import DevTools from './components/DevTools'
+import LunaChatWidget from './components/LunaChatWidget'
 
 // Pages
 import Landing from './pages/Landing'
@@ -301,6 +302,9 @@ const AppContent = () => {
 
       {/* Upgrade Modal */}
       <UpgradeModal />
+
+      {/* Luna AI Chat Widget */}
+      <LunaChatWidget user={user} />
 
       {/* Development Tools */}
       <DevTools />

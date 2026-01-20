@@ -519,7 +519,58 @@ class PaperPosition(db.Model):
 
 
 # ============================================
-# 11. DEPLOYED STRATEGY MODEL
+# 11. CONNECTED ACCOUNT MODEL
+# ============================================
+class ConnectedAccount(db.Model):
+    """Connected external platform account (Kalshi, Polymarket, etc.)."""
+    __tablename__ = 'connected_accounts'
+
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f'acc_{generate_uuid()}')
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    
+    # Platform info
+    platform = db.Column(db.String(50), nullable=False)  # kalshi, polymarket, manifold, etc.
+    platform_user_id = db.Column(db.String(255), nullable=True)  # User ID on the platform
+    
+    # Encrypted credentials (stored securely)
+    api_key_id = db.Column(db.String(512), nullable=True)  # Encrypted
+    api_secret = db.Column(db.String(512), nullable=True)  # Encrypted
+    extra_credentials = db.Column(db.JSON, default=dict)  # For additional fields like wallet address
+    
+    # Status and balance
+    status = db.Column(db.String(20), default='connected')  # connected, disconnected, error
+    balance = db.Column(db.Float, default=0.0)
+    last_balance_update = db.Column(db.DateTime, nullable=True)
+    error_message = db.Column(db.Text, nullable=True)
+    
+    # Timestamps
+    connected_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Unique constraint: one account per platform per user
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'platform', name='uq_user_platform'),
+    )
+
+    def to_dict(self):
+        """Serialize connected account to dictionary (no sensitive data)."""
+        return {
+            'id': self.id,
+            'platform': self.platform,
+            'platformUserId': self.platform_user_id,
+            'status': self.status,
+            'balance': self.balance,
+            'lastBalanceUpdate': self.last_balance_update.isoformat() if self.last_balance_update else None,
+            'errorMessage': self.error_message,
+            'connectedAt': self.connected_at.isoformat() if self.connected_at else None,
+        }
+
+    def __repr__(self):
+        return f'<ConnectedAccount {self.platform} user={self.user_id}>'
+
+
+# ============================================
+# 12. DEPLOYED STRATEGY MODEL
 # ============================================
 class DeployedStrategy(db.Model):
     """A strategy that has been deployed for paper or live trading."""

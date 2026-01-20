@@ -5,7 +5,7 @@
 import axios from 'axios';
 
 // Base URL configuration
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Create axios instance
 const api = axios.create({
@@ -286,6 +286,31 @@ export const paperTradingApi = {
   /** Quick buy with dollar amount (auto-calculates quantity) */
   quickBuy: (data) =>
     api.post('/paper/quick-buy', data),
+};
+
+// ============================================
+// CONNECTED ACCOUNTS ENDPOINTS
+// ============================================
+export const accountsApi = {
+  /** Get all connected trading platform accounts */
+  getAll: () =>
+    api.get('/accounts'),
+
+  /** Connect a new trading platform account */
+  connect: (platform, credentials) =>
+    api.post('/accounts/connect', { platform, ...credentials }),
+
+  /** Refresh balance for a specific account */
+  refreshBalance: (accountId) =>
+    api.post(`/accounts/${accountId}/refresh`),
+
+  /** Refresh balances for all connected accounts */
+  refreshAll: () =>
+    api.post('/accounts/refresh-all'),
+
+  /** Disconnect a trading platform account */
+  disconnect: (accountId) =>
+    api.delete(`/accounts/${accountId}`),
 };
 
 // ============================================

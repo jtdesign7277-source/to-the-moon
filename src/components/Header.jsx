@@ -108,6 +108,7 @@ const Header = ({
     tradingMode,
     setTradingMode,
     openUpgradeModal,
+    openLunaChat,
   } = useApp()
 
   const [exploreOpen, setExploreOpen] = useState(false)
@@ -455,12 +456,8 @@ const Header = ({
                       Profile
                     </button>
                     <button
-                      onClick={() => setActiveTab('support')}
-                      className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
-                        activeTab === 'support' 
-                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
-                          : 'text-gray-500 hover:text-gray-700'
-                      }`}
+                      onClick={() => { setProfileOpen(false); openLunaChat(); }}
+                      className="flex-1 px-4 py-2.5 text-xs font-medium transition-colors text-gray-500 hover:text-gray-700"
                     >
                       <MessageCircle className="w-3.5 h-3.5 mx-auto mb-1" />
                       Support
@@ -535,156 +532,6 @@ const Header = ({
                             )}
                           </div>
                         </div>
-                      </div>
-                    )}
-
-                    {/* Support Tab */}
-                    {activeTab === 'support' && (
-                      <div className="space-y-3 animate-in fade-in duration-200">
-                        {/* Luna AI Header */}
-                        {!talkToHuman && (
-                          <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-800 rounded-xl p-3 -mt-1 overflow-hidden relative">
-                            {/* Starry background */}
-                            <div className="absolute inset-0 opacity-30">
-                              <div className="absolute w-1 h-1 bg-white rounded-full top-2 left-4 animate-pulse" />
-                              <div className="absolute w-0.5 h-0.5 bg-white rounded-full top-6 left-12 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                              <div className="absolute w-1 h-1 bg-white rounded-full top-3 right-16 animate-pulse" style={{ animationDelay: '0.4s' }} />
-                              <div className="absolute w-0.5 h-0.5 bg-white rounded-full bottom-3 left-8 animate-pulse" style={{ animationDelay: '0.6s' }} />
-                              <div className="absolute w-1 h-1 bg-white rounded-full bottom-2 right-8 animate-pulse" style={{ animationDelay: '0.8s' }} />
-                            </div>
-                            <div className="flex items-center gap-3 relative">
-                              <div className="relative">
-                                <LunaAvatar size="md" />
-                                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-indigo-900 rounded-full animate-pulse" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="text-white font-bold text-base">Luna</h3>
-                                  <span className="px-1.5 py-0.5 bg-white/20 rounded text-[10px] text-white/90 font-medium">AI</span>
-                                </div>
-                                <p className="text-purple-100 text-xs">Your personal trading assistant</p>
-                              </div>
-                              <button
-                                onClick={() => setTalkToHuman(true)}
-                                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/80 hover:text-white"
-                                title="Talk to human support"
-                              >
-                                <UserCircle className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Human Support Header */}
-                        {talkToHuman && (
-                          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-3 -mt-1">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-                                <Mail className="w-6 h-6 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="text-white font-bold text-base">Human Support</h3>
-                                <p className="text-emerald-100 text-xs">We reply within 24 hours</p>
-                              </div>
-                              <button
-                                onClick={() => setTalkToHuman(false)}
-                                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/80 hover:text-white"
-                                title="Switch to AI assistant"
-                              >
-                                <Bot className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {!talkToHuman ? (
-                          /* AI Chat Interface */
-                          <>
-                            {/* Chat Messages */}
-                            <div 
-                              ref={chatContainerRef}
-                              className="h-64 overflow-y-auto space-y-3 p-3 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100"
-                            >
-                              {chatMessages.map((msg, idx) => (
-                                <div
-                                  key={idx}
-                                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
-                                  {msg.role === 'assistant' && (
-                                    <LunaAvatar size="sm" className="mr-2 flex-shrink-0" />
-                                  )}
-                                  <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm shadow-sm ${
-                                    msg.role === 'user'
-                                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
-                                      : 'bg-white border border-gray-200 text-gray-700 rounded-bl-md'
-                                  }`}>
-                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                  </div>
-                                </div>
-                              ))}
-                              {isAiTyping && (
-                                <div className="flex justify-start">
-                                  <LunaAvatar size="sm" className="mr-2 flex-shrink-0" />
-                                  <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
-                                    <div className="flex gap-1.5">
-                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Input */}
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={supportMessage}
-                                onChange={(e) => setSupportMessage(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendAiMessage()}
-                                placeholder="Ask Luna anything..."
-                                disabled={isAiTyping}
-                                className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 shadow-sm"
-                              />
-                              <button
-                                onClick={handleSendAiMessage}
-                                disabled={!supportMessage.trim() || isAiTyping}
-                                className="px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl transition-all shadow-sm hover:shadow-md"
-                              >
-                                <Send className="w-5 h-5" />
-                              </button>
-                            </div>
-                            <div className="flex items-center justify-center gap-2 text-[11px] text-gray-400">
-                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                              Luna is online • Powered by AI
-                            </div>
-                          </>
-                        ) : (
-                          /* Human Support Interface */
-                          <>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              Need help with something complex? Our team is here for you. Describe your issue below and we'll get back to you as soon as possible.
-                            </p>
-                            
-                            <textarea
-                              value={supportMessage}
-                              onChange={(e) => setSupportMessage(e.target.value)}
-                              placeholder="Describe your issue in detail..."
-                              rows={6}
-                              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none shadow-sm"
-                            />
-
-                            <button
-                              onClick={handleSendHumanMessage}
-                              disabled={!supportMessage.trim()}
-                              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                            >
-                              <Mail className="w-4 h-4" />
-                              Send Email to Support
-                            </button>
-                          </>
-                        )}
                       </div>
                     )}
 
