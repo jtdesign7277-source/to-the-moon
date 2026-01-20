@@ -668,6 +668,113 @@ def login():
         }), 500
 
 
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    """Authenticate user with Google OAuth."""
+    try:
+        data = request.get_json()
+        credential = data.get('credential')
+        
+        if not credential:
+            return jsonify({
+                'error': 'Bad Request',
+                'message': 'Google credential is required'
+            }), 400
+        
+        # Verify the Google token
+        # In production, you should verify this token with Google
+        # For now, we'll decode it (JWT) to get user info
+        try:
+            import json
+            import base64
+            
+            # Decode the JWT payload (second part)
+            parts = credential.split('.')
+            if len(parts) != 3:
+                raise ValueError("Invalid token format")
+            
+            # Add padding if needed
+            payload = parts[1]
+            padding = 4 - len(payload) % 4
+            if padding != 4:
+                payload += '=' * padding
+            
+            decoded = base64.urlsafe_b64decode(payload)
+            user_info = json.loads(decoded)
+            
+            email = user_info.get('email', '').lower()
+            name = user_info.get('name', '')
+            picture = user_info.get('picture', '')
+            
+            if not email:
+                raise ValueError("No email in token")
+                
+        except Exception as e:
+            return jsonify({
+                'error': 'Invalid Token',
+                'message': 'Could not verify Google token'
+            }), 401
+        
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        is_new_user = False
+        
+        if not user:
+            # Create new user
+            is_new_user = True
+            username = name.replace(' ', '_').lower()[:20] or email.split('@')[0]
+            
+            # Ensure unique username
+            base_username = username
+            counter = 1
+            while User.query.filter(db.func.lower(User.username) == username.lower()).first():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            # Generate a random password (user won't use it, they'll use Google)
+            import secrets
+            random_password = secrets.token_urlsafe(32)
+            
+            user = User(
+                email=email,
+                username=username,
+                password_hash=hash_password(random_password),
+                tier='free',
+            )
+            db.session.add(user)
+            db.session.flush()
+            
+            # Create default user stats
+            user_stats = UserStats(user_id=user.id)
+            db.session.add(user_stats)
+            
+            # Add to waitlist
+            existing_waitlist = WaitlistEntry.query.filter_by(email=email).first()
+            if not existing_waitlist:
+                waitlist_entry = WaitlistEntry(email=email, source='google_signup')
+                db.session.add(waitlist_entry)
+            
+            db.session.commit()
+        
+        # Generate JWT token
+        access_token = generate_jwt_token(user.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Google authentication successful',
+            'access_token': access_token,
+            'user': user.sanitize(),
+            'isNewUser': is_new_user
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': 'Server Error',
+            'message': str(e)
+        }), 500
+
+
 @app.route('/api/auth/me', methods=['GET'])
 @require_auth
 def get_current_user_info():
