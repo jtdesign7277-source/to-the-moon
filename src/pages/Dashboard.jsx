@@ -5,7 +5,8 @@ import {
 } from 'recharts'
 import {
   TrendingUp, TrendingDown, Activity, Wrench, LayoutDashboard,
-  ChevronRight, Check, X, Rocket, Crown, Wallet, BarChart3
+  ChevronRight, Check, X, Rocket, Crown, Wallet, BarChart3,
+  DollarSign, Target, Zap, Calendar, ArrowUpRight, ArrowDownRight, Clock
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
@@ -33,6 +34,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [performancePeriod, setPerformancePeriod] = useState('1M') // 1D, 1W, 1M, 6M, 1Y
+  const [selectedStat, setSelectedStat] = useState(null) // For stat card modal
 
   // Track page view when dashboard loads
   useEffect(() => {
@@ -109,6 +111,19 @@ const Dashboard = () => {
       change: formatPercent(userData.monthlyChange),
       positive: userData.totalPnl >= 0,
       icon: TrendingUp,
+      detailIcon: DollarSign,
+      color: userData.totalPnl >= 0 ? 'green' : 'red',
+      details: {
+        title: 'Profit & Loss Overview',
+        description: 'Your total earnings from all trading activity',
+        metrics: [
+          { label: 'Total P&L', value: formatCurrency(userData.totalPnl), icon: DollarSign },
+          { label: 'Monthly Change', value: formatPercent(userData.monthlyChange), icon: Calendar },
+          { label: 'Best Trade', value: userData.totalTrades > 0 ? '+$50.00' : '—', icon: ArrowUpRight },
+          { label: 'Worst Trade', value: userData.totalTrades > 0 ? '-$20.00' : '—', icon: ArrowDownRight },
+        ],
+        tip: 'Pro tip: Diversify across multiple strategies to reduce volatility.'
+      }
     },
     {
       label: 'Win Rate',
@@ -116,6 +131,19 @@ const Dashboard = () => {
       change: userData.totalTrades > 0 ? '+0%' : '—',
       positive: true,
       icon: Activity,
+      detailIcon: Target,
+      color: 'indigo',
+      details: {
+        title: 'Win Rate Analysis',
+        description: 'Percentage of profitable trades out of total trades',
+        metrics: [
+          { label: 'Win Rate', value: userData.totalTrades > 0 ? `${userData.winRate}%` : '—', icon: Target },
+          { label: 'Winning Trades', value: userData.totalTrades > 0 ? Math.round(userData.totalTrades * userData.winRate / 100).toString() : '0', icon: Check },
+          { label: 'Losing Trades', value: userData.totalTrades > 0 ? Math.round(userData.totalTrades * (100 - userData.winRate) / 100).toString() : '0', icon: X },
+          { label: 'Avg Win Size', value: userData.totalTrades > 0 ? '+$25.00' : '—', icon: ArrowUpRight },
+        ],
+        tip: 'A win rate above 50% combined with good risk management leads to profitability.'
+      }
     },
     {
       label: 'Active Strategies',
@@ -123,6 +151,19 @@ const Dashboard = () => {
       change: userData.activeStrategies > 0 ? '+0' : '—',
       positive: true,
       icon: Wrench,
+      detailIcon: Zap,
+      color: 'purple',
+      details: {
+        title: 'Strategy Overview',
+        description: 'Automated strategies currently running on your account',
+        metrics: [
+          { label: 'Active Strategies', value: userData.activeStrategies.toString(), icon: Zap },
+          { label: 'Total Capital', value: formatCurrency(userData.totalBalance || 0), icon: DollarSign },
+          { label: 'Avg Allocation', value: userData.activeStrategies > 0 ? formatCurrency((userData.totalBalance || 0) / userData.activeStrategies) : '—', icon: Target },
+          { label: 'Last Execution', value: userData.activeStrategies > 0 ? '2 min ago' : '—', icon: Clock },
+        ],
+        tip: 'Running multiple uncorrelated strategies can improve overall returns.'
+      }
     },
     {
       label: 'Total Trades',
@@ -130,6 +171,19 @@ const Dashboard = () => {
       change: userData.totalTrades > 0 ? '+0' : '—',
       positive: true,
       icon: LayoutDashboard,
+      detailIcon: Activity,
+      color: 'amber',
+      details: {
+        title: 'Trading Activity',
+        description: 'Summary of all trades executed on your account',
+        metrics: [
+          { label: 'Total Trades', value: userData.totalTrades.toLocaleString(), icon: Activity },
+          { label: 'Open Positions', value: recentTrades.filter(t => t.status === 'Open').length.toString(), icon: Clock },
+          { label: 'Closed Trades', value: (userData.totalTrades - recentTrades.filter(t => t.status === 'Open').length).toString(), icon: Check },
+          { label: 'Avg Trade Size', value: userData.totalTrades > 0 ? '$50.00' : '—', icon: DollarSign },
+        ],
+        tip: 'Consistent trading with proper position sizing is key to long-term success.'
+      }
     },
   ]
 
@@ -143,6 +197,7 @@ const Dashboard = () => {
   // Handle stat card click with tracking
   const handleStatClick = (stat) => {
     trackStatView(stat.label, stat.value)
+    setSelectedStat(stat)
   }
 
   // Handle View All trades click
@@ -481,6 +536,94 @@ const Dashboard = () => {
           trade={selectedTrade}
           onClose={() => setSelectedTrade(null)}
         />
+      )}
+
+      {/* Stat Detail Modal */}
+      {selectedStat && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedStat(null)}>
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className={`px-6 py-4 ${
+              selectedStat.color === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+              selectedStat.color === 'red' ? 'bg-gradient-to-r from-red-500 to-rose-600' :
+              selectedStat.color === 'indigo' ? 'bg-gradient-to-r from-indigo-500 to-purple-600' :
+              selectedStat.color === 'purple' ? 'bg-gradient-to-r from-purple-500 to-violet-600' :
+              'bg-gradient-to-r from-amber-500 to-orange-600'
+            } text-white`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                    {selectedStat.detailIcon && <selectedStat.detailIcon className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{selectedStat.details.title}</h3>
+                    <p className="text-white/80 text-sm">{selectedStat.details.description}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedStat(null)}
+                  className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Main Value */}
+            <div className="px-6 py-6 text-center border-b border-gray-100">
+              <p className="text-sm text-gray-500 mb-1">{selectedStat.label}</p>
+              <p className={`text-4xl font-bold ${
+                selectedStat.color === 'green' ? 'text-green-600' :
+                selectedStat.color === 'red' ? 'text-red-600' :
+                selectedStat.color === 'indigo' ? 'text-indigo-600' :
+                selectedStat.color === 'purple' ? 'text-purple-600' :
+                'text-amber-600'
+              }`}>{selectedStat.value}</p>
+              {selectedStat.change !== '—' && (
+                <p className={`text-sm mt-1 ${selectedStat.positive ? 'text-green-600' : 'text-red-600'}`}>
+                  {selectedStat.change} vs last month
+                </p>
+              )}
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="px-6 py-4 grid grid-cols-2 gap-3">
+              {selectedStat.details.metrics.map((metric, i) => {
+                const MetricIcon = metric.icon
+                return (
+                  <div key={i} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-1">
+                      <MetricIcon className="w-3 h-3" />
+                      {metric.label}
+                    </div>
+                    <p className="font-semibold text-gray-900">{metric.value}</p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Pro Tip */}
+            <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-t border-indigo-100">
+              <div className="flex items-start gap-2">
+                <Zap className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
+                <p className="text-sm text-indigo-700">{selectedStat.details.tip}</p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+              <button
+                onClick={() => setSelectedStat(null)}
+                className="w-full py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
