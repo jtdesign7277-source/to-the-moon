@@ -66,7 +66,7 @@ const Header = ({
     setIsAiTyping(true)
     
     try {
-      const response = await api.post('/api/support/chat', {
+      const response = await api.post('/support/chat', {
         message: userMessage,
         history: chatMessages.slice(-10) // Send last 10 messages for context
       })
