@@ -434,6 +434,23 @@ def admin_clear_live_trades():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/onetime-clear-live-7x9k2m', methods=['DELETE'])
+def onetime_clear_live():
+    """One-time endpoint to clear live trades. Will be removed after use."""
+    try:
+        from models import Trade
+        deleted = Trade.query.filter_by(is_paper=False).delete()
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'deleted': deleted,
+            'message': f'Cleared {deleted} live trades. Paper trades preserved.'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 # --------------------------------------------
 # AI Support Chat Routes
 # --------------------------------------------
