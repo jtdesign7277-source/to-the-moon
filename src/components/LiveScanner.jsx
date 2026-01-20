@@ -182,7 +182,7 @@ const formatTime = (date) => {
 
 const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tradingMode = 'paper', isPro = false }) => {
   const [events, setEvents] = useState([])
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)  // Collapsed by default
   const [isPaused, setIsPaused] = useState(false)
   const [selectedOpportunity, setSelectedOpportunity] = useState(null)
   const [stats, setStats] = useState({ scanned: 0, opportunities: 0, watching: 0 })
