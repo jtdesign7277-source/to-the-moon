@@ -709,18 +709,44 @@ def get_user_dashboard():
         simulate_strategy_activity(strategy)
     db.session.commit()
     
+    # Get manual trades from database
+    manual_trades = Trade.query.filter_by(user_id=user.id).order_by(Trade.created_at.desc()).limit(20).all()
+    
     # Calculate totals from deployed strategies
-    total_pnl = sum(s.total_pnl or 0 for s in deployed_strategies)
-    total_trades = sum(s.total_trades or 0 for s in deployed_strategies)
-    total_wins = sum(s.winning_trades or 0 for s in deployed_strategies)
+    strategy_pnl = sum(s.total_pnl or 0 for s in deployed_strategies)
+    strategy_trades = sum(s.total_trades or 0 for s in deployed_strategies)
+    strategy_wins = sum(s.winning_trades or 0 for s in deployed_strategies)
     active_strategies = len([s for s in deployed_strategies if s.status == 'running'])
     total_capital = sum(s.allocated_capital or 0 for s in deployed_strategies)
+    
+    # Add manual trade stats
+    manual_trade_count = len(manual_trades)
+    manual_wins = sum(1 for t in manual_trades if t.status == 'Won')
+    
+    total_pnl = strategy_pnl
+    total_trades = strategy_trades + manual_trade_count
+    total_wins = strategy_wins + manual_wins
     
     # Calculate win rate
     win_rate = (total_wins / total_trades * 100) if total_trades > 0 else 0
     
-    # Generate recent trades from deployed strategies
+    # Start with manual trades (real data from database)
     recent_trades = []
+    for trade in manual_trades:
+        recent_trades.append({
+            'id': trade.id,
+            'pair': trade.pair,
+            'type': trade.trade_type,
+            'entry': trade.entry,
+            'exit': trade.exit,
+            'pnl': trade.pnl,
+            'status': trade.status,
+            'strategy': 'Manual Trade',
+            'source': 'scanner',
+            'timestamp': trade.created_at.isoformat() if trade.created_at else None,
+        })
+    
+    # Add simulated trades from deployed strategies
     markets = ['Bitcoin YES/NO', 'ETH > $4000', 'Trump 2028', 'Fed Rate Cut', 'Super Bowl', 'S&P 500 Up', 'Gold > $2500']
     
     for strategy in deployed_strategies:
@@ -762,11 +788,11 @@ def get_user_dashboard():
                     'pnl': pnl_str,
                     'status': status,
                     'strategy': strategy.name,
+                    'source': 'strategy',
                     'hoursAgo': hours_ago,
                 })
     
-    # Sort by recency and limit
-    recent_trades.sort(key=lambda x: x.get('hoursAgo', 0))
+    # Keep manual trades first, then add strategy trades, limit to 10
     recent_trades = recent_trades[:10]
     
     # Generate performance data (last 7 days)

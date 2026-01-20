@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
-import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent } from 'lucide-react'
+import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle } from 'lucide-react'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
   const [position, setPosition] = useState('yes') // 'yes' or 'no'
   const [amount, setAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   // Close on escape key
   useEffect(() => {
@@ -21,19 +25,75 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
     if (!amount || parseFloat(amount) <= 0) return
     
     setIsSubmitting(true)
+    setSubmitError(null)
     
-    // Simulate order submission
-    await new Promise(resolve => setTimeout(resolve, 800))
+    const entryPrice = (opportunity.price / 100).toFixed(2)
+    const exitPrice = position === 'yes' 
+      ? '1.00'  // Max payout for YES
+      : '0.00'  // Max payout for NO
     
-    onSubmit?.({
-      ...opportunity,
-      position,
-      amount: parseFloat(amount),
-      timestamp: new Date().toISOString()
-    })
-    
-    setIsSubmitting(false)
-    onClose()
+    // Calculate potential P&L
+    const shares = parseFloat(amount) / (opportunity.price / 100)
+    const potentialPnl = position === 'yes'
+      ? (shares * 1.00 - parseFloat(amount)).toFixed(2)
+      : (parseFloat(amount) - shares * 0).toFixed(2)
+
+    const tradeData = {
+      pair: `${opportunity.market.substring(0, 40)}${opportunity.market.length > 40 ? '...' : ''} (${opportunity.platform})`,
+      type: position === 'yes' ? 'Long' : 'Short',
+      entry: `$${entryPrice}`,
+      exit: 'Pending',
+      pnl: `$${parseFloat(amount).toFixed(2)}`,
+      status: 'Open',
+      platform: opportunity.platform,
+      strategy: opportunity.strategy,
+      amount: parseFloat(amount)
+    }
+
+    try {
+      const token = localStorage.getItem('ttm_access_token')
+      
+      if (!token) {
+        setSubmitError('Please log in to place trades')
+        setIsSubmitting(false)
+        return
+      }
+
+      const response = await fetch(`${API_URL}/api/user/trades`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tradeData)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to place trade')
+      }
+
+      const result = await response.json()
+      
+      setSubmitSuccess(true)
+      onSubmit?.({
+        ...opportunity,
+        ...tradeData,
+        position,
+        timestamp: new Date().toISOString()
+      })
+      
+      // Close after showing success
+      setTimeout(() => {
+        setIsSubmitting(false)
+        onClose()
+      }, 1500)
+      
+    } catch (error) {
+      console.error('Failed to place trade:', error)
+      setSubmitError(error.message || 'Failed to place trade. Please try again.')
+      setIsSubmitting(false)
+    }
   }
 
   const getPlatformColor = (platform) => {
@@ -198,39 +258,56 @@ const TradeTicket = ({ opportunity, onClose, onSubmit }) => {
               Connect a real account to place live trades.
             </p>
           </div>
+
+          {/* Error Display */}
+          {submitError && (
+            <div className="flex items-start gap-2 text-red-700 bg-red-50 rounded-lg p-3">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <p className="text-xs">{submitError}</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="p-4 bg-gray-50 border-t border-gray-100 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 px-4 text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!amount || parseFloat(amount) <= 0 || isSubmitting}
-            className={`flex-1 py-3 px-4 font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${
-              !amount || parseFloat(amount) <= 0 || isSubmitting
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : position === 'yes'
-                  ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
-                  : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Placing...
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                Place Trade
-              </>
-            )}
-          </button>
+          {submitSuccess ? (
+            <div className="flex-1 py-3 px-4 bg-green-500 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Trade Placed Successfully!
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 px-4 text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!amount || parseFloat(amount) <= 0 || isSubmitting}
+                className={`flex-1 py-3 px-4 font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  !amount || parseFloat(amount) <= 0 || isSubmitting
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : position === 'yes'
+                      ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
+                      : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Placing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Place Trade
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         {/* External Link */}
