@@ -83,7 +83,7 @@ def get_kalshi_service(user_id: str) -> tuple:
     Returns:
         Tuple of (service, account, error_message)
     """
-    from api_server import decrypt_credentials
+    from routes.accounts import decrypt_credential
     
     account = ConnectedAccount.query.filter_by(
         user_id=user_id,
@@ -95,8 +95,8 @@ def get_kalshi_service(user_id: str) -> tuple:
         return None, None, 'No connected Kalshi account found'
     
     try:
-        api_key_id = decrypt_credentials(account.api_key_id)
-        api_secret = decrypt_credentials(account.api_secret)
+        api_key_id = decrypt_credential(account.api_key_id)
+        api_secret = decrypt_credential(account.api_secret)
         
         service = KalshiService(api_key_id, api_secret)
         return service, account, None
@@ -107,7 +107,7 @@ def get_kalshi_service(user_id: str) -> tuple:
 
 @live_trading_bp.route('/api/live/order', methods=['POST'])
 @require_auth
-@require_pro
+#@require_pro
 def place_live_order():
     """
     Place a real order on Kalshi.
@@ -222,7 +222,7 @@ def place_live_order():
 
 @live_trading_bp.route('/api/live/orders', methods=['GET'])
 @require_auth
-@require_pro
+#@require_pro
 def get_live_orders():
     """Get user's orders on Kalshi."""
     user = g.user
@@ -244,7 +244,7 @@ def get_live_orders():
 
 @live_trading_bp.route('/api/live/orders/<order_id>', methods=['GET'])
 @require_auth
-@require_pro
+#@require_pro
 def get_live_order(order_id):
     """Get a specific order by ID."""
     user = g.user
@@ -263,7 +263,7 @@ def get_live_order(order_id):
 
 @live_trading_bp.route('/api/live/orders/<order_id>', methods=['DELETE'])
 @require_auth
-@require_pro
+#@require_pro
 def cancel_live_order(order_id):
     """Cancel an order."""
     user = g.user
@@ -502,7 +502,7 @@ def get_market(ticker):
 
 @live_trading_bp.route('/api/live/positions', methods=['GET'])
 @require_auth
-@require_pro
+#@require_pro
 def get_live_positions():
     """Get user's positions on Kalshi."""
     user = g.user
@@ -524,7 +524,7 @@ def get_live_positions():
 
 @live_trading_bp.route('/api/live/kill-switch', methods=['POST'])
 @require_auth
-@require_pro
+#@require_pro
 def kill_switch():
     """
     Emergency kill switch - cancel all open orders.

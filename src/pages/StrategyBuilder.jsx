@@ -495,9 +495,8 @@ const StrategyBuilder = () => {
 
   // Sync deployedStrategies to localStorage whenever it changes
   useEffect(() => {
-    if (deployedStrategies.length > 0) {
-      localStorage.setItem('ttm_deployed_strategies', JSON.stringify(deployedStrategies))
-    }
+    // Always save to localStorage, even when empty (so deletions persist)
+    localStorage.setItem('ttm_deployed_strategies', JSON.stringify(deployedStrategies))
   }, [deployedStrategies])
 
   // Fetch deployed strategies on mount

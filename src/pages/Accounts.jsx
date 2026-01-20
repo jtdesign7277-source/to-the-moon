@@ -377,7 +377,20 @@ const Accounts = () => {
       }
     } catch (error) {
       console.error('Failed to connect account:', error)
-      setConnectionError(error.message || 'Failed to connect. Please check your credentials.')
+      // Check if the error is "already connected" - treat as success and refresh
+      const errorMessage = error.message || ''
+      if (errorMessage.toLowerCase().includes('already connected')) {
+        await fetchConnectedAccounts()
+        setConnectionSuccess(true)
+        setTimeout(() => {
+          setShowAddAccountModal(false)
+          setSelectedPlatform(null)
+          setConnectionSuccess(false)
+          setApiCredentials({})
+        }, 1500)
+      } else {
+        setConnectionError(errorMessage || 'Failed to connect. Please check your credentials.')
+      }
     } finally {
       setIsConnecting(false)
     }
