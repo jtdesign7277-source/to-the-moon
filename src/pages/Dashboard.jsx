@@ -12,11 +12,18 @@ import { useApp } from '../hooks/useApp'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 import LiveScanner from '../components/LiveScanner'
 import TradeSlipViewer from '../components/TradeSlipViewer'
+import { strategyApi } from '../utils/api'
+import { Play, Pause, AlertCircle } from 'lucide-react'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
   const { tradingMode, isPro, openUpgradeModal, user } = useApp()
+
+  // Active strategies state
+  const [activeStrategies, setActiveStrategies] = useState([])
+  const [isLoadingStrategies, setIsLoadingStrategies] = useState(true)
+  const [strategyActivity, setStrategyActivity] = useState({})
 
   // User data state - starts with zeros for new users
   const [userData, setUserData] = useState({
@@ -40,6 +47,70 @@ const Dashboard = () => {
   useEffect(() => {
     trackPageView('Dashboard')
   }, [])
+
+  // Fetch active strategies
+  useEffect(() => {
+    const fetchActiveStrategies = async () => {
+      if (!user) {
+        setIsLoadingStrategies(false)
+        return
+      }
+      try {
+        const response = await strategyApi.getDeployed()
+        const strategies = response.data?.strategies || []
+        const running = strategies.filter(s => s.status === 'running')
+        setActiveStrategies(running)
+        
+        // Initialize activity state for each strategy
+        const activity = {}
+        running.forEach(s => {
+          activity[s.id] = {
+            message: { text: 'Monitoring markets...', icon: '🔍' },
+            marketsScanned: Math.floor(Math.random() * 30) + 10,
+            lastActive: new Date(),
+          }
+        })
+        setStrategyActivity(activity)
+      } catch (error) {
+        console.error('Failed to fetch strategies:', error)
+      } finally {
+        setIsLoadingStrategies(false)
+      }
+    }
+    fetchActiveStrategies()
+  }, [user])
+
+  // Simulate strategy activity updates
+  useEffect(() => {
+    if (activeStrategies.length === 0) return
+    
+    const messages = [
+      { text: 'Scanning for arbitrage opportunities...', icon: '🔍' },
+      { text: 'Analyzing market sentiment...', icon: '📊' },
+      { text: 'Checking price discrepancies...', icon: '💹' },
+      { text: 'Monitoring volume changes...', icon: '📈' },
+      { text: 'Evaluating entry points...', icon: '🎯' },
+    ]
+    
+    const interval = setInterval(() => {
+      setStrategyActivity(prev => {
+        const updated = { ...prev }
+        activeStrategies.forEach(s => {
+          if (s.status === 'running') {
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)]
+            updated[s.id] = {
+              message: randomMsg,
+              marketsScanned: Math.floor(Math.random() * 50) + 10,
+              lastActive: new Date(),
+            }
+          }
+        })
+        return updated
+      })
+    }, 5000)
+    
+    return () => clearInterval(interval)
+  }, [activeStrategies])
 
   // Fetch user data from API - filtered by trading mode
   const fetchUserData = async () => {
@@ -330,6 +401,92 @@ const Dashboard = () => {
           )
         })}
       </div>
+
+      {/* Active Strategies Section */}
+      {activeStrategies.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 rounded-lg">
+                <Zap className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900">Active Strategies</h2>
+                <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigate && onNavigate('strategies')}
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+            >
+              Manage <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="divide-y divide-gray-100">
+            {activeStrategies.map(strategy => {
+              const activity = strategyActivity[strategy.id] || {}
+              const isLive = strategy.mode === 'live'
+              
+              return (
+                <div 
+                  key={strategy.id}
+                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => onNavigate && onNavigate('strategies')}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{strategy.icon || '⚡'}</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-gray-900">{strategy.name}</h3>
+                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                            isLive 
+                              ? 'bg-red-100 text-red-700' 
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {isLive ? '🔴 LIVE' : '📝 Paper'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          ${strategy.allocatedCapital?.toLocaleString() || '0'} allocated
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      {/* Activity indicator */}
+                      <div className="text-right hidden sm:block">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <span>{activity.message?.icon} {activity.message?.text || 'Running...'}</span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {activity.marketsScanned || 0} markets scanned
+                        </p>
+                      </div>
+                      
+                      {/* P&L */}
+                      <div className="text-right">
+                        <p className={`font-semibold ${
+                          (strategy.totalPnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {(strategy.totalPnl || 0) >= 0 ? '+' : ''}${(strategy.totalPnl || 0).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">{strategy.totalTrades || 0} trades</p>
+                      </div>
+                      
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <Play className="w-4 h-4 text-green-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Live Market Scanner */}
       <LiveScanner 

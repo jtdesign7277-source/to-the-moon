@@ -97,10 +97,10 @@ const NAV_ITEMS = [
 ]
 
 // Page renderer component
-const PageRenderer = ({ currentPage, legalTab }) => {
+const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
   switch (currentPage) {
     case 'dashboard':
-      return <Dashboard />
+      return <Dashboard onNavigate={onNavigate} />
     case 'history':
       return <TradeHistory />
     case 'accounts':
@@ -118,7 +118,7 @@ const PageRenderer = ({ currentPage, legalTab }) => {
     case 'legal':
       return <Legal initialTab={legalTab} />
     default:
-      return <Dashboard />
+      return <Dashboard onNavigate={onNavigate} />
   }
 }
 
@@ -261,7 +261,7 @@ const AppContent = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6 flex-1">
-        <PageRenderer currentPage={currentPage} legalTab={legalTab} />
+        <PageRenderer currentPage={currentPage} legalTab={legalTab} onNavigate={handleNavigation} />
       </main>
 
       {/* Footer with Legal Links */}
