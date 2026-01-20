@@ -124,6 +124,8 @@ def run_auto_migrations():
         "ALTER TABLE trades ADD COLUMN IF NOT EXISTS platform VARCHAR(50)",
         # Add amount column to trades table
         "ALTER TABLE trades ADD COLUMN IF NOT EXISTS amount FLOAT",
+"ALTER TABLE connected_accounts ALTER COLUMN api_secret TYPE TEXT",
+        "ALTER TABLE connected_accounts ALTER COLUMN api_key_id TYPE TEXT",
     ]
     
     for sql in migrations:
