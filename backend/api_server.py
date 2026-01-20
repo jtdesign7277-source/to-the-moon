@@ -1010,10 +1010,16 @@ def get_user_dashboard():
         simulate_strategy_activity(strategy)
     db.session.commit()
     
-    # Get manual trades from database - filter by paper/live mode
-    manual_trades = Trade.query.filter_by(user_id=user.id).filter(
-        (Trade.is_paper == is_paper) | (Trade.is_paper == None)
-    ).order_by(Trade.created_at.desc()).limit(20).all()
+    # Get manual trades from database - STRICTLY filter by paper/live mode
+    # For live mode: only trades where is_paper=False
+    # For paper mode: trades where is_paper=True OR is_paper=None (legacy)
+    if is_paper:
+        manual_trades = Trade.query.filter_by(user_id=user.id).filter(
+            (Trade.is_paper == True) | (Trade.is_paper == None)
+        ).order_by(Trade.created_at.desc()).limit(20).all()
+    else:
+        # Live mode - ONLY live trades, no legacy data
+        manual_trades = Trade.query.filter_by(user_id=user.id, is_paper=False).order_by(Trade.created_at.desc()).limit(20).all()
     
     # Calculate totals from deployed strategies
     strategy_pnl = sum(s.total_pnl or 0 for s in deployed_strategies)
@@ -1022,11 +1028,12 @@ def get_user_dashboard():
     active_strategies = len([s for s in deployed_strategies if s.status == 'running'])
     total_capital = sum(s.allocated_capital or 0 for s in deployed_strategies)
     
-    # Add manual trade stats
+    # Add manual trade stats - calculate P&L from actual trades
     manual_trade_count = len(manual_trades)
     manual_wins = sum(1 for t in manual_trades if t.status == 'Won')
+    manual_pnl = sum(t.pnl or 0 for t in manual_trades)
     
-    total_pnl = strategy_pnl
+    total_pnl = strategy_pnl + manual_pnl
     total_trades = strategy_trades + manual_trade_count
     total_wins = strategy_wins + manual_wins
     
