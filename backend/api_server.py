@@ -413,6 +413,27 @@ def sentry_test():
         })
 
 
+@app.route('/api/admin/clear-live-trades', methods=['DELETE'])
+def admin_clear_live_trades():
+    """Admin endpoint to clear all live trades. Requires admin key."""
+    admin_key = request.headers.get('X-Admin-Key')
+    if admin_key != os.environ.get('ADMIN_KEY', 'dev-admin-key'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        from models import Trade
+        deleted = Trade.query.filter_by(is_paper=False).delete()
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'deleted': deleted,
+            'message': f'Cleared {deleted} live trades. Paper trades preserved.'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
 # --------------------------------------------
 # AI Support Chat Routes
 # --------------------------------------------
