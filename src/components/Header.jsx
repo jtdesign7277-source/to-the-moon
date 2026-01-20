@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Sun, Moon } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 
 const Header = ({
@@ -19,18 +19,62 @@ const Header = ({
   } = useApp()
 
   const [exploreOpen, setExploreOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [supportMessage, setSupportMessage] = useState('')
+  const [suggestionMessage, setSuggestionMessage] = useState('')
+  const [messageSent, setMessageSent] = useState(false)
+  const [suggestionSent, setSuggestionSent] = useState(false)
+  const [activeTab, setActiveTab] = useState('profile') // 'profile', 'support', 'suggest'
   const exploreRef = useRef(null)
+  const profileRef = useRef(null)
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (exploreRef.current && !exploreRef.current.contains(event.target)) {
         setExploreOpen(false)
       }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const handleSendSupport = () => {
+    if (!supportMessage.trim()) return
+    // Send as email - opens mail client
+    const subject = encodeURIComponent('Support Request - To The Moon')
+    const body = encodeURIComponent(`From: ${user?.email}\n\nMessage:\n${supportMessage}`)
+    window.open(`mailto:support@tothemoon.app?subject=${subject}&body=${body}`)
+    setSupportMessage('')
+    setMessageSent(true)
+    setTimeout(() => setMessageSent(false), 3000)
+  }
+
+  const handleSendSuggestion = () => {
+    if (!suggestionMessage.trim()) return
+    // Send as email - opens mail client
+    const subject = encodeURIComponent('Feature Suggestion - To The Moon')
+    const body = encodeURIComponent(`From: ${user?.email}\n\nSuggestion:\n${suggestionMessage}`)
+    window.open(`mailto:suggestions@tothemoon.app?subject=${subject}&body=${body}`)
+    setSuggestionMessage('')
+    setSuggestionSent(true)
+    setTimeout(() => setSuggestionSent(false), 3000)
+  }
+
+  // Format member since date
+  const getMemberSince = () => {
+    if (user?.created_at) {
+      return new Date(user.created_at).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    }
+    return 'January 2026'
+  }
 
   const handleNavigation = (pageId, requiresPro) => {
     if (requiresPro && !isPro) {
@@ -212,28 +256,250 @@ const Header = ({
 
             {/* User Menu */}
             {user && (
-              <div className="relative group">
-                <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-indigo-600" />
+              <div className="relative" ref={profileRef}>
+                <button 
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+                      {(user.username || user.email)?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                   </div>
-                  <span className="hidden lg:block text-sm font-medium text-gray-700 max-w-[100px] truncate">
-                    {user.username || user.email?.split('@')[0]}
-                  </span>
+                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
-                {/* Dropdown */}
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900 truncate">{user.username}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+
+                {/* Enhanced Profile Dropdown */}
+                <div 
+                  className={`absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                    profileOpen 
+                      ? 'opacity-100 scale-100 translate-y-0' 
+                      : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  }`}
+                >
+                  {/* Header with user info */}
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {(user.username || user.email)?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold truncate">{user.username || user.email?.split('@')[0]}</p>
+                        <p className="text-indigo-200 text-sm truncate">{user.email}</p>
+                      </div>
+                      <button 
+                        onClick={() => setProfileOpen(false)}
+                        className="p-1 text-white/60 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={onLogout}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Log Out
-                  </button>
+
+                  {/* Tab Navigation */}
+                  <div className="flex border-b border-gray-100">
+                    <button
+                      onClick={() => setActiveTab('profile')}
+                      className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
+                        activeTab === 'profile' 
+                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <User className="w-3.5 h-3.5 mx-auto mb-1" />
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('support')}
+                      className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
+                        activeTab === 'support' 
+                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 mx-auto mb-1" />
+                      Support
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('suggest')}
+                      className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
+                        activeTab === 'suggest' 
+                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      <Lightbulb className="w-3.5 h-3.5 mx-auto mb-1" />
+                      Suggest
+                    </button>
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="p-4">
+                    {/* Profile Tab */}
+                    {activeTab === 'profile' && (
+                      <div className="space-y-4 animate-in fade-in duration-200">
+                        <div>
+                          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <User className="w-4 h-4 text-indigo-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Full Name</p>
+                                <p className="text-sm font-medium text-gray-900">{user.username || 'Not set'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <Mail className="w-4 h-4 text-purple-600" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs text-gray-500">Email Address</p>
+                                <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                <Calendar className="w-4 h-4 text-green-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Member Since</p>
+                                <p className="text-sm font-medium text-gray-900">{getMemberSince()}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Subscription Status */}
+                        <div className={`p-3 rounded-lg ${isPro ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100' : 'bg-gray-50'}`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600' : 'text-gray-400'}`} />
+                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-700' : 'text-gray-600'}`}>
+                                {isPro ? 'Pro Member' : 'Free Plan'}
+                              </span>
+                            </div>
+                            {!isPro && (
+                              <button
+                                onClick={() => { setProfileOpen(false); openUpgradeModal(); }}
+                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                              >
+                                Upgrade →
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Support Tab */}
+                    {activeTab === 'support' && (
+                      <div className="space-y-3 animate-in fade-in duration-200">
+                        <div className="bg-indigo-50 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <MessageCircle className="w-4 h-4 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-indigo-900">Support Chat</p>
+                              <p className="text-xs text-indigo-700 mt-0.5">We typically reply within 24 hours</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-600 mb-2">
+                            <span className="font-medium">Hi! 👋</span> Welcome to To The Moon support. How can I help you today?
+                          </p>
+                          <p className="text-[10px] text-gray-400">Support Team</p>
+                        </div>
+
+                        {messageSent && (
+                          <div className="bg-green-50 text-green-700 text-xs p-2 rounded-lg text-center">
+                            ✓ Opening email client...
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={supportMessage}
+                            onChange={(e) => setSupportMessage(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendSupport()}
+                            placeholder="Type your message..."
+                            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                          <button
+                            onClick={handleSendSupport}
+                            disabled={!supportMessage.trim()}
+                            className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Suggest Tab */}
+                    {activeTab === 'suggest' && (
+                      <div className="space-y-3 animate-in fade-in duration-200">
+                        <div className="bg-amber-50 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <Lightbulb className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-amber-900">Feature Suggestions</p>
+                              <p className="text-xs text-amber-700 mt-0.5">Help us build what you need!</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-xs text-gray-600">
+                          Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of To The Moon.
+                        </p>
+
+                        {suggestionSent && (
+                          <div className="bg-green-50 text-green-700 text-xs p-2 rounded-lg text-center">
+                            ✓ Opening email client...
+                          </div>
+                        )}
+
+                        <textarea
+                          value={suggestionMessage}
+                          onChange={(e) => setSuggestionMessage(e.target.value)}
+                          placeholder="Describe your feature idea..."
+                          rows={3}
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                        />
+                        
+                        <button
+                          onClick={handleSendSuggestion}
+                          disabled={!suggestionMessage.trim()}
+                          className="w-full py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Send className="w-4 h-4" />
+                          Submit Suggestion
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sign Out Button */}
+                  <div className="border-t border-gray-100 p-3">
+                    <button
+                      onClick={() => { setProfileOpen(false); onLogout(); }}
+                      className="w-full py-2.5 text-red-600 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
