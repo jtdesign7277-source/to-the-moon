@@ -285,25 +285,198 @@ def cancel_live_order(order_id):
 @live_trading_bp.route('/api/live/markets', methods=['GET'])
 @require_auth
 def get_markets():
-    """Get open markets (doesn't require connected account)."""
-    from services.kalshi_service import KalshiService
-    import requests
+    """Get open markets with optional search."""
+    user = g.user
     
-    # Public endpoint - no auth needed
+    query = request.args.get('q')
+    limit = min(int(request.args.get('limit', 50)), 100)
+    
+    # Try to use connected Kalshi account if available
+    service, account, error = get_kalshi_service(user.id)
+    
+    if service:
+        # Use authenticated search
+        success, result = service.search_markets(query=query, limit=limit)
+        if success:
+            return jsonify({
+                'markets': result.get('markets', []),
+                'count': result.get('count', 0)
+            })
+    
+    # Fall back to public API
+    import requests
     try:
         response = requests.get(
             'https://api.elections.kalshi.com/trade-api/v2/markets',
-            params={'limit': 50, 'status': 'open'},
+            params={'limit': limit, 'status': 'open'},
             timeout=10
         )
         
         if response.status_code == 200:
             data = response.json()
-            return jsonify({'markets': data.get('markets', [])})
+            markets = data.get('markets', [])
+            
+            # Filter by query if provided
+            if query and markets:
+                query_lower = query.lower()
+                keywords = [kw.strip() for kw in query_lower.split() if len(kw.strip()) > 2]
+                markets = [
+                    m for m in markets
+                    if all(kw in (m.get('title', '') + m.get('subtitle', '')).lower() for kw in keywords)
+                ]
+            
+            return jsonify({'markets': markets, 'count': len(markets)})
         else:
             return jsonify({'error': 'Failed to fetch markets'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@live_trading_bp.route('/api/live/resolve-ticker', methods=['POST'])
+@require_auth
+def resolve_ticker():
+    """
+    Resolve a market title to an actual Kalshi ticker.
+    
+    Request body:
+    {
+        "title": "Will Bitcoin hit $100k by January 2026?",
+        "platform": "kalshi"  # optional, defaults to kalshi
+    }
+    
+    Returns the best matching ticker and alternatives.
+    """
+    user = g.user
+    data = request.get_json() or {}
+    
+    title = data.get('title')
+    platform = data.get('platform', 'kalshi')
+    
+    if not title:
+        return jsonify({'error': 'Market title is required'}), 400
+    
+    # Get Kalshi service for authenticated search
+    service, account, error = get_kalshi_service(user.id)
+    
+    if not service:
+        # Try public API fallback
+        import requests
+        try:
+            response = requests.get(
+                'https://api.elections.kalshi.com/trade-api/v2/markets',
+                params={'limit': 50, 'status': 'open'},
+                timeout=10
+            )
+            
+            if response.status_code != 200:
+                return jsonify({'error': 'Failed to search markets'}), 500
+            
+            data = response.json()
+            markets = data.get('markets', [])
+            
+            # Manual fuzzy search
+            title_lower = title.lower()
+            keywords = [kw.strip() for kw in title_lower.split() if len(kw.strip()) > 2]
+            
+            scored = []
+            for m in markets:
+                m_title = (m.get('title', '') or '').lower()
+                m_subtitle = (m.get('subtitle', '') or '').lower()
+                searchable = f"{m_title} {m_subtitle}"
+                
+                if all(kw in searchable for kw in keywords):
+                    # Score by how many keywords match
+                    score = sum(1 for kw in keywords if kw in searchable) * 20
+                    if title_lower in m_title:
+                        score += 40
+                    scored.append((score, m))
+            
+            scored.sort(key=lambda x: x[0], reverse=True)
+            
+            if not scored or scored[0][0] < 20:
+                return jsonify({
+                    'success': False,
+                    'error': f'No markets found matching: {title}',
+                    'suggestions': [
+                        {'ticker': m.get('ticker'), 'title': m.get('title')}
+                        for _, m in scored[:5]
+                    ] if scored else []
+                }), 404
+            
+            best = scored[0][1]
+            return jsonify({
+                'success': True,
+                'ticker': best.get('ticker'),
+                'title': best.get('title'),
+                'subtitle': best.get('subtitle'),
+                'yes_bid': best.get('yes_bid'),
+                'no_bid': best.get('no_bid'),
+                'yes_ask': best.get('yes_ask'),
+                'no_ask': best.get('no_ask'),
+                'volume': best.get('volume'),
+                'alternatives': [
+                    {'ticker': m.get('ticker'), 'title': m.get('title'), 'score': s}
+                    for s, m in scored[1:4]
+                ]
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    # Use authenticated service with built-in resolve_ticker
+    success, result = service.resolve_ticker(title, platform)
+    
+    if success:
+        return jsonify({
+            'success': True,
+            **result
+        })
+    else:
+        return jsonify({
+            'success': False,
+            **result
+        }), 404
+
+
+@live_trading_bp.route('/api/live/search-markets', methods=['GET'])
+@require_auth
+def search_markets():
+    """
+    Search for markets by query.
+    
+    Query params:
+        q: Search query
+        status: Market status (open, closed, settled)
+        limit: Max results
+    """
+    user = g.user
+    
+    query = request.args.get('q', '')
+    status = request.args.get('status', 'open')
+    limit = min(int(request.args.get('limit', 30)), 100)
+    
+    service, account, error = get_kalshi_service(user.id)
+    
+    if service:
+        success, result = service.search_markets(
+            query=query,
+            status=status,
+            limit=limit
+        )
+        
+        if success:
+            return jsonify({
+                'markets': result.get('markets', []),
+                'count': result.get('count', 0)
+            })
+        else:
+            return jsonify({'error': result.get('error', 'Search failed')}), 500
+    
+    # Fallback - no connected account
+    return jsonify({
+        'error': 'Connect a Kalshi account for market search',
+        'markets': []
+    }), 400
 
 
 @live_trading_bp.route('/api/live/market/<ticker>', methods=['GET'])

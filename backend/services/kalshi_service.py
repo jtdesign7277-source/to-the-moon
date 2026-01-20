@@ -452,6 +452,208 @@ class KalshiService:
             return False, {'error': data}
 
 
+    # ============================================
+    # MARKET SEARCH & TICKER LOOKUP
+    # ============================================
+    
+    def search_markets(
+        self, 
+        query: str = None,
+        event_ticker: str = None,
+        series_ticker: str = None,
+        status: str = 'open',
+        limit: int = 50
+    ) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Search for markets by query string, event, or series.
+        
+        Args:
+            query: Text search query (searches title and description)
+            event_ticker: Filter by event ticker
+            series_ticker: Filter by series ticker
+            status: Market status ('open', 'closed', 'settled')
+            limit: Max results to return
+            
+        Returns:
+            Tuple of (success: bool, markets_data: dict)
+        """
+        import urllib.parse
+        
+        params = [f'limit={limit}']
+        if status:
+            params.append(f'status={status}')
+        if event_ticker:
+            params.append(f'event_ticker={event_ticker}')
+        if series_ticker:
+            params.append(f'series_ticker={series_ticker}')
+        
+        endpoint = '/markets?' + '&'.join(params)
+        success, data = self._make_request('GET', endpoint)
+        
+        if not success:
+            return False, {'error': data}
+        
+        markets = data.get('markets', [])
+        
+        # If query provided, filter by title/subtitle matching
+        if query and markets:
+            query_lower = query.lower()
+            # Split query into keywords for flexible matching
+            keywords = [kw.strip() for kw in query_lower.split() if len(kw.strip()) > 2]
+            
+            filtered = []
+            for market in markets:
+                title = (market.get('title', '') or '').lower()
+                subtitle = (market.get('subtitle', '') or '').lower()
+                event_title = (market.get('event_title', '') or '').lower()
+                searchable = f"{title} {subtitle} {event_title}"
+                
+                # Check if all keywords appear in the searchable text
+                if all(kw in searchable for kw in keywords):
+                    filtered.append(market)
+            
+            markets = filtered
+        
+        return True, {
+            'markets': markets,
+            'count': len(markets),
+            'cursor': data.get('cursor')
+        }
+    
+    def resolve_ticker(
+        self, 
+        market_title: str,
+        platform: str = 'kalshi'
+    ) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Resolve a market title to an actual ticker.
+        Uses fuzzy matching to find the best matching market.
+        
+        Args:
+            market_title: The human-readable market title
+            platform: The platform (currently only 'kalshi' supported)
+            
+        Returns:
+            Tuple of (success: bool, result: dict with ticker or error)
+        """
+        if platform.lower() != 'kalshi':
+            return False, {'error': f'Platform {platform} not supported for ticker resolution'}
+        
+        # Search for markets matching the title
+        success, data = self.search_markets(query=market_title, status='open', limit=20)
+        
+        if not success:
+            return False, data
+        
+        markets = data.get('markets', [])
+        
+        if not markets:
+            return False, {'error': f'No open markets found matching: {market_title}'}
+        
+        # Score markets by how well they match the title
+        title_lower = market_title.lower()
+        scored_markets = []
+        
+        for market in markets:
+            market_title_lower = (market.get('title', '') or '').lower()
+            subtitle = (market.get('subtitle', '') or '').lower()
+            
+            # Calculate simple match score
+            score = 0
+            
+            # Exact title match gets highest score
+            if title_lower == market_title_lower:
+                score = 100
+            elif title_lower in market_title_lower or market_title_lower in title_lower:
+                score = 80
+            else:
+                # Count matching words
+                title_words = set(title_lower.split())
+                market_words = set(market_title_lower.split())
+                common = title_words & market_words
+                if common:
+                    score = len(common) / max(len(title_words), len(market_words)) * 60
+            
+            # Boost if query appears in subtitle
+            if title_lower in subtitle:
+                score += 10
+            
+            scored_markets.append((score, market))
+        
+        # Sort by score descending
+        scored_markets.sort(key=lambda x: x[0], reverse=True)
+        
+        if scored_markets[0][0] < 20:
+            # No good match found
+            return False, {
+                'error': f'No good match found for: {market_title}',
+                'suggestions': [
+                    {
+                        'ticker': m.get('ticker'),
+                        'title': m.get('title'),
+                        'yes_price': m.get('yes_bid'),
+                        'no_price': m.get('no_bid'),
+                    }
+                    for _, m in scored_markets[:5]
+                ]
+            }
+        
+        best_match = scored_markets[0][1]
+        
+        return True, {
+            'ticker': best_match.get('ticker'),
+            'title': best_match.get('title'),
+            'subtitle': best_match.get('subtitle'),
+            'yes_price': best_match.get('yes_bid'),
+            'no_price': best_match.get('no_bid'),
+            'yes_ask': best_match.get('yes_ask'),
+            'no_ask': best_match.get('no_ask'),
+            'volume': best_match.get('volume'),
+            'open_interest': best_match.get('open_interest'),
+            'close_time': best_match.get('close_time'),
+            'status': best_match.get('status'),
+            'match_score': scored_markets[0][0],
+            'alternatives': [
+                {
+                    'ticker': m.get('ticker'),
+                    'title': m.get('title'),
+                    'score': s,
+                }
+                for s, m in scored_markets[1:4] if s > 10
+            ]
+        }
+    
+    def get_events(self, status: str = 'open', limit: int = 50) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get list of events (groups of related markets).
+        
+        Returns:
+            Tuple of (success: bool, events_data: dict)
+        """
+        endpoint = f'/events?status={status}&limit={limit}'
+        success, data = self._make_request('GET', endpoint)
+        
+        if success:
+            return True, {
+                'events': data.get('events', []),
+                'cursor': data.get('cursor')
+            }
+        else:
+            return False, {'error': data}
+    
+    def get_event_markets(self, event_ticker: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get all markets for a specific event.
+        
+        Args:
+            event_ticker: The event ticker
+            
+        Returns:
+            Tuple of (success: bool, markets_data: dict)
+        """
+        return self.search_markets(event_ticker=event_ticker, limit=100)
+
+
 def connect_kalshi_account(api_key_id: str, private_key_pem: str) -> Tuple[bool, Dict[str, Any]]:
     """
     Connect and verify a Kalshi account.

@@ -300,56 +300,89 @@ const StrategyBuilder = () => {
         // For safety, we use smaller position sizes for automated trades
         const safeContracts = Math.min(contracts, 10) // Max 10 contracts per auto-trade
         
-        // TODO: In production, you'd map market titles to real tickers
-        // For now, we'll log that this would be a live trade
-        console.log(`[LIVE TRADE] Would execute: buy ${safeContracts} ${isYes ? 'yes' : 'no'} @ ${price}¢`)
-        
-        // Uncomment below when ready for real trading:
-        /*
-        const response = await liveTradeApi.placeOrder({
-          ticker: 'ACTUAL-MARKET-TICKER', // Need real ticker mapping
-          action: 'buy',
-          side: isYes ? 'yes' : 'no',
-          count: safeContracts,
-          type: 'limit',
-          price: price,
-          strategyId: strategy.id,
-        })
-        
-        if (response.data?.success) {
-          // Update strategy with new trade
-          setDeployedStrategies(prev => prev.map(s => {
-            if (s.id === strategy.id) {
-              return {
-                ...s,
-                trades: (s.trades || 0) + 1,
-                lastTradeAt: new Date().toISOString(),
-                pnl: (s.pnl || 0) - (safeContracts * price / 100), // Initial cost
-              }
-            }
-            return s
-          }))
+        // Resolve the market title to a real ticker
+        try {
+          const resolveResponse = await liveTradeApi.resolveTicker(market)
           
+          if (!resolveResponse.data?.success || !resolveResponse.data?.ticker) {
+            console.log(`[LIVE] No ticker found for: ${market}`)
+            // Show scanning activity instead
+            setStrategyActivity(prev => ({
+              ...prev,
+              [strategy.id]: {
+                ...prev[strategy.id],
+                message: { text: `🔴 Scanning for opportunities...`, icon: '🔍' },
+                lastActive: new Date(),
+              }
+            }))
+            return
+          }
+          
+          const ticker = resolveResponse.data.ticker
+          const marketTitle = resolveResponse.data.title
+          
+          // Use best available price from market data
+          const bestPrice = isYes 
+            ? (resolveResponse.data.yes_ask || price)
+            : (resolveResponse.data.no_ask || price)
+          
+          console.log(`[LIVE TRADE] Executing: buy ${safeContracts} ${isYes ? 'yes' : 'no'} on ${ticker} @ ${bestPrice}¢`)
+          
+          const orderResponse = await liveTradeApi.placeOrder({
+            ticker: ticker,
+            action: 'buy',
+            side: isYes ? 'yes' : 'no',
+            count: safeContracts,
+            type: 'limit',
+            price: bestPrice,
+            strategyId: strategy.id,
+          })
+          
+          if (orderResponse.data?.success) {
+            // Update strategy with new trade
+            setDeployedStrategies(prev => prev.map(s => {
+              if (s.id === strategy.id) {
+                return {
+                  ...s,
+                  trades: (s.trades || 0) + 1,
+                  lastTradeAt: new Date().toISOString(),
+                  pnl: (s.pnl || 0) - (safeContracts * bestPrice / 100), // Initial cost
+                }
+              }
+              return s
+            }))
+            
+            setStrategyActivity(prev => ({
+              ...prev,
+              [strategy.id]: {
+                ...prev[strategy.id],
+                message: { text: `🔴 LIVE: Bought ${safeContracts} @ ${bestPrice}¢ on ${marketTitle.slice(0, 30)}...`, icon: '💰' },
+                lastActive: new Date(),
+              }
+            }))
+          } else {
+            console.error('[LIVE TRADE] Order failed:', orderResponse.data?.error)
+            setStrategyActivity(prev => ({
+              ...prev,
+              [strategy.id]: {
+                ...prev[strategy.id],
+                message: { text: `⚠️ Order failed: ${orderResponse.data?.error || 'Unknown error'}`, icon: '❌' },
+                lastActive: new Date(),
+              }
+            }))
+          }
+        } catch (liveError) {
+          console.error('[LIVE TRADE] Error:', liveError)
+          // Show monitoring message on error
           setStrategyActivity(prev => ({
             ...prev,
             [strategy.id]: {
               ...prev[strategy.id],
-              message: { text: `🔴 LIVE: Bought ${safeContracts} contracts on Kalshi!`, icon: '💰' },
+              message: { text: `🔴 Live mode - monitoring markets`, icon: '👁️' },
               lastActive: new Date(),
             }
           }))
         }
-        */
-        
-        // For now, just show that live trading is enabled
-        setStrategyActivity(prev => ({
-          ...prev,
-          [strategy.id]: {
-            ...prev[strategy.id],
-            message: { text: `🔴 Live mode active - monitoring ${platform}`, icon: '👁️' },
-            lastActive: new Date(),
-          }
-        }))
         
       } else {
         // Paper trading (existing behavior)

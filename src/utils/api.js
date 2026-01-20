@@ -333,9 +333,17 @@ export const liveTradeApi = {
   cancelOrder: (orderId) =>
     api.delete(`/live/orders/${orderId}`),
 
-  /** Get open markets */
-  getMarkets: (limit = 50) =>
-    api.get('/live/markets', { params: { limit } }),
+  /** Get open markets with optional search */
+  getMarkets: (params = {}) =>
+    api.get('/live/markets', { params }),
+
+  /** Search markets by query */
+  searchMarkets: (query, status = 'open', limit = 30) =>
+    api.get('/live/search-markets', { params: { q: query, status, limit } }),
+
+  /** Resolve a market title to a ticker */
+  resolveTicker: (title, platform = 'kalshi') =>
+    api.post('/live/resolve-ticker', { title, platform }),
 
   /** Get market by ticker */
   getMarket: (ticker) =>
