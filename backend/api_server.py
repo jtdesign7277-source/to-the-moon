@@ -99,6 +99,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-i
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_placeholder')
 STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_placeholder')
 
+# Register live trading blueprint
+from routes.live_trading import live_trading_bp
+app.register_blueprint(live_trading_bp)
+
 # JWT Configuration
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
 JWT_ALGORITHM = 'HS256'

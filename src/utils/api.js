@@ -314,6 +314,43 @@ export const accountsApi = {
 };
 
 // ============================================
+// LIVE TRADING ENDPOINTS
+// ============================================
+export const liveTradeApi = {
+  /** Place a real order on Kalshi */
+  placeOrder: (orderData) =>
+    api.post('/live/order', orderData),
+
+  /** Get list of orders */
+  getOrders: (params = {}) =>
+    api.get('/live/orders', { params }),
+
+  /** Get a specific order */
+  getOrder: (orderId) =>
+    api.get(`/live/orders/${orderId}`),
+
+  /** Cancel an order */
+  cancelOrder: (orderId) =>
+    api.delete(`/live/orders/${orderId}`),
+
+  /** Get open markets */
+  getMarkets: (limit = 50) =>
+    api.get('/live/markets', { params: { limit } }),
+
+  /** Get market by ticker */
+  getMarket: (ticker) =>
+    api.get(`/live/market/${ticker}`),
+
+  /** Get user's positions */
+  getPositions: () =>
+    api.get('/live/positions'),
+
+  /** Emergency kill switch - cancel all orders */
+  killSwitch: () =>
+    api.post('/live/kill-switch'),
+};
+
+// ============================================
 // HEALTH CHECK
 // ============================================
 export const healthApi = {

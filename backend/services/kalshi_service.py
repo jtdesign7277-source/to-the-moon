@@ -239,6 +239,217 @@ class KalshiService:
             'positions': positions,
             'positionCount': len(positions)
         }
+    
+    # ============================================
+    # ORDER EXECUTION METHODS
+    # ============================================
+    
+    def get_market(self, ticker: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get market details by ticker.
+        
+        Args:
+            ticker: Market ticker (e.g., "KXBTC-24JAN20-B50000")
+            
+        Returns:
+            Tuple of (success: bool, market_data: dict)
+        """
+        success, data = self._make_request('GET', f'/markets/{ticker}')
+        
+        if success:
+            return True, data.get('market', data)
+        else:
+            return False, {'error': data}
+    
+    def get_open_markets(self, limit: int = 100, cursor: str = None) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get list of open markets.
+        
+        Returns:
+            Tuple of (success: bool, markets_data: dict)
+        """
+        endpoint = f'/markets?limit={limit}&status=open'
+        if cursor:
+            endpoint += f'&cursor={cursor}'
+            
+        success, data = self._make_request('GET', endpoint)
+        
+        if success:
+            return True, {
+                'markets': data.get('markets', []),
+                'cursor': data.get('cursor')
+            }
+        else:
+            return False, {'error': data}
+    
+    def place_order(
+        self,
+        ticker: str,
+        action: str,  # 'buy' or 'sell'
+        side: str,    # 'yes' or 'no'
+        count: int,   # number of contracts
+        order_type: str = 'limit',  # 'limit' or 'market'
+        price: int = None,  # price in cents (1-99) for limit orders
+        client_order_id: str = None,
+        expiration_ts: int = None,  # Unix timestamp for order expiration
+    ) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Place an order on Kalshi.
+        
+        Args:
+            ticker: Market ticker
+            action: 'buy' or 'sell'
+            side: 'yes' or 'no'
+            count: Number of contracts
+            order_type: 'limit' or 'market'
+            price: Price in cents (1-99) for limit orders
+            client_order_id: Unique ID for deduplication
+            expiration_ts: Unix timestamp when order expires
+            
+        Returns:
+            Tuple of (success: bool, order_data: dict)
+        """
+        import uuid
+        
+        # Validate inputs
+        if action not in ['buy', 'sell']:
+            return False, {'error': 'Action must be "buy" or "sell"'}
+        if side not in ['yes', 'no']:
+            return False, {'error': 'Side must be "yes" or "no"'}
+        if count < 1:
+            return False, {'error': 'Count must be at least 1'}
+        if order_type == 'limit' and (price is None or price < 1 or price > 99):
+            return False, {'error': 'Limit order price must be between 1 and 99 cents'}
+        
+        # Build order data
+        order_data = {
+            'ticker': ticker,
+            'action': action,
+            'side': side,
+            'count': count,
+            'type': order_type,
+            'client_order_id': client_order_id or str(uuid.uuid4()),
+        }
+        
+        # Add price for limit orders
+        if order_type == 'limit' and price is not None:
+            if side == 'yes':
+                order_data['yes_price'] = price
+            else:
+                order_data['no_price'] = price
+        
+        # Add expiration if specified
+        if expiration_ts:
+            order_data['expiration_ts'] = expiration_ts
+        
+        success, data = self._make_request('POST', '/portfolio/orders', order_data)
+        
+        if success:
+            order = data.get('order', data)
+            return True, {
+                'order_id': order.get('order_id'),
+                'client_order_id': order.get('client_order_id'),
+                'ticker': order.get('ticker'),
+                'action': order.get('action'),
+                'side': order.get('side'),
+                'count': order.get('remaining_count', count),
+                'price': order.get('yes_price') or order.get('no_price'),
+                'status': order.get('status'),
+                'created_time': order.get('created_time'),
+                'raw': order
+            }
+        else:
+            return False, {'error': data}
+    
+    def get_order(self, order_id: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get order details by ID.
+        
+        Args:
+            order_id: The order ID
+            
+        Returns:
+            Tuple of (success: bool, order_data: dict)
+        """
+        success, data = self._make_request('GET', f'/portfolio/orders/{order_id}')
+        
+        if success:
+            return True, data.get('order', data)
+        else:
+            return False, {'error': data}
+    
+    def get_orders(self, status: str = None, ticker: str = None, limit: int = 100) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Get list of orders.
+        
+        Args:
+            status: Filter by status ('resting', 'canceled', 'executed', 'pending')
+            ticker: Filter by market ticker
+            limit: Max number of orders to return
+            
+        Returns:
+            Tuple of (success: bool, orders_data: dict)
+        """
+        endpoint = f'/portfolio/orders?limit={limit}'
+        if status:
+            endpoint += f'&status={status}'
+        if ticker:
+            endpoint += f'&ticker={ticker}'
+            
+        success, data = self._make_request('GET', endpoint)
+        
+        if success:
+            return True, {
+                'orders': data.get('orders', []),
+                'cursor': data.get('cursor')
+            }
+        else:
+            return False, {'error': data}
+    
+    def cancel_order(self, order_id: str) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Cancel an order.
+        
+        Args:
+            order_id: The order ID to cancel
+            
+        Returns:
+            Tuple of (success: bool, result: dict)
+        """
+        success, data = self._make_request('DELETE', f'/portfolio/orders/{order_id}')
+        
+        if success:
+            return True, {'cancelled': True, 'order_id': order_id, 'raw': data}
+        else:
+            return False, {'error': data}
+    
+    def amend_order(self, order_id: str, count: int = None, price: int = None) -> Tuple[bool, Dict[str, Any]]:
+        """
+        Amend an existing order's count or price.
+        
+        Args:
+            order_id: The order ID to amend
+            count: New count (optional)
+            price: New price in cents (optional)
+            
+        Returns:
+            Tuple of (success: bool, order_data: dict)
+        """
+        amend_data = {}
+        if count is not None:
+            amend_data['count'] = count
+        if price is not None:
+            amend_data['price'] = price
+            
+        if not amend_data:
+            return False, {'error': 'Must specify count or price to amend'}
+        
+        success, data = self._make_request('PUT', f'/portfolio/orders/{order_id}', amend_data)
+        
+        if success:
+            return True, data.get('order', data)
+        else:
+            return False, {'error': data}
 
 
 def connect_kalshi_account(api_key_id: str, private_key_pem: str) -> Tuple[bool, Dict[str, Any]]:

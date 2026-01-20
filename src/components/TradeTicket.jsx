@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle, ShieldCheck } from 'lucide-react'
+import { liveTradeApi } from '../utils/api'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', isPro = false }) => {
   const [position, setPosition] = useState('yes') // 'yes' or 'no'

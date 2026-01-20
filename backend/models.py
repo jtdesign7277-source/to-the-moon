@@ -231,6 +231,75 @@ class Strategy(db.Model):
 
 
 # ============================================
+# 5a. STRATEGY FOLLOW MODEL
+# ============================================
+class StrategyFollow(db.Model):
+    """Track users following strategies."""
+    __tablename__ = 'strategy_follows'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    strategy_id = db.Column(db.String(50), db.ForeignKey('strategies.id', ondelete='CASCADE'), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Unique constraint to prevent duplicate follows
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'strategy_id', name='unique_user_strategy_follow'),
+    )
+
+    def __repr__(self):
+        return f'<StrategyFollow user={self.user_id} strategy={self.strategy_id}>'
+
+    @property
+    def is_active(self):
+        """Check if follow is still active."""
+        return True  # All follows are active by default
+
+
+# ============================================
+# 5b. LEADERBOARD ENTRY MODEL
+# ============================================
+class LeaderboardEntry(db.Model):
+    """Cached leaderboard entry for fast retrieval."""
+    __tablename__ = 'leaderboard_entries'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    username = db.Column(db.String(50), nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+    total_pnl = db.Column(db.Float, default=0.0)
+    total_return_pct = db.Column(db.Float, default=0.0)
+    win_rate = db.Column(db.Float, default=0.0)
+    total_trades = db.Column(db.Integer, default=0)
+    followers_count = db.Column(db.Integer, default=0)
+    period = db.Column(db.String(20), default='monthly')  # daily, weekly, monthly, alltime
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Unique constraint per user/period
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'period', name='unique_user_period_entry'),
+    )
+
+    def to_dict(self):
+        """Serialize leaderboard entry to dictionary."""
+        return {
+            'rank': self.rank,
+            'userId': self.user_id,
+            'username': self.username,
+            'totalPnl': self.total_pnl,
+            'totalReturnPct': self.total_return_pct,
+            'winRate': self.win_rate,
+            'totalTrades': self.total_trades,
+            'followersCount': self.followers_count,
+            'period': self.period,
+        }
+
+    def __repr__(self):
+        return f'<LeaderboardEntry rank={self.rank} user={self.username}>'
+
+
+# ============================================
 # 6. WAITLIST MODEL
 # ============================================
 class WaitlistEntry(db.Model):

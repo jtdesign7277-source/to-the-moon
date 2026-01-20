@@ -4,7 +4,7 @@ import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingU
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
-import { paperTradingApi, strategyApi, accountsApi } from '../utils/api'
+import { paperTradingApi, strategyApi, accountsApi, liveTradeApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
 import { useApp } from '../hooks/useApp'
 
@@ -282,7 +282,7 @@ const StrategyBuilder = () => {
     "OpenAI releases GPT-5 by June?",
   ]
 
-  // Execute a simulated paper trade for a strategy
+  // Execute a trade for a strategy (paper or live)
   const executeStrategyTrade = async (strategy) => {
     try {
       const market = sampleTradeMarkets[Math.floor(Math.random() * sampleTradeMarkets.length)]
@@ -292,40 +292,101 @@ const StrategyBuilder = () => {
       const contracts = Math.floor(Math.random() * 20) + 5 // 5-25 contracts
       const isYes = Math.random() > 0.5
       
-      // Call the paper trading API
-      const response = await paperTradingApi.placeTrade({
-        marketId: `auto-${Date.now()}`,
-        marketTitle: market,
-        platform: platform,
-        position: isYes ? 'yes' : 'no',
-        contracts: contracts,
-        price: price,
-        strategyId: strategy.id,
-        strategyName: strategy.name,
-      })
+      // Check if this is a live trading strategy
+      const isLiveStrategy = strategy.mode === 'live'
       
-      if (response.data?.success) {
-        // Update strategy with new trade
-        setDeployedStrategies(prev => prev.map(s => {
-          if (s.id === strategy.id) {
-            return {
-              ...s,
-              trades: (s.trades || 0) + 1,
-              lastTradeAt: new Date().toISOString(),
-            }
-          }
-          return s
-        }))
+      if (isLiveStrategy && platform === 'Kalshi') {
+        // Execute real trade on Kalshi
+        // For safety, we use smaller position sizes for automated trades
+        const safeContracts = Math.min(contracts, 10) // Max 10 contracts per auto-trade
         
-        // Show activity message about the trade
+        // TODO: In production, you'd map market titles to real tickers
+        // For now, we'll log that this would be a live trade
+        console.log(`[LIVE TRADE] Would execute: buy ${safeContracts} ${isYes ? 'yes' : 'no'} @ ${price}¢`)
+        
+        // Uncomment below when ready for real trading:
+        /*
+        const response = await liveTradeApi.placeOrder({
+          ticker: 'ACTUAL-MARKET-TICKER', // Need real ticker mapping
+          action: 'buy',
+          side: isYes ? 'yes' : 'no',
+          count: safeContracts,
+          type: 'limit',
+          price: price,
+          strategyId: strategy.id,
+        })
+        
+        if (response.data?.success) {
+          // Update strategy with new trade
+          setDeployedStrategies(prev => prev.map(s => {
+            if (s.id === strategy.id) {
+              return {
+                ...s,
+                trades: (s.trades || 0) + 1,
+                lastTradeAt: new Date().toISOString(),
+                pnl: (s.pnl || 0) - (safeContracts * price / 100), // Initial cost
+              }
+            }
+            return s
+          }))
+          
+          setStrategyActivity(prev => ({
+            ...prev,
+            [strategy.id]: {
+              ...prev[strategy.id],
+              message: { text: `🔴 LIVE: Bought ${safeContracts} contracts on Kalshi!`, icon: '💰' },
+              lastActive: new Date(),
+            }
+          }))
+        }
+        */
+        
+        // For now, just show that live trading is enabled
         setStrategyActivity(prev => ({
           ...prev,
           [strategy.id]: {
             ...prev[strategy.id],
-            message: { text: `Executed trade on ${platform}!`, icon: '✅' },
+            message: { text: `🔴 Live mode active - monitoring ${platform}`, icon: '👁️' },
             lastActive: new Date(),
           }
         }))
+        
+      } else {
+        // Paper trading (existing behavior)
+        const response = await paperTradingApi.placeTrade({
+          marketId: `auto-${Date.now()}`,
+          marketTitle: market,
+          platform: platform,
+          position: isYes ? 'yes' : 'no',
+          contracts: contracts,
+          price: price,
+          strategyId: strategy.id,
+          strategyName: strategy.name,
+        })
+        
+        if (response.data?.success) {
+          // Update strategy with new trade
+          setDeployedStrategies(prev => prev.map(s => {
+            if (s.id === strategy.id) {
+              return {
+                ...s,
+                trades: (s.trades || 0) + 1,
+                lastTradeAt: new Date().toISOString(),
+              }
+            }
+            return s
+          }))
+          
+          // Show activity message about the trade
+          setStrategyActivity(prev => ({
+            ...prev,
+            [strategy.id]: {
+              ...prev[strategy.id],
+              message: { text: `Executed trade on ${platform}!`, icon: '✅' },
+              lastActive: new Date(),
+            }
+          }))
+        }
       }
     } catch (error) {
       console.error('Strategy auto-trade error:', error)
