@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [portfolioData, setPortfolioData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTrade, setSelectedTrade] = useState(null)
+  const [performancePeriod, setPerformancePeriod] = useState('1M') // 1D, 1W, 1M, 6M, 1Y
 
   // Track page view when dashboard loads
   useEffect(() => {
@@ -280,11 +281,27 @@ const Dashboard = () => {
         <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900">Performance</h2>
-            <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-              <option>Last 6 months</option>
-              <option>Last 12 months</option>
-              <option>Last 30 days</option>
-            </select>
+            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+              {[
+                { key: '1D', label: '1D' },
+                { key: '1W', label: '1W' },
+                { key: '1M', label: '1M' },
+                { key: '6M', label: '6M' },
+                { key: '1Y', label: '1Y' },
+              ].map(period => (
+                <button
+                  key={period.key}
+                  onClick={() => setPerformancePeriod(period.key)}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                    performancePeriod === period.key
+                      ? 'bg-white text-indigo-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
           </div>
           {!hasData ? (
             <div className="h-64 flex flex-col items-center justify-center text-center">
