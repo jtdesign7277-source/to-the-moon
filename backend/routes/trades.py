@@ -295,3 +295,29 @@ def get_trade_stats():
 
     except Exception as e:
         return jsonify({'error': f'Failed to get stats: {str(e)}'}), 500
+
+
+@trades_bp.route('/clear-live', methods=['DELETE'])
+@jwt_required_custom
+def clear_live_trades():
+    """Clear all live (non-paper) trades for the user. Paper trades are kept."""
+    try:
+        user = g.current_user
+        
+        # Delete only live trades (is_paper = False)
+        deleted = Trade.query.filter_by(
+            user_id=user.id,
+            is_paper=False
+        ).delete()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'deleted': deleted,
+            'message': f'Cleared {deleted} live trades. Paper trades preserved.'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to clear live trades: {str(e)}'}), 500
