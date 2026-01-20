@@ -265,7 +265,71 @@ const StrategyBuilder = () => {
     { text: `Watching ${markets[Math.floor(Math.random() * markets.length)] || 'markets'}...`, icon: '👁️' },
   ]
 
-  // Rotate activity messages for running strategies
+  // Sample markets for auto-trading
+  const sampleTradeMarkets = [
+    "Fed funds rate above 4.5% end of Q1?",
+    "Bitcoin above $120K by March?",
+    "Chiefs win Super Bowl LX?",
+    "Tesla Q4 deliveries above 500K?",
+    "S&P 500 above 6,000 by March 31?",
+    "NYC temperature below 20°F tomorrow?",
+    "Ethereum above $5,000 by end of Q1?",
+    "Oscar Best Picture 2026: Anora?",
+    "Oil price above $90/barrel in February?",
+    "OpenAI releases GPT-5 by June?",
+  ]
+
+  // Execute a simulated paper trade for a strategy
+  const executeStrategyTrade = async (strategy) => {
+    try {
+      const market = sampleTradeMarkets[Math.floor(Math.random() * sampleTradeMarkets.length)]
+      const platforms = strategy.markets || ['Kalshi', 'Polymarket']
+      const platform = platforms[Math.floor(Math.random() * platforms.length)]
+      const price = Math.floor(Math.random() * 60) + 20 // 20-80 cents
+      const contracts = Math.floor(Math.random() * 20) + 5 // 5-25 contracts
+      const isYes = Math.random() > 0.5
+      
+      // Call the paper trading API
+      const response = await paperTradingApi.placeTrade({
+        marketId: `auto-${Date.now()}`,
+        marketTitle: market,
+        platform: platform,
+        position: isYes ? 'yes' : 'no',
+        contracts: contracts,
+        price: price,
+        strategyId: strategy.id,
+        strategyName: strategy.name,
+      })
+      
+      if (response.data?.success) {
+        // Update strategy with new trade
+        setDeployedStrategies(prev => prev.map(s => {
+          if (s.id === strategy.id) {
+            return {
+              ...s,
+              trades: (s.trades || 0) + 1,
+              lastTradeAt: new Date().toISOString(),
+            }
+          }
+          return s
+        }))
+        
+        // Show activity message about the trade
+        setStrategyActivity(prev => ({
+          ...prev,
+          [strategy.id]: {
+            ...prev[strategy.id],
+            message: { text: `Executed trade on ${platform}!`, icon: '✅' },
+            lastActive: new Date(),
+          }
+        }))
+      }
+    } catch (error) {
+      console.error('Strategy auto-trade error:', error)
+    }
+  }
+
+  // Rotate activity messages for running strategies + occasionally execute trades
   useEffect(() => {
     const interval = setInterval(() => {
       setStrategyActivity(prev => {
@@ -276,6 +340,12 @@ const StrategyBuilder = () => {
             const randomIndex = Math.floor(Math.random() * allMessages.length)
             const marketsScanned = Math.floor(Math.random() * 50) + 10
             const opportunitiesFound = Math.floor(Math.random() * 5)
+            
+            // 8% chance to execute a trade each interval (roughly 1-2 trades per minute)
+            if (Math.random() < 0.08) {
+              executeStrategyTrade(strategy)
+            }
+            
             newActivity[strategy.id] = {
               message: allMessages[randomIndex],
               marketsScanned,
