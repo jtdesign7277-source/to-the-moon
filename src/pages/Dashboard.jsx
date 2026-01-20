@@ -167,8 +167,18 @@ const Dashboard = () => {
     { name: 'No Data', value: 100, color: '#e5e7eb' },
   ]
 
+  // Vibrant colors for portfolio allocation
+  const portfolioColors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
+  
   const chartData = performanceData.length > 0 ? performanceData : emptyPerformanceData
-  const pieData = portfolioData.length > 0 ? portfolioData : emptyPortfolioData
+  
+  // Ensure portfolioData always has colors
+  const pieData = portfolioData.length > 0 
+    ? portfolioData.map((item, i) => ({
+        ...item,
+        color: item.color || portfolioColors[i % portfolioColors.length]
+      }))
+    : emptyPortfolioData
 
   if (isLoading) {
     return (

@@ -846,13 +846,15 @@ def get_user_dashboard():
         else:
             performance_data.append({'day': day, 'value': 0})
     
-    # Portfolio allocation
+    # Portfolio allocation with colors
+    portfolio_colors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
     portfolio_data = []
     if deployed_strategies:
-        for strategy in deployed_strategies[:5]:  # Top 5 strategies
+        for i, strategy in enumerate(deployed_strategies[:5]):  # Top 5 strategies
             portfolio_data.append({
                 'name': strategy.name[:15] + ('...' if len(strategy.name) > 15 else ''),
                 'value': round((strategy.allocated_capital / total_capital * 100) if total_capital > 0 else 0),
+                'color': portfolio_colors[i % len(portfolio_colors)],
             })
 
     return jsonify({
