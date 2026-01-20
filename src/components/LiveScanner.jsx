@@ -82,7 +82,7 @@ const formatTime = (date) => {
   })
 }
 
-const LiveScanner = ({ maxEvents = 50, scanInterval = 1500 }) => {
+const LiveScanner = ({ maxEvents = 50, scanInterval = 1500, onTradeComplete }) => {
   const [events, setEvents] = useState([])
   const [isExpanded, setIsExpanded] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
@@ -147,7 +147,10 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 1500 }) => {
 
   const handleTradeSubmit = (trade) => {
     console.log('Trade submitted:', trade)
-    // In production, this would submit to the backend
+    // Notify parent to refresh dashboard data
+    if (onTradeComplete) {
+      onTradeComplete(trade)
+    }
   }
 
   const getPlatformColor = (platform) => {

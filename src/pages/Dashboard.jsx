@@ -37,46 +37,52 @@ const Dashboard = () => {
   }, [])
 
   // Fetch user data from API
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem('ttm_access_token')
-      if (!token) {
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        const response = await fetch(`${API_URL}/api/user/dashboard`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setUserData({
-            totalPnl: data.totalPnl || 0,
-            winRate: data.winRate || 0,
-            activeStrategies: data.activeStrategies || 0,
-            totalTrades: data.totalTrades || 0,
-            connectedAccounts: data.connectedAccounts || 0,
-            totalBalance: data.totalBalance || 0,
-            monthlyChange: data.monthlyChange || 0,
-          })
-          setRecentTrades(data.recentTrades || [])
-          setPerformanceData(data.performanceData || [])
-          setPortfolioData(data.portfolioData || [])
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error)
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('ttm_access_token')
+    if (!token) {
+      setIsLoading(false)
+      return
     }
 
+    try {
+      const response = await fetch(`${API_URL}/api/user/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUserData({
+          totalPnl: data.totalPnl || 0,
+          winRate: data.winRate || 0,
+          activeStrategies: data.activeStrategies || 0,
+          totalTrades: data.totalTrades || 0,
+          connectedAccounts: data.connectedAccounts || 0,
+          totalBalance: data.totalBalance || 0,
+          monthlyChange: data.monthlyChange || 0,
+        })
+        setRecentTrades(data.recentTrades || [])
+        setPerformanceData(data.performanceData || [])
+        setPortfolioData(data.portfolioData || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchUserData()
   }, [user])
+
+  // Callback when a trade is placed from the scanner
+  const handleTradeComplete = (trade) => {
+    // Immediately refetch dashboard data to show the new trade
+    fetchUserData()
+  }
 
   // Format currency
   const formatCurrency = (value) => {
@@ -257,7 +263,7 @@ const Dashboard = () => {
       </div>
 
       {/* Live Market Scanner */}
-      <LiveScanner maxEvents={50} scanInterval={1200} />
+      <LiveScanner maxEvents={50} scanInterval={1200} onTradeComplete={handleTradeComplete} />
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">
