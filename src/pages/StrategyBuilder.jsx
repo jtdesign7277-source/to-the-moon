@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp, Wallet } from 'lucide-react'
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
-import { paperTradingApi, strategyApi } from '../utils/api'
+import { paperTradingApi, strategyApi, accountsApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
 import { useApp } from '../hooks/useApp'
 
@@ -215,6 +215,9 @@ const StrategyBuilder = () => {
     capital: 1000,
     mode: 'paper'
   })
+  const [availableBalance, setAvailableBalance] = useState({ paper: 100000, live: 0 })
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false)
+  const [capitalError, setCapitalError] = useState(null)
 
   // Template customization state (Pro feature)
   const [templateSettings, setTemplateSettings] = useState({})
@@ -528,8 +531,41 @@ const StrategyBuilder = () => {
     }, 2000)
   }
 
-  const handleDeploy = () => {
+  const handleDeploy = async () => {
     if (!activeStrategy || !backtestComplete) return
+    
+    setIsLoadingBalance(true)
+    setCapitalError(null)
+    
+    try {
+      // Fetch paper trading balance
+      const paperResponse = await paperTradingApi.getPortfolio()
+      const paperBalance = paperResponse.data?.portfolio?.currentBalance || 100000
+      
+      // Fetch live trading balance from connected accounts
+      let liveBalance = 0
+      try {
+        const accountsResponse = await accountsApi.getAll()
+        const connectedAccounts = accountsResponse.data?.accounts || []
+        // Sum all connected account balances
+        liveBalance = connectedAccounts.reduce((sum, acc) => sum + (acc.balance || 0), 0)
+      } catch (e) {
+        console.log('No connected accounts or error fetching:', e)
+      }
+      
+      setAvailableBalance({ paper: paperBalance, live: liveBalance })
+      
+      // Set default capital to 10% of available balance or $100, whichever is greater
+      const currentModeBalance = deploySettings.mode === 'paper' ? paperBalance : liveBalance
+      const defaultCapital = Math.max(100, Math.floor(currentModeBalance * 0.1))
+      setDeploySettings(prev => ({ ...prev, capital: Math.min(defaultCapital, currentModeBalance) }))
+      
+    } catch (error) {
+      console.error('Error fetching balances:', error)
+    } finally {
+      setIsLoadingBalance(false)
+    }
+    
     setShowDeployModal(true)
   }
 
@@ -1638,19 +1674,64 @@ const StrategyBuilder = () => {
             </div>
 
             <div className="space-y-4">
+              {/* Available Balance Display */}
+              <div className="p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-600">Available Balance</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {isLoadingBalance ? '...' : `$${(deploySettings.mode === 'paper' ? availableBalance.paper : availableBalance.live).toLocaleString()}`}
+                  </span>
+                </div>
+                {deploySettings.mode === 'live' && availableBalance.live === 0 && (
+                  <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    No connected accounts. Go to Accounts to connect.
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Starting Capital
+                  Allocate Capital
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                   <input
                     type="number"
                     value={deploySettings.capital}
-                    onChange={(e) => setDeploySettings({ ...deploySettings, capital: Number(e.target.value) })}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onChange={(e) => {
+                      const value = Number(e.target.value)
+                      const maxBalance = deploySettings.mode === 'paper' ? availableBalance.paper : availableBalance.live
+                      setDeploySettings({ ...deploySettings, capital: value })
+                      if (value > maxBalance) {
+                        setCapitalError(`Cannot exceed available balance of $${maxBalance.toLocaleString()}`)
+                      } else if (value < 10) {
+                        setCapitalError('Minimum allocation is $10')
+                      } else {
+                        setCapitalError(null)
+                      }
+                    }}
+                    min={10}
+                    max={deploySettings.mode === 'paper' ? availableBalance.paper : availableBalance.live}
+                    className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      capitalError ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                    }`}
                   />
                 </div>
+                {capitalError && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {capitalError}
+                  </p>
+                )}
+                {!capitalError && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    This is the amount the strategy will use for trading
+                  </p>
+                )}
               </div>
 
               <div>
@@ -1659,7 +1740,11 @@ const StrategyBuilder = () => {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => setDeploySettings({ ...deploySettings, mode: 'paper' })}
+                    onClick={() => {
+                      const newCapital = Math.min(deploySettings.capital, availableBalance.paper)
+                      setDeploySettings({ ...deploySettings, mode: 'paper', capital: newCapital })
+                      setCapitalError(null)
+                    }}
                     className={`p-3 rounded-xl border-2 text-left transition-all ${
                       deploySettings.mode === 'paper'
                         ? 'border-indigo-500 bg-indigo-50'
@@ -1672,7 +1757,13 @@ const StrategyBuilder = () => {
                   <button
                     onClick={() => {
                       if (isPro) {
-                        setDeploySettings({ ...deploySettings, mode: 'live' })
+                        const newCapital = Math.min(deploySettings.capital, availableBalance.live)
+                        setDeploySettings({ ...deploySettings, mode: 'live', capital: newCapital > 0 ? newCapital : 0 })
+                        if (availableBalance.live === 0) {
+                          setCapitalError('Connect an account first to trade live')
+                        } else {
+                          setCapitalError(null)
+                        }
                       } else {
                         setShowDeployModal(false)
                         openUpgradeModal()
@@ -1707,7 +1798,12 @@ const StrategyBuilder = () => {
 
               <button
                 onClick={confirmDeploy}
-                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center justify-center gap-2"
+                disabled={!!capitalError || deploySettings.capital <= 0 || isLoadingBalance}
+                className={`w-full py-3 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  capitalError || deploySettings.capital <= 0 || isLoadingBalance
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500'
+                }`}
               >
                 <Rocket className="w-5 h-5" />
                 Deploy {deploySettings.mode === 'paper' ? 'Paper' : 'Live'} Strategy
