@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
-import { api } from '../utils/api'
+import api from '../utils/api'
 
 const Header = ({
   navItems,
@@ -322,7 +322,7 @@ const Header = ({
 
                 {/* Enhanced Profile Dropdown */}
                 <div 
-                  className={`absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                  className={`absolute right-0 top-full mt-2 ${activeTab === 'support' ? 'w-96' : 'w-80'} bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen 
                       ? 'opacity-100 scale-100 translate-y-0' 
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -450,27 +450,55 @@ const Header = ({
                     {/* Support Tab */}
                     {activeTab === 'support' && (
                       <div className="space-y-3 animate-in fade-in duration-200">
-                        {/* Toggle between AI and Human */}
-                        <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-lg">
-                          <button
-                            onClick={() => setTalkToHuman(false)}
-                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
-                              !talkToHuman ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'
-                            }`}
-                          >
-                            <Bot className="w-3.5 h-3.5" />
-                            AI Assistant
-                          </button>
-                          <button
-                            onClick={() => setTalkToHuman(true)}
-                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
-                              talkToHuman ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'
-                            }`}
-                          >
-                            <UserCircle className="w-3.5 h-3.5" />
-                            Talk to Human
-                          </button>
-                        </div>
+                        {/* Luna AI Header */}
+                        {!talkToHuman && (
+                          <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 rounded-xl p-3 -mt-1">
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                  <Bot className="w-7 h-7 text-white" />
+                                </div>
+                                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-purple-500 rounded-full animate-pulse" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-white font-bold text-base">Luna</h3>
+                                  <span className="px-1.5 py-0.5 bg-white/20 rounded text-[10px] text-white/90 font-medium">AI</span>
+                                </div>
+                                <p className="text-purple-100 text-xs">Your personal trading assistant</p>
+                              </div>
+                              <button
+                                onClick={() => setTalkToHuman(true)}
+                                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/80 hover:text-white"
+                                title="Talk to human support"
+                              >
+                                <UserCircle className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Human Support Header */}
+                        {talkToHuman && (
+                          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-3 -mt-1">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                <Mail className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="text-white font-bold text-base">Human Support</h3>
+                                <p className="text-emerald-100 text-xs">We reply within 24 hours</p>
+                              </div>
+                              <button
+                                onClick={() => setTalkToHuman(false)}
+                                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/80 hover:text-white"
+                                title="Switch to AI assistant"
+                              >
+                                <Bot className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
                         {!talkToHuman ? (
                           /* AI Chat Interface */
@@ -478,39 +506,37 @@ const Header = ({
                             {/* Chat Messages */}
                             <div 
                               ref={chatContainerRef}
-                              className="h-48 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg"
+                              className="h-64 overflow-y-auto space-y-3 p-3 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100"
                             >
                               {chatMessages.map((msg, idx) => (
                                 <div
                                   key={idx}
                                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
-                                  <div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                                  {msg.role === 'assistant' && (
+                                    <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 shadow-sm">
+                                      <Bot className="w-4 h-4 text-white" />
+                                    </div>
+                                  )}
+                                  <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm shadow-sm ${
                                     msg.role === 'user'
-                                      ? 'bg-indigo-600 text-white rounded-br-sm'
-                                      : 'bg-white border border-gray-200 text-gray-700 rounded-bl-sm'
+                                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
+                                      : 'bg-white border border-gray-200 text-gray-700 rounded-bl-md'
                                   }`}>
-                                    {msg.role === 'assistant' && (
-                                      <div className="flex items-center gap-1.5 mb-1">
-                                        <Bot className="w-3 h-3 text-indigo-500" />
-                                        <span className="text-[10px] font-medium text-indigo-500">Luna</span>
-                                      </div>
-                                    )}
-                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                                   </div>
                                 </div>
                               ))}
                               {isAiTyping && (
                                 <div className="flex justify-start">
-                                  <div className="bg-white border border-gray-200 px-3 py-2 rounded-xl rounded-bl-sm">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                      <Bot className="w-3 h-3 text-indigo-500" />
-                                      <span className="text-[10px] font-medium text-indigo-500">Luna</span>
-                                    </div>
-                                    <div className="flex gap-1">
-                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                  <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 shadow-sm">
+                                    <Bot className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
+                                    <div className="flex gap-1.5">
+                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                      <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                     </div>
                                   </div>
                                 </div>
@@ -526,47 +552,40 @@ const Header = ({
                                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendAiMessage()}
                                 placeholder="Ask Luna anything..."
                                 disabled={isAiTyping}
-                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                                className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 shadow-sm"
                               />
                               <button
                                 onClick={handleSendAiMessage}
                                 disabled={!supportMessage.trim() || isAiTyping}
-                                className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+                                className="px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl transition-all shadow-sm hover:shadow-md"
                               >
-                                <Send className="w-4 h-4" />
+                                <Send className="w-5 h-5" />
                               </button>
                             </div>
-                            <p className="text-[10px] text-gray-400 text-center">
-                              Luna is AI-powered. For complex issues, switch to "Talk to Human".
-                            </p>
+                            <div className="flex items-center justify-center gap-2 text-[11px] text-gray-400">
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                              Luna is online • Powered by AI
+                            </div>
                           </>
                         ) : (
                           /* Human Support Interface */
                           <>
-                            <div className="bg-indigo-50 rounded-lg p-3">
-                              <div className="flex items-start gap-2">
-                                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <Mail className="w-4 h-4 text-indigo-600" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-indigo-900">Email Support</p>
-                                  <p className="text-xs text-indigo-700 mt-0.5">We typically reply within 24 hours</p>
-                                </div>
-                              </div>
-                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              Need help with something complex? Our team is here for you. Describe your issue below and we'll get back to you as soon as possible.
+                            </p>
                             
                             <textarea
                               value={supportMessage}
                               onChange={(e) => setSupportMessage(e.target.value)}
                               placeholder="Describe your issue in detail..."
-                              rows={4}
-                              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                              rows={6}
+                              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none shadow-sm"
                             />
 
                             <button
                               onClick={handleSendHumanMessage}
                               disabled={!supportMessage.trim()}
-                              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                             >
                               <Mail className="w-4 h-4" />
                               Send Email to Support
