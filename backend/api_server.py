@@ -2,6 +2,7 @@
 ToTheMoon API Server
 Flask backend with subscription, strategies, and backtesting endpoints
 PostgreSQL database for persistent storage
+Version: 2.1.0 - Added Luna AI Support Chat
 """
 
 import os
