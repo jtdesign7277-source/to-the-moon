@@ -88,7 +88,7 @@ class Subscription(db.Model):
             return False
         return True 
 
-@property
+@   @property
     def is_pro(self):
         """Check if subscription is Pro tier."""
         return self.is_active
