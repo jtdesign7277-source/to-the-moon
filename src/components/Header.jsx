@@ -3,6 +3,67 @@ import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, 
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
+// Custom Luna Avatar - Cute moon character
+const LunaAvatar = ({ size = 'md', className = '' }) => {
+  const sizes = {
+    sm: 'w-7 h-7',
+    md: 'w-12 h-12',
+    lg: 'w-16 h-16'
+  }
+  
+  return (
+    <div className={`${sizes[size]} ${className} relative`}>
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+        {/* Glow effect */}
+        <defs>
+          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#fef3c7" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="moonFace" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fef9c3" />
+            <stop offset="50%" stopColor="#fde047" />
+            <stop offset="100%" stopColor="#facc15" />
+          </linearGradient>
+        </defs>
+        
+        {/* Outer glow */}
+        <circle cx="50" cy="50" r="48" fill="url(#moonGlow)" />
+        
+        {/* Moon face */}
+        <circle cx="50" cy="50" r="38" fill="url(#moonFace)" stroke="#eab308" strokeWidth="2" />
+        
+        {/* Cute crater details */}
+        <circle cx="35" cy="60" r="6" fill="#fcd34d" opacity="0.5" />
+        <circle cx="62" cy="68" r="4" fill="#fcd34d" opacity="0.5" />
+        <circle cx="55" cy="38" r="3" fill="#fcd34d" opacity="0.4" />
+        
+        {/* Left eye */}
+        <ellipse cx="38" cy="45" rx="6" ry="7" fill="#1f2937" />
+        <circle cx="40" cy="43" r="2" fill="white" />
+        
+        {/* Right eye */}
+        <ellipse cx="62" cy="45" rx="6" ry="7" fill="#1f2937" />
+        <circle cx="64" cy="43" r="2" fill="white" />
+        
+        {/* Cute smile */}
+        <path d="M 40 58 Q 50 68 60 58" stroke="#1f2937" strokeWidth="3" fill="none" strokeLinecap="round" />
+        
+        {/* Rosy cheeks */}
+        <circle cx="28" cy="52" r="5" fill="#fca5a5" opacity="0.6" />
+        <circle cx="72" cy="52" r="5" fill="#fca5a5" opacity="0.6" />
+        
+        {/* Sparkles */}
+        <g fill="#fef3c7">
+          <polygon points="15,20 17,25 22,25 18,28 20,33 15,30 10,33 12,28 8,25 13,25" className="animate-pulse" />
+          <polygon points="80,15 81.5,19 86,19 82.5,21.5 84,26 80,23 76,26 77.5,21.5 74,19 78.5,19" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
+          <polygon points="85,70 86,73 89,73 86.5,75 87.5,78 85,76 82.5,78 83.5,75 81,73 84,73" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
+        </g>
+      </svg>
+    </div>
+  )
+}
+
 const Header = ({
   navItems,
   currentPage,
@@ -452,13 +513,19 @@ const Header = ({
                       <div className="space-y-3 animate-in fade-in duration-200">
                         {/* Luna AI Header */}
                         {!talkToHuman && (
-                          <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 rounded-xl p-3 -mt-1">
-                            <div className="flex items-center gap-3">
+                          <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-800 rounded-xl p-3 -mt-1 overflow-hidden relative">
+                            {/* Starry background */}
+                            <div className="absolute inset-0 opacity-30">
+                              <div className="absolute w-1 h-1 bg-white rounded-full top-2 left-4 animate-pulse" />
+                              <div className="absolute w-0.5 h-0.5 bg-white rounded-full top-6 left-12 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                              <div className="absolute w-1 h-1 bg-white rounded-full top-3 right-16 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                              <div className="absolute w-0.5 h-0.5 bg-white rounded-full bottom-3 left-8 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                              <div className="absolute w-1 h-1 bg-white rounded-full bottom-2 right-8 animate-pulse" style={{ animationDelay: '0.8s' }} />
+                            </div>
+                            <div className="flex items-center gap-3 relative">
                               <div className="relative">
-                                <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-                                  <Bot className="w-7 h-7 text-white" />
-                                </div>
-                                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-purple-500 rounded-full animate-pulse" />
+                                <LunaAvatar size="md" />
+                                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-indigo-900 rounded-full animate-pulse" />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
@@ -514,9 +581,7 @@ const Header = ({
                                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                   {msg.role === 'assistant' && (
-                                    <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 shadow-sm">
-                                      <Bot className="w-4 h-4 text-white" />
-                                    </div>
+                                    <LunaAvatar size="sm" className="mr-2 flex-shrink-0" />
                                   )}
                                   <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm shadow-sm ${
                                     msg.role === 'user'
@@ -529,9 +594,7 @@ const Header = ({
                               ))}
                               {isAiTyping && (
                                 <div className="flex justify-start">
-                                  <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0 shadow-sm">
-                                    <Bot className="w-4 h-4 text-white" />
-                                  </div>
+                                  <LunaAvatar size="sm" className="mr-2 flex-shrink-0" />
                                   <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
                                     <div className="flex gap-1.5">
                                       <span className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
