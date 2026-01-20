@@ -100,9 +100,42 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-producti
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_DAYS = int(os.environ.get('JWT_EXPIRATION_DAYS', 30))
 
+
+def run_auto_migrations():
+    """Run database migrations to add missing columns."""
+    from sqlalchemy import text
+    
+    migrations = [
+        # Add is_paper column to trades table
+        "ALTER TABLE trades ADD COLUMN IF NOT EXISTS is_paper BOOLEAN DEFAULT TRUE",
+        # Add platform column to trades table
+        "ALTER TABLE trades ADD COLUMN IF NOT EXISTS platform VARCHAR(50)",
+        # Add amount column to trades table
+        "ALTER TABLE trades ADD COLUMN IF NOT EXISTS amount FLOAT",
+    ]
+    
+    for sql in migrations:
+        try:
+            db.session.execute(text(sql))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            # Ignore errors - column might already exist or syntax might differ
+            pass
+    
+    # Try to extend pair column (different syntax for some DBs)
+    try:
+        db.session.execute(text("ALTER TABLE trades ALTER COLUMN pair TYPE VARCHAR(200)"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        pass
+
+
 # Initialize database tables and create demo user
 with app.app_context():
     db.create_all()
+    run_auto_migrations()  # Run migrations to add any missing columns
     create_demo_user()
     print("[Database] PostgreSQL initialized successfully")
 

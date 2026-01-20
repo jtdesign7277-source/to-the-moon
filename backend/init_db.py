@@ -167,6 +167,39 @@ def seed_strategies(app):
         print(f"✓ Seeded {len(templates)} strategy templates!")
 
 
+def run_migrations(app):
+    """Run database migrations to add missing columns."""
+    with app.app_context():
+        from sqlalchemy import text
+        
+        print("Running database migrations...")
+        
+        migrations = [
+            # Add is_paper column to trades table
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS is_paper BOOLEAN DEFAULT TRUE", "is_paper"),
+            # Add platform column to trades table
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS platform VARCHAR(50)", "platform"),
+            # Add amount column to trades table
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS amount FLOAT", "amount"),
+            # Extend pair column size
+            ("ALTER TABLE trades ALTER COLUMN pair TYPE VARCHAR(200)", "pair extended to 200"),
+        ]
+        
+        for sql, description in migrations:
+            try:
+                db.session.execute(text(sql))
+                db.session.commit()
+                print(f"  ✓ Added/updated column: {description}")
+            except Exception as e:
+                db.session.rollback()
+                if "already exists" in str(e).lower() or "does not exist" not in str(e).lower():
+                    print(f"  ⚠ Column {description}: {str(e)[:50]}...")
+                else:
+                    print(f"  ✓ Column {description} already exists")
+        
+        print("✓ Migrations complete!")
+
+
 def drop_all(app):
     """Drop all tables (use with caution!)."""
     with app.app_context():
@@ -197,6 +230,7 @@ def main():
     parser.add_argument('--seed', action='store_true', help='Seed initial data (demo user + strategies)')
     parser.add_argument('--drop', action='store_true', help='Drop all tables (DESTRUCTIVE)')
     parser.add_argument('--reset', action='store_true', help='Drop and recreate all tables (DESTRUCTIVE)')
+    parser.add_argument('--migrate', action='store_true', help='Run database migrations (add missing columns)')
     parser.add_argument('--stats', action='store_true', help='Show database statistics')
 
     args = parser.parse_args()
@@ -225,6 +259,9 @@ def main():
     if args.init:
         init_db(app)
 
+    if args.migrate:
+        run_migrations(app)
+
     if args.seed:
         seed_demo_user(app)
         seed_strategies(app)
@@ -232,11 +269,14 @@ def main():
     if args.stats:
         show_stats(app)
 
-    if not any([args.init, args.seed, args.drop, args.reset, args.stats]):
+    if not any([args.init, args.seed, args.drop, args.reset, args.migrate, args.stats]):
         parser.print_help()
         print("\n" + "=" * 50)
         print("Quick Start:")
         print("  python init_db.py --init --seed")
+        print("")
+        print("Run migrations:")
+        print("  python init_db.py --migrate")
         print("")
         print("Show stats:")
         print("  python init_db.py --stats")
