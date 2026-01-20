@@ -413,7 +413,7 @@ const Header = ({
 
                 {/* Enhanced Profile Dropdown */}
                 <div 
-                  className={`absolute right-0 top-full mt-2 ${activeTab === 'support' ? 'w-96' : 'w-80'} bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                  className={`absolute right-0 top-full mt-2 ${(activeTab === 'support' || activeTab === 'suggest') ? 'w-96' : 'w-80'} bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen 
                       ? 'opacity-100 scale-100 translate-y-0' 
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -717,9 +717,8 @@ const Header = ({
                         <textarea
                           value={suggestionMessage}
                           onChange={(e) => setSuggestionMessage(e.target.value)}
-                          placeholder="Describe your feature idea..."
-                          rows={6}
-                          className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm"
+                          placeholder="Describe your feature idea in detail..."
+                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-gradient-to-b from-gray-50 to-white"
                         />
                         
                         <button
