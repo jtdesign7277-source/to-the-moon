@@ -326,7 +326,7 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
                       }`}
                     >
                       {/* Timestamp */}
-                      <span className="text-gray-400 shrink-0 tabular-nums text-xs font-medium">
+                      <span className="text-gray-700 shrink-0 tabular-nums text-xs font-medium">
                         {formatTime(event.timestamp)}
                       </span>
 
