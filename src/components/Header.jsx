@@ -3,7 +3,7 @@ import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, 
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
-// Luna Avatar - Modern 3D robot head, sleek and professional
+// Luna Avatar - Elegant constellation of stars with slow rotation
 const LunaAvatar = ({ size = 'md', className = '' }) => {
   const sizes = {
     sm: 'w-7 h-7',
@@ -13,66 +13,83 @@ const LunaAvatar = ({ size = 'md', className = '' }) => {
   
   return (
     <div className={`${sizes[size]} ${className} relative`}>
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <defs>
-          {/* Metallic gradient for robot head */}
-          <linearGradient id="metalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#64748b" />
-            <stop offset="30%" stopColor="#94a3b8" />
-            <stop offset="70%" stopColor="#64748b" />
-            <stop offset="100%" stopColor="#475569" />
-          </linearGradient>
-          {/* Face plate gradient */}
-          <linearGradient id="faceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#1e293b" />
-            <stop offset="100%" stopColor="#0f172a" />
-          </linearGradient>
-          {/* Glow for eyes */}
-          <filter id="eyeGlow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          {/* Accent gradient - cyan/blue tech color */}
-          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#06b6d4" />
-            <stop offset="100%" stopColor="#3b82f6" />
-          </linearGradient>
-        </defs>
-        
-        {/* Outer ring - tech accent */}
-        <circle cx="50" cy="50" r="48" fill="none" stroke="url(#accentGradient)" strokeWidth="1.5" opacity="0.5" />
-        
-        {/* Robot head base - rounded rectangle shape */}
-        <rect x="15" y="18" width="70" height="64" rx="18" ry="18" fill="url(#metalGradient)" />
-        
-        {/* Face plate - dark screen area */}
-        <rect x="22" y="28" width="56" height="40" rx="10" ry="10" fill="url(#faceGradient)" />
-        
-        {/* Left eye - glowing cyan */}
-        <rect x="30" y="40" width="14" height="8" rx="2" fill="#06b6d4" filter="url(#eyeGlow)" />
-        <rect x="32" y="42" width="4" height="4" rx="1" fill="#ffffff" opacity="0.8" />
-        
-        {/* Right eye - glowing cyan */}
-        <rect x="56" y="40" width="14" height="8" rx="2" fill="#06b6d4" filter="url(#eyeGlow)" />
-        <rect x="58" y="42" width="4" height="4" rx="1" fill="#ffffff" opacity="0.8" />
-        
-        {/* Mouth - horizontal line indicator */}
-        <rect x="38" y="56" width="24" height="3" rx="1.5" fill="#06b6d4" opacity="0.8" />
-        
-        {/* Antenna detail on top */}
-        <circle cx="50" cy="14" r="4" fill="url(#accentGradient)" />
-        <rect x="48" y="14" width="4" height="6" fill="#64748b" />
-        
-        {/* Side vents/details */}
-        <rect x="12" y="42" width="3" height="16" rx="1" fill="#475569" />
-        <rect x="85" y="42" width="3" height="16" rx="1" fill="#475569" />
-        
-        {/* Subtle reflection on head */}
-        <rect x="22" y="22" width="30" height="4" rx="2" fill="white" opacity="0.15" />
-      </svg>
+      {/* Slow rotating container */}
+      <div className="w-full h-full animate-spin" style={{ animationDuration: '20s' }}>
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <defs>
+            {/* Soft glow filter */}
+            <filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            {/* Larger glow for main star */}
+            <filter id="mainStarGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            {/* Gradient for connection lines */}
+            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#818cf8" stopOpacity="0.3" />
+            </linearGradient>
+          </defs>
+          
+          {/* Constellation connection lines */}
+          <line x1="50" y1="30" x2="28" y2="55" stroke="url(#lineGradient)" strokeWidth="1" />
+          <line x1="50" y1="30" x2="72" y2="55" stroke="url(#lineGradient)" strokeWidth="1" />
+          <line x1="28" y1="55" x2="50" y2="78" stroke="url(#lineGradient)" strokeWidth="1" />
+          <line x1="72" y1="55" x2="50" y2="78" stroke="url(#lineGradient)" strokeWidth="1" />
+          <line x1="28" y1="55" x2="72" y2="55" stroke="url(#lineGradient)" strokeWidth="1" />
+          
+          {/* Main star - top (brightest) */}
+          <circle cx="50" cy="30" r="8" fill="#c4b5fd" filter="url(#mainStarGlow)" />
+          <circle cx="50" cy="30" r="5" fill="#e9d5ff" />
+          <circle cx="50" cy="30" r="2.5" fill="#ffffff" />
+          
+          {/* Star - left */}
+          <circle cx="28" cy="55" r="6" fill="#a78bfa" filter="url(#starGlow)" />
+          <circle cx="28" cy="55" r="3.5" fill="#ddd6fe" />
+          <circle cx="28" cy="55" r="1.5" fill="#ffffff" />
+          
+          {/* Star - right */}
+          <circle cx="72" cy="55" r="6" fill="#a78bfa" filter="url(#starGlow)" />
+          <circle cx="72" cy="55" r="3.5" fill="#ddd6fe" />
+          <circle cx="72" cy="55" r="1.5" fill="#ffffff" />
+          
+          {/* Star - bottom */}
+          <circle cx="50" cy="78" r="5" fill="#8b5cf6" filter="url(#starGlow)" />
+          <circle cx="50" cy="78" r="3" fill="#c4b5fd" />
+          <circle cx="50" cy="78" r="1.5" fill="#ffffff" />
+          
+          {/* Tiny accent stars */}
+          <circle cx="38" cy="42" r="1.5" fill="#e9d5ff" opacity="0.8" />
+          <circle cx="62" cy="42" r="1.5" fill="#e9d5ff" opacity="0.8" />
+          <circle cx="50" cy="55" r="2" fill="#ddd6fe" opacity="0.9" />
+        </svg>
+      </div>
+      
+      {/* Pulsing outer ring (doesn't rotate) */}
+      <div className="absolute inset-0">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <circle 
+            cx="50" cy="50" r="46" 
+            fill="none" 
+            stroke="#8b5cf6" 
+            strokeWidth="1" 
+            opacity="0.3"
+            className="animate-pulse"
+            style={{ animationDuration: '3s' }}
+          />
+        </svg>
+      </div>
     </div>
   )
 }
