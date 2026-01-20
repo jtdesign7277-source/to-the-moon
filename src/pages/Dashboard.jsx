@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
+import LiveScanner from '../components/LiveScanner'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -254,6 +255,9 @@ const Dashboard = () => {
           )
         })}
       </div>
+
+      {/* Live Market Scanner */}
+      <LiveScanner maxEvents={50} scanInterval={1200} />
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">
