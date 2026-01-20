@@ -602,8 +602,8 @@ class ConnectedAccount(db.Model):
     platform_user_id = db.Column(db.String(255), nullable=True)  # User ID on the platform
     
     # Encrypted credentials (stored securely)
-    api_key_id = db.Column(db.String(512), nullable=True)  # Encrypted
-    api_secret = db.Column(db.String(512), nullable=True)  # Encrypted
+    api_key_id = db.Column(db.Text, nullable=True)  # Encrypted
+    api_secret = db.Column(db.Text, nullable=True)  # Encrypted
     extra_credentials = db.Column(db.JSON, default=dict)  # For additional fields like wallet address
     
     # Status and balance
