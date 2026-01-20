@@ -1,6 +1,14 @@
-import { useState, useEffect, useRef } from 'react'
-import { Radio, TrendingUp, Eye, XCircle, Zap, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Radio, TrendingUp, Eye, XCircle, Zap, ChevronDown, ChevronUp, ExternalLink, GripVertical } from 'lucide-react'
 import TradeTicket from './TradeTicket'
+
+// Default dimensions
+const DEFAULT_WIDTH = null // null = 100% width
+const DEFAULT_HEIGHT = 256 // 16rem = 256px
+const MIN_WIDTH = 300
+const MAX_WIDTH = 800
+const MIN_HEIGHT = 150
+const MAX_HEIGHT = 600
 
 // Real prediction markets from Kalshi, Polymarket, and Manifold
 // These are actual market categories traded on these platforms
@@ -180,6 +188,73 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
   const [stats, setStats] = useState({ scanned: 0, opportunities: 0, watching: 0 })
   const scrollRef = useRef(null)
   const [isAutoScroll, setIsAutoScroll] = useState(true)
+  
+  // Resize state
+  const [dimensions, setDimensions] = useState({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+  const [isResizing, setIsResizing] = useState(false)
+  const [resizeType, setResizeType] = useState(null) // 'width', 'height', or 'both'
+  const containerRef = useRef(null)
+  const startPosRef = useRef({ x: 0, y: 0 })
+  const startDimsRef = useRef({ width: 0, height: 0 })
+
+  // Reset dimensions when collapsed
+  useEffect(() => {
+    if (!isExpanded) {
+      setDimensions({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+    }
+  }, [isExpanded])
+
+  // Handle resize drag
+  const handleResizeStart = useCallback((e, type) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizing(true)
+    setResizeType(type)
+    startPosRef.current = { x: e.clientX, y: e.clientY }
+    const rect = containerRef.current?.getBoundingClientRect()
+    startDimsRef.current = {
+      width: rect?.width || 400,
+      height: dimensions.height || DEFAULT_HEIGHT
+    }
+  }, [dimensions.height])
+
+  useEffect(() => {
+    if (!isResizing) return
+
+    const handleMouseMove = (e) => {
+      const deltaX = e.clientX - startPosRef.current.x
+      const deltaY = e.clientY - startPosRef.current.y
+
+      setDimensions(prev => {
+        const newDims = { ...prev }
+        
+        if (resizeType === 'width' || resizeType === 'both') {
+          const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startDimsRef.current.width + deltaX))
+          newDims.width = newWidth
+        }
+        
+        if (resizeType === 'height' || resizeType === 'both') {
+          const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startDimsRef.current.height + deltaY))
+          newDims.height = newHeight
+        }
+        
+        return newDims
+      })
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      setResizeType(null)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing, resizeType])
 
   // Generate new scan events periodically
   useEffect(() => {
@@ -254,7 +329,14 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div 
+        ref={containerRef}
+        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative"
+        style={{ 
+          width: dimensions.width ? `${dimensions.width}px` : '100%',
+          transition: isResizing ? 'none' : 'width 0.2s ease'
+        }}
+      >
         {/* Header */}
         <div 
           className="px-4 py-3 border-b border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
@@ -304,7 +386,11 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
           <div 
             ref={scrollRef}
             onScroll={handleScroll}
-            className="max-h-64 overflow-y-auto bg-gray-50 text-sm"
+            className="overflow-y-auto bg-gray-50 text-sm"
+            style={{ 
+              height: `${dimensions.height}px`,
+              transition: isResizing ? 'none' : 'height 0.2s ease'
+            }}
           >
             {events.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
@@ -396,6 +482,38 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
               Real markets from <a href="https://kalshi.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Kalshi</a>, <a href="https://polymarket.com" target="_blank" rel="noopener noreferrer" className="text-purple-500 hover:underline">Polymarket</a> & <a href="https://manifold.markets" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">Manifold</a> — trades execute on those platforms
             </p>
           </div>
+        )}
+
+        {/* Resize Handles */}
+        {isExpanded && (
+          <>
+            {/* Right edge - resize width */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'width')}
+              className="absolute top-0 right-0 w-2 h-full cursor-ew-resize hover:bg-indigo-200/50 transition-colors group"
+              title="Drag to resize width"
+            >
+              <div className="absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 bg-gray-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+
+            {/* Bottom edge - resize height */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'height')}
+              className="absolute bottom-0 left-0 w-full h-2 cursor-ns-resize hover:bg-indigo-200/50 transition-colors group"
+              title="Drag to resize height"
+            >
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-8 bg-gray-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+
+            {/* Corner - resize both */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'both')}
+              className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize hover:bg-indigo-200/50 transition-colors flex items-center justify-center group"
+              title="Drag to resize"
+            >
+              <GripVertical className="w-3 h-3 text-gray-400 rotate-45 opacity-50 group-hover:opacity-100 group-hover:text-indigo-500 transition-all" />
+            </div>
+          </>
         )}
       </div>
 
