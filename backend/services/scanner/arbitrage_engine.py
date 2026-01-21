@@ -119,7 +119,7 @@ class ArbitrageEngine:
     
     def __init__(self, config: Optional[ArbitrageConfig] = None):
         self.config = config or ArbitrageConfig()  
-       self._active_signals: Dict[str, TradingSignal] = {}
+        self._active_signals: Dict[str, TradingSignal] = {}
         self._signal_history: List[TradingSignal] = []
         self._stats = {
             'total_signals': 0,
