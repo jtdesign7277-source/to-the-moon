@@ -1,9 +1,6 @@
 /**
- * Scanner Dashboard v2
- * - Platform selection (Kalshi, Polymarket, Manifold, etc.)
- * - Risk presets (Conservative, Moderate, Aggressive, Custom)
- * - Continuous background scanning
- * - Persistent signals storage with timestamps
+ * Scanner Dashboard - IBKR-Style Full Page Layout
+ * No scrolling - everything fits on one screen
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -13,21 +10,19 @@ import {
   RefreshCw,
   TrendingUp,
   TrendingDown,
-  AlertTriangle,
-  Activity,
-  Bell,
-  Zap,
-  Target,
+  LayoutDashboard,
+  History,
+  Wallet,
+  BookOpen,
+  Trophy,
   Settings,
+  Zap,
+  Shield,
+  Scale,
+  Flame,
   Check,
   Clock,
-  Trash2,
   ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Shield,
-  Flame,
-  Scale,
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -37,54 +32,12 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 // ============================================
 
 const PLATFORMS = [
-  {
-    id: 'kalshi',
-    name: 'Kalshi',
-    icon: '🎯',
-    description: 'Prediction Market',
-    details: ['Regulated in US', 'Real USD trading'],
-    status: 'live', // 'live' | 'coming_soon'
-  },
-  {
-    id: 'polymarket',
-    name: 'Polymarket',
-    icon: '📊',
-    description: 'Prediction Market',
-    details: ['Crypto-based (USDC)', 'Global access'],
-    status: 'coming_soon',
-  },
-  {
-    id: 'manifold',
-    name: 'Manifold Markets',
-    icon: '🔮',
-    description: 'Prediction Market',
-    details: ['Free to use', 'Play money (Mana)'],
-    status: 'coming_soon',
-  },
-  {
-    id: 'predictit',
-    name: 'PredictIt',
-    icon: '🏛️',
-    description: 'Prediction Market',
-    details: ['Political markets', 'US-based'],
-    status: 'coming_soon',
-  },
-  {
-    id: 'betfair',
-    name: 'Betfair Exchange',
-    icon: '🏇',
-    description: 'Betting Exchange',
-    details: ['Sports & politics', 'High liquidity'],
-    status: 'coming_soon',
-  },
-  {
-    id: 'metaculus',
-    name: 'Metaculus',
-    icon: '🔬',
-    description: 'Forecasting Platform',
-    details: ['Reputation-based', 'Science focus'],
-    status: 'coming_soon',
-  },
+  { id: 'kalshi', name: 'Kalshi', icon: '🎯', status: 'live' },
+  { id: 'polymarket', name: 'Polymarket', icon: '📊', status: 'coming_soon' },
+  { id: 'manifold', name: 'Manifold', icon: '🔮', status: 'coming_soon' },
+  { id: 'predictit', name: 'PredictIt', icon: '🏛️', status: 'coming_soon' },
+  { id: 'betfair', name: 'Betfair', icon: '🏇', status: 'coming_soon' },
+  { id: 'metaculus', name: 'Metaculus', icon: '🔬', status: 'coming_soon' },
 ];
 
 // ============================================
@@ -92,34 +45,23 @@ const PLATFORMS = [
 // ============================================
 
 const RISK_PRESETS = {
-  conservative: {
-    label: 'Conservative',
-    icon: Shield,
-    color: 'green',
-    minEdge: 5,
-    maxPosition: 100,
-    stopLoss: 10,
-    takeProfit: 10,
-  },
-  moderate: {
-    label: 'Moderate',
-    icon: Scale,
-    color: 'yellow',
-    minEdge: 2.5,
-    maxPosition: 350,
-    stopLoss: 15,
-    takeProfit: 15,
-  },
-  aggressive: {
-    label: 'Aggressive',
-    icon: Flame,
-    color: 'red',
-    minEdge: 1.5,
-    maxPosition: 1000,
-    stopLoss: 25,
-    takeProfit: 25,
-  },
+  conservative: { label: 'Conservative', icon: Shield, minEdge: 5, maxPosition: 100, stopLoss: 10, takeProfit: 10 },
+  moderate: { label: 'Moderate', icon: Scale, minEdge: 2.5, maxPosition: 350, stopLoss: 15, takeProfit: 15 },
+  aggressive: { label: 'Aggressive', icon: Flame, minEdge: 1.5, maxPosition: 1000, stopLoss: 25, takeProfit: 25 },
 };
+
+// ============================================
+// NAV ITEMS
+// ============================================
+
+const NAV_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'scanner', label: 'Scanner', icon: Zap, active: true },
+  { id: 'history', label: 'Trade History', icon: History },
+  { id: 'accounts', label: 'Accounts', icon: Wallet },
+  { id: 'education', label: 'Education', icon: BookOpen },
+  { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+];
 
 // ============================================
 // STORAGE KEYS
@@ -132,197 +74,29 @@ const STORAGE_KEYS = {
 };
 
 // ============================================
-// COMPONENTS
+// MOCK DATA
 // ============================================
 
-// Platform Card
-function PlatformCard({ platform, selected, onToggle }) {
-  const isLive = platform.status === 'live';
-  
-  return (
-    <button
-      onClick={() => isLive && onToggle(platform.id)}
-      disabled={!isLive}
-      className={`relative p-4 rounded-xl border-2 transition-all text-left ${
-        selected
-          ? 'border-indigo-500 bg-indigo-500/20'
-          : isLive
-            ? 'border-slate-600 bg-slate-800/50 hover:border-slate-500'
-            : 'border-slate-700 bg-slate-800/30 opacity-60 cursor-not-allowed'
-      }`}
-    >
-      {/* Selection indicator */}
-      {selected && (
-        <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
-          <Check className="w-3 h-3 text-white" />
-        </div>
-      )}
-      
-      {/* Status badge */}
-      <div className={`absolute top-2 right-2 ${selected ? 'hidden' : ''}`}>
-        {isLive ? (
-          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
-            LIVE
-          </span>
-        ) : (
-          <span className="px-2 py-0.5 bg-slate-600/50 text-slate-400 text-xs rounded-full">
-            SOON
-          </span>
-        )}
-      </div>
-      
-      <div className="text-2xl mb-2">{platform.icon}</div>
-      <h3 className="font-semibold text-white">{platform.name}</h3>
-      <p className="text-xs text-gray-400 mb-2">{platform.description}</p>
-      <div className="space-y-0.5">
-        {platform.details.map((detail, i) => (
-          <p key={i} className="text-xs text-gray-500">{detail}</p>
-        ))}
-      </div>
-    </button>
-  );
-}
-
-// Risk Preset Button
-function RiskPresetButton({ preset, presetKey, selected, onClick }) {
-  const Icon = preset.icon;
-  const colors = {
-    green: 'border-green-500 bg-green-500/20 text-green-400',
-    yellow: 'border-yellow-500 bg-yellow-500/20 text-yellow-400',
-    red: 'border-red-500 bg-red-500/20 text-red-400',
-  };
-  
-  return (
-    <button
-      onClick={() => onClick(presetKey)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-        selected
-          ? colors[preset.color]
-          : 'border-slate-600 bg-slate-800/50 text-gray-400 hover:border-slate-500'
-      }`}
-    >
-      <Icon className="w-4 h-4" />
-      <span className="font-medium">{preset.label}</span>
-    </button>
-  );
-}
-
-// Signal Card
-function SignalCard({ signal, onTrade, onDismiss }) {
-  const [expanded, setExpanded] = useState(false);
-  
-  const getTimeAgo = (timestamp) => {
-    if (!timestamp) return 'Just now';
-    const seconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours}h ago`;
-  };
-  
-  const strengthColors = {
-    strong: 'border-green-500 bg-green-500/10',
-    moderate: 'border-yellow-500 bg-yellow-500/10',
-    weak: 'border-gray-500 bg-gray-500/10',
-  };
-  
-  const isStale = signal.timestamp && 
-    (Date.now() - new Date(signal.timestamp).getTime()) > 10 * 60 * 1000; // 10 min
-  
-  return (
-    <div className={`rounded-xl border-2 p-4 ${strengthColors[signal.strength]} ${isStale ? 'opacity-50' : ''}`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            {signal.direction === 'up' ? (
-              <TrendingUp className="w-4 h-4 text-green-400" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-red-400" />
-            )}
-            <span className="font-semibold text-white">{signal.ticker}</span>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-              signal.strength === 'strong' ? 'bg-green-500/30 text-green-300' :
-              signal.strength === 'moderate' ? 'bg-yellow-500/30 text-yellow-300' :
-              'bg-gray-500/30 text-gray-300'
-            }`}>
-              {signal.strength.toUpperCase()}
-            </span>
-            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
-              {signal.platform}
-            </span>
-          </div>
-          
-          <p className="text-sm text-gray-300 mt-2">{signal.reason}</p>
-          
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-            <span>Edge: <span className="text-green-400 font-medium">{signal.edge?.toFixed(1)}%</span></span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {getTimeAgo(signal.timestamp)}
-              {isStale && <span className="text-yellow-500">(stale)</span>}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-1 ml-2">
-          <button
-            onClick={() => onDismiss(signal.id)}
-            className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400"
-            title="Dismiss"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="p-1 hover:bg-white/10 rounded"
-          >
-            {expanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-          </button>
-        </div>
-      </div>
-
-      {expanded && (
-        <div className="mt-4 pt-4 border-t border-gray-600">
-          <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-            <div>
-              <span className="text-gray-400">Entry Price:</span>
-              <span className="ml-2 font-medium text-white">{signal.entryPrice}¢</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Target:</span>
-              <span className="ml-2 font-medium text-green-400">{signal.targetPrice}¢</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Side:</span>
-              <span className={`ml-2 font-medium ${signal.side === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
-                {signal.side}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-400">Expected:</span>
-              <span className="ml-2 font-medium text-green-400">+${signal.expectedProfit?.toFixed(2)}</span>
-            </div>
-          </div>
-          <button
-            onClick={() => onTrade(signal)}
-            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors text-sm"
-          >
-            Place Trade
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
+const generateMockMarkets = () => [
+  { ticker: 'KXBTC-26JAN', title: 'Bitcoin > $100k', last: 62, change: 5.40, changePct: 3.03, volume: 199000, edge: 5.2, platform: 'kalshi' },
+  { ticker: 'KXETH-26JAN', title: 'Ethereum > $4k', last: 58, change: 2.15, changePct: 1.64, volume: 145000, edge: 4.5, platform: 'kalshi' },
+  { ticker: 'KXFED-26JAN', title: 'Fed Rate Cut', last: 45, change: -1.20, changePct: -2.14, volume: 87000, edge: 3.8, platform: 'kalshi' },
+  { ticker: 'KXSPY-26JAN', title: 'S&P 500 > 5000', last: 72, change: 0.50, changePct: 0.22, volume: 234000, edge: 2.1, platform: 'kalshi' },
+  { ticker: 'KXGOLD-26JAN', title: 'Gold > $2100', last: 55, change: 6.81, changePct: 2.11, volume: 156000, edge: 3.2, platform: 'kalshi' },
+  { ticker: 'KXTSLA-26JAN', title: 'Tesla > $300', last: 48, change: 13.85, changePct: 3.30, volume: 289000, edge: 4.1, platform: 'kalshi' },
+  { ticker: 'KXNVDA-26JAN', title: 'NVIDIA > $600', last: 67, change: 9.88, changePct: 1.64, volume: 312000, edge: 2.8, platform: 'kalshi' },
+  { ticker: 'KXAAPL-26JAN', title: 'Apple > $200', last: 71, change: 1.18, changePct: 0.48, volume: 178000, edge: 1.9, platform: 'kalshi' },
+  { ticker: 'KXMSFT-26JAN', title: 'Microsoft > $450', last: 63, change: -9.72, changePct: -2.14, volume: 145000, edge: 3.5, platform: 'kalshi' },
+  { ticker: 'KXAMZN-26JAN', title: 'Amazon > $200', last: 54, change: 0.50, changePct: 0.22, volume: 198000, edge: 2.4, platform: 'kalshi' },
+];
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
 
-const ScannerDashboard = () => {
-  // Load saved preferences from localStorage
-  const loadSavedPreferences = () => {
+const ScannerDashboard = ({ onNavigate }) => {
+  // Load saved preferences
+  const loadSavedPrefs = () => {
     try {
       const platforms = localStorage.getItem(STORAGE_KEYS.PLATFORMS);
       const risk = localStorage.getItem(STORAGE_KEYS.RISK_SETTINGS);
@@ -333,16 +107,12 @@ const ScannerDashboard = () => {
         signals: signals ? JSON.parse(signals) : [],
       };
     } catch {
-      return {
-        platforms: ['kalshi'],
-        risk: { preset: 'moderate', ...RISK_PRESETS.moderate },
-        signals: [],
-      };
+      return { platforms: ['kalshi'], risk: { preset: 'moderate', ...RISK_PRESETS.moderate }, signals: [] };
     }
   };
-  
-  const saved = loadSavedPreferences();
-  
+
+  const saved = loadSavedPrefs();
+
   // State
   const [selectedPlatforms, setSelectedPlatforms] = useState(saved.platforms);
   const [riskPreset, setRiskPreset] = useState(saved.risk.preset || 'moderate');
@@ -353,77 +123,58 @@ const ScannerDashboard = () => {
     takeProfit: saved.risk.takeProfit || 15,
   });
   const [signals, setSignals] = useState(saved.signals);
-  const [scannerStatus, setScannerStatus] = useState({ running: false, lastScan: null });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('setup'); // 'setup' | 'signals'
+  const [markets, setMarkets] = useState([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannerStats, setScannerStats] = useState({ count: 0, lastScan: null });
 
   // Auth headers
   const getAuthHeaders = () => {
     const token = localStorage.getItem('ttm_access_token') || localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
   };
 
-  // Save preferences to localStorage whenever they change
+  // Save preferences
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PLATFORMS, JSON.stringify(selectedPlatforms));
   }, [selectedPlatforms]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RISK_SETTINGS, JSON.stringify({
-      preset: riskPreset,
-      ...riskSettings
-    }));
+    localStorage.setItem(STORAGE_KEYS.RISK_SETTINGS, JSON.stringify({ preset: riskPreset, ...riskSettings }));
   }, [riskPreset, riskSettings]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SIGNALS, JSON.stringify(signals));
   }, [signals]);
 
-  // Toggle platform selection
-  const togglePlatform = (platformId) => {
-    setSelectedPlatforms(prev => 
-      prev.includes(platformId)
-        ? prev.filter(p => p !== platformId)
-        : [...prev, platformId]
+  // Toggle platform
+  const togglePlatform = (id) => {
+    const platform = PLATFORMS.find(p => p.id === id);
+    if (platform?.status !== 'live') return;
+    setSelectedPlatforms(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     );
   };
 
-  // Apply risk preset
-  const applyPreset = (presetKey) => {
-    setRiskPreset(presetKey);
-    if (presetKey !== 'custom') {
-      const preset = RISK_PRESETS[presetKey];
-      setRiskSettings({
-        minEdge: preset.minEdge,
-        maxPosition: preset.maxPosition,
-        stopLoss: preset.stopLoss,
-        takeProfit: preset.takeProfit,
-      });
-    }
-  };
-
-  // Update individual risk setting (switches to custom)
-  const updateRiskSetting = (key, value) => {
-    setRiskPreset('custom');
-    setRiskSettings(prev => ({ ...prev, [key]: value }));
+  // Apply preset
+  const applyPreset = (key) => {
+    setRiskPreset(key);
+    const preset = RISK_PRESETS[key];
+    setRiskSettings({
+      minEdge: preset.minEdge,
+      maxPosition: preset.maxPosition,
+      stopLoss: preset.stopLoss,
+      takeProfit: preset.takeProfit,
+    });
   };
 
   // Start scanner
   const startScanner = async () => {
-    if (selectedPlatforms.length === 0) {
-      setError('Please select at least one platform');
-      return;
-    }
-    
-    setLoading(true);
-    setError(null);
+    if (selectedPlatforms.length === 0) return;
+    setIsScanning(true);
+    setMarkets(generateMockMarkets());
     
     try {
-      const response = await fetch(`${API_BASE}/api/scanner/start`, {
+      await fetch(`${API_BASE}/api/scanner/start`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -434,362 +185,435 @@ const ScannerDashboard = () => {
           takeProfit: riskSettings.takeProfit,
         })
       });
-
-      if (response.ok) {
-        setScannerStatus({ running: true, lastScan: new Date().toISOString() });
-        setActiveTab('signals');
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to start scanner');
-      }
     } catch (err) {
-      console.error('Start scanner error:', err);
-      // For demo, still show as running
-      setScannerStatus({ running: true, lastScan: new Date().toISOString() });
-      setActiveTab('signals');
-    } finally {
-      setLoading(false);
+      console.error('Scanner start error:', err);
     }
   };
 
   // Stop scanner
   const stopScanner = async () => {
-    setLoading(true);
+    setIsScanning(false);
     try {
       await fetch(`${API_BASE}/api/scanner/stop`, {
         method: 'POST',
         headers: getAuthHeaders()
       });
-      setScannerStatus({ running: false, lastScan: null });
     } catch (err) {
-      console.error('Stop scanner error:', err);
-      setScannerStatus({ running: false, lastScan: null });
-    } finally {
-      setLoading(false);
+      console.error('Scanner stop error:', err);
     }
   };
 
-  // Fetch scanner status and signals
+  // Fetch status
   const fetchStatus = useCallback(async () => {
+    if (!isScanning) return;
     try {
-      const response = await fetch(`${API_BASE}/api/scanner/status`, {
-        headers: getAuthHeaders()
-      });
+      const response = await fetch(`${API_BASE}/api/scanner/status`, { headers: getAuthHeaders() });
       if (response.ok) {
         const data = await response.json();
-        setScannerStatus({
-          running: data.running,
-          lastScan: data.lastScan,
-        });
-        if (data.signals && data.signals.length > 0) {
+        setScannerStats({ count: data.scanCount || 0, lastScan: data.lastScan });
+        if (data.signals?.length > 0) {
           setSignals(prev => {
             const existingIds = new Set(prev.map(s => s.id));
             const newSignals = data.signals.filter(s => !existingIds.has(s.id));
-            return [...newSignals, ...prev];
+            return [...newSignals, ...prev].slice(0, 10);
           });
         }
       }
     } catch (err) {
-      console.error('Fetch status error:', err);
+      console.error('Status fetch error:', err);
     }
-  }, []);
+  }, [isScanning]);
 
-  // Poll for new signals
+  // Poll for updates
   useEffect(() => {
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 10000); // Poll every 10 seconds
+    if (!isScanning) return;
+    const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
-  }, [fetchStatus]);
+  }, [isScanning, fetchStatus]);
+
+  // Simulate market updates when scanning
+  useEffect(() => {
+    if (!isScanning) return;
+    const interval = setInterval(() => {
+      setMarkets(prev => prev.map(m => ({
+        ...m,
+        last: Math.max(1, Math.min(99, m.last + (Math.random() - 0.5) * 2)),
+        change: m.change + (Math.random() - 0.5),
+        changePct: m.changePct + (Math.random() - 0.5) * 0.5,
+      })));
+      setScannerStats(prev => ({ ...prev, count: prev.count + 1, lastScan: new Date().toISOString() }));
+      
+      // Randomly generate signals
+      if (Math.random() > 0.7) {
+        const market = markets[Math.floor(Math.random() * markets.length)];
+        if (market && market.edge >= riskSettings.minEdge) {
+          const newSignal = {
+            id: Date.now().toString(),
+            ticker: market.ticker,
+            title: market.title,
+            edge: market.edge,
+            direction: Math.random() > 0.5 ? 'up' : 'down',
+            side: Math.random() > 0.5 ? 'YES' : 'NO',
+            entryPrice: market.last,
+            strength: market.edge > 4 ? 'strong' : market.edge > 2.5 ? 'moderate' : 'weak',
+            timestamp: new Date().toISOString(),
+            platform: market.platform,
+          };
+          setSignals(prev => [newSignal, ...prev].slice(0, 10));
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isScanning, markets, riskSettings.minEdge]);
 
   // Handle trade
   const handleTrade = (signal) => {
-    console.log('Trade signal:', signal);
-    alert(`Opening trade ticket for ${signal.ticker} - ${signal.side} @ ${signal.entryPrice}¢`);
+    alert(`Opening trade: ${signal.ticker} - ${signal.side} @ ${signal.entryPrice}¢`);
   };
 
-  // Dismiss signal
-  const dismissSignal = (signalId) => {
-    setSignals(prev => prev.filter(s => s.id !== signalId));
+  // Time ago helper
+  const timeAgo = (timestamp) => {
+    if (!timestamp) return '';
+    const seconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
   };
-
-  // Clear all signals
-  const clearAllSignals = () => {
-    setSignals([]);
-  };
-
-  // Remove stale signals (older than 30 min)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
-      setSignals(prev => prev.filter(s => 
-        !s.timestamp || new Date(s.timestamp).getTime() > thirtyMinAgo
-      ));
-    }, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Activity className="w-8 h-8 text-indigo-400" />
-              Market Scanner
-            </h1>
-            <p className="text-gray-400 mt-1">
-              {scannerStatus.running 
-                ? '🟢 Scanning continuously in background...'
-                : 'Configure platforms and risk settings, then start scanning'
-              }
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {scannerStatus.running ? (
+    <div className="h-screen w-full bg-slate-900 text-white flex flex-col overflow-hidden">
+      {/* TOP BAR - Platform Selection */}
+      <div className="h-12 bg-slate-800 border-b border-slate-700 flex items-center px-4 shrink-0">
+        <span className="text-sm font-medium text-gray-400 mr-4">My Screeners</span>
+        <div className="flex items-center gap-2">
+          {PLATFORMS.map(platform => {
+            const isSelected = selectedPlatforms.includes(platform.id);
+            const isLive = platform.status === 'live';
+            return (
               <button
-                onClick={stopScanner}
-                disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                key={platform.id}
+                onClick={() => togglePlatform(platform.id)}
+                disabled={!isLive}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-all ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white'
+                    : isLive
+                      ? 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                      : 'bg-slate-800 text-gray-500 cursor-not-allowed'
+                }`}
               >
-                <Square className="w-5 h-5" />
-                Stop Scanner
+                <span>{platform.icon}</span>
+                <span>{platform.name}</span>
+                {isSelected && <Check className="w-3 h-3" />}
+                {!isLive && <span className="text-[10px] text-gray-500 ml-1">Soon</span>}
               </button>
-            ) : (
-              <button
-                onClick={startScanner}
-                disabled={loading || selectedPlatforms.length === 0}
-                className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors disabled:opacity-50"
-              >
-                <Play className="w-5 h-5" />
-                Start Scanner
-              </button>
-            )}
-          </div>
+            );
+          })}
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            {error}
-            <button onClick={() => setError(null)} className="ml-auto text-red-300 hover:text-white">✕</button>
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-slate-800/50 p-1 rounded-lg inline-flex">
-          <button
-            onClick={() => setActiveTab('setup')}
-            className={`px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'setup'
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-slate-700'
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            Setup
-          </button>
-          <button
-            onClick={() => setActiveTab('signals')}
-            className={`px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              activeTab === 'signals'
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-slate-700'
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            Signals
-            {signals.length > 0 && (
-              <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
-                {signals.length}
+        
+        {/* Scanner Status */}
+        <div className="ml-auto flex items-center gap-4 text-sm">
+          {isScanning && (
+            <>
+              <span className="flex items-center gap-1 text-green-400">
+                <RefreshCw className="w-3 h-3 animate-spin" />
+                Scanning...
               </span>
-            )}
-          </button>
+              <span className="text-gray-400">Scans: {scannerStats.count}</span>
+            </>
+          )}
         </div>
+      </div>
 
-        {/* Setup Tab */}
-        {activeTab === 'setup' && (
-          <div className="space-y-6">
-            {/* Platforms Section */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5 text-indigo-400" />
-                Select Platforms to Scan
-              </h2>
-              <p className="text-gray-400 text-sm mb-4">
-                Choose which prediction markets the scanner should monitor. More platforms = more opportunities.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {PLATFORMS.map(platform => (
-                  <PlatformCard
-                    key={platform.id}
-                    platform={platform}
-                    selected={selectedPlatforms.includes(platform.id)}
-                    onToggle={togglePlatform}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Risk Settings Section */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-indigo-400" />
-                Risk Settings
-              </h2>
-              
-              {/* Presets */}
-              <div className="flex flex-wrap gap-3 mb-6">
-                {Object.entries(RISK_PRESETS).map(([key, preset]) => (
-                  <RiskPresetButton
-                    key={key}
-                    preset={preset}
-                    presetKey={key}
-                    selected={riskPreset === key}
-                    onClick={applyPreset}
-                  />
-                ))}
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* LEFT SIDEBAR */}
+        <div className="w-56 bg-slate-800 border-r border-slate-700 flex flex-col shrink-0">
+          {/* Navigation */}
+          <div className="p-2 border-b border-slate-700">
+            {NAV_ITEMS.map(item => {
+              const Icon = item.icon;
+              return (
                 <button
-                  onClick={() => setRiskPreset('custom')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-                    riskPreset === 'custom'
-                      ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
-                      : 'border-slate-600 bg-slate-800/50 text-gray-400 hover:border-slate-500'
+                  key={item.id}
+                  onClick={() => item.id !== 'scanner' && onNavigate?.(item.id)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
+                    item.active
+                      ? 'bg-indigo-600/20 text-indigo-400'
+                      : 'text-gray-400 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
-                  <Settings className="w-4 h-4" />
-                  <span className="font-medium">Custom</span>
+                  <Icon className="w-4 h-4" />
+                  {item.label}
                 </button>
-              </div>
+              );
+            })}
+          </div>
 
-              {/* Custom Settings */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Min Edge Required</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={riskSettings.minEdge}
-                      onChange={(e) => updateRiskSetting('minEdge', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pr-8"
-                      step="0.5"
-                      min="0"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Max Position Size</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                    <input
-                      type="number"
-                      value={riskSettings.maxPosition}
-                      onChange={(e) => updateRiskSetting('maxPosition', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7"
-                      step="50"
-                      min="0"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Stop Loss</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">-</span>
-                    <input
-                      type="number"
-                      value={riskSettings.stopLoss}
-                      onChange={(e) => updateRiskSetting('stopLoss', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7 pr-8"
-                      step="5"
-                      min="0"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Take Profit</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">+</span>
-                    <input
-                      type="number"
-                      value={riskSettings.takeProfit}
-                      onChange={(e) => updateRiskSetting('takeProfit', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7 pr-8"
-                      step="5"
-                      min="0"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
-                  </div>
-                </div>
-              </div>
+          {/* Custom Screener Settings */}
+          <div className="flex-1 p-3 overflow-y-auto">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Custom Screener</h3>
+            
+            {/* Risk Presets */}
+            <div className="space-y-1 mb-4">
+              {Object.entries(RISK_PRESETS).map(([key, preset]) => {
+                const Icon = preset.icon;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => applyPreset(key)}
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
+                      riskPreset === key
+                        ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/50'
+                        : 'text-gray-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Start Button (mobile friendly) */}
-            <div className="flex justify-center">
-              <button
-                onClick={startScanner}
-                disabled={loading || selectedPlatforms.length === 0}
-                className="flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 rounded-xl font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Play className="w-6 h-6" />
-                Start Scanning
-              </button>
+            {/* Settings Inputs */}
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-gray-500 uppercase">Min Edge Required</label>
+                <div className="flex items-center mt-1">
+                  <input
+                    type="number"
+                    value={riskSettings.minEdge}
+                    onChange={(e) => setRiskSettings(prev => ({ ...prev, minEdge: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm"
+                    step="0.5"
+                  />
+                  <span className="ml-1 text-gray-500 text-xs">%</span>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-gray-500 uppercase">Max Position Size</label>
+                <div className="flex items-center mt-1">
+                  <span className="mr-1 text-gray-500 text-xs">$</span>
+                  <input
+                    type="number"
+                    value={riskSettings.maxPosition}
+                    onChange={(e) => setRiskSettings(prev => ({ ...prev, maxPosition: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm"
+                    step="50"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-gray-500 uppercase">Stop Loss</label>
+                <div className="flex items-center mt-1">
+                  <span className="mr-1 text-gray-500 text-xs">-</span>
+                  <input
+                    type="number"
+                    value={riskSettings.stopLoss}
+                    onChange={(e) => setRiskSettings(prev => ({ ...prev, stopLoss: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm"
+                    step="5"
+                  />
+                  <span className="ml-1 text-gray-500 text-xs">%</span>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-gray-500 uppercase">Take Profit</label>
+                <div className="flex items-center mt-1">
+                  <span className="mr-1 text-gray-500 text-xs">+</span>
+                  <input
+                    type="number"
+                    value={riskSettings.takeProfit}
+                    onChange={(e) => setRiskSettings(prev => ({ ...prev, takeProfit: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm"
+                    step="5"
+                  />
+                  <span className="ml-1 text-gray-500 text-xs">%</span>
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Signals Tab */}
-        {activeTab === 'signals' && (
-          <div>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-400" />
-                Trading Signals
-                {scannerStatus.running && (
-                  <RefreshCw className="w-4 h-4 text-green-400 animate-spin" style={{ animationDuration: '3s' }} />
+          {/* Start/Stop Button */}
+          <div className="p-3 border-t border-slate-700">
+            <button
+              onClick={isScanning ? stopScanner : startScanner}
+              disabled={selectedPlatforms.length === 0}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded font-semibold transition-colors disabled:opacity-50 ${
+                isScanning
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              {isScanning ? (
+                <>
+                  <Square className="w-4 h-4" />
+                  Stop Scan
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Start Scan
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* MAIN AREA */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Results Header */}
+          <div className="h-8 bg-slate-800/50 border-b border-slate-700 flex items-center px-4 text-xs text-gray-400 shrink-0">
+            <span>Displaying {markets.length} of {markets.length} Results</span>
+            <span className="mx-4">•</span>
+            <span>Generated at {new Date().toLocaleTimeString()}</span>
+            <button
+              onClick={() => setMarkets(generateMockMarkets())}
+              className="ml-4 flex items-center gap-1 text-indigo-400 hover:text-indigo-300"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Refresh results
+            </button>
+          </div>
+
+          {/* Markets Table */}
+          <div className="flex-1 overflow-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-800 sticky top-0">
+                <tr className="text-left text-xs text-gray-400 uppercase">
+                  <th className="px-4 py-2 font-medium">Ticker</th>
+                  <th className="px-4 py-2 font-medium">Market</th>
+                  <th className="px-4 py-2 font-medium text-right">Last</th>
+                  <th className="px-4 py-2 font-medium text-right">Change</th>
+                  <th className="px-4 py-2 font-medium text-right">Change %</th>
+                  <th className="px-4 py-2 font-medium text-right">Volume</th>
+                  <th className="px-4 py-2 font-medium text-right">Edge</th>
+                  <th className="px-4 py-2 font-medium text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {markets.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                      {isScanning ? 'Scanning for markets...' : 'Click "Start Scan" to begin'}
+                    </td>
+                  </tr>
+                ) : (
+                  markets.map((market, i) => (
+                    <tr
+                      key={market.ticker}
+                      className={`border-b border-slate-700/50 hover:bg-slate-800/50 ${
+                        i % 2 === 0 ? 'bg-slate-800/20' : ''
+                      }`}
+                    >
+                      <td className="px-4 py-2 font-medium text-indigo-400">{market.ticker}</td>
+                      <td className="px-4 py-2 text-gray-300">{market.title}</td>
+                      <td className="px-4 py-2 text-right font-mono">{market.last.toFixed(0)}¢</td>
+                      <td className={`px-4 py-2 text-right font-mono ${market.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {market.change >= 0 ? '+' : ''}{market.change.toFixed(2)}
+                      </td>
+                      <td className={`px-4 py-2 text-right font-mono ${market.changePct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {market.changePct >= 0 ? '+' : ''}{market.changePct.toFixed(2)}%
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-gray-300">
+                        ${(market.volume / 1000).toFixed(0)}K
+                      </td>
+                      <td className={`px-4 py-2 text-right font-mono ${
+                        market.edge >= riskSettings.minEdge ? 'text-green-400' : 'text-gray-500'
+                      }`}>
+                        {market.edge.toFixed(1)}%
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <a
+                          href={`https://kalshi.com/markets/${market.ticker}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-400 hover:text-indigo-300"
+                        >
+                          <ExternalLink className="w-4 h-4 inline" />
+                        </a>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </h2>
+              </tbody>
+            </table>
+          </div>
+
+          {/* SIGNALS SECTION */}
+          <div className="h-36 bg-slate-800/50 border-t border-slate-700 shrink-0">
+            <div className="h-7 px-4 flex items-center justify-between border-b border-slate-700 bg-slate-800">
+              <span className="text-xs font-medium text-gray-400 uppercase flex items-center gap-2">
+                <Zap className="w-3 h-3 text-yellow-400" />
+                Signals ({signals.length})
+              </span>
               {signals.length > 0 && (
                 <button
-                  onClick={clearAllSignals}
-                  className="text-sm text-gray-400 hover:text-red-400 flex items-center gap-1"
+                  onClick={() => setSignals([])}
+                  className="text-xs text-gray-500 hover:text-gray-400"
                 >
-                  <Trash2 className="w-4 h-4" />
                   Clear All
                 </button>
               )}
             </div>
-
-            {/* Signals List */}
-            {signals.length === 0 ? (
-              <div className="text-center py-16 bg-slate-800/50 rounded-xl border border-slate-700">
-                <Bell className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">No signals yet</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  {scannerStatus.running 
-                    ? 'Scanner is running. Signals will appear here when opportunities are found.'
-                    : 'Start the scanner to begin finding trading opportunities.'
-                  }
-                </p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {signals.map((signal) => (
-                  <SignalCard
-                    key={signal.id}
-                    signal={signal}
-                    onTrade={handleTrade}
-                    onDismiss={dismissSignal}
-                  />
-                ))}
-              </div>
-            )}
+            
+            <div className="h-[calc(100%-28px)] overflow-x-auto overflow-y-hidden">
+              {signals.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-gray-500 text-sm">
+                  {isScanning ? 'Scanning for signals...' : 'Signals will appear here when scanner is running'}
+                </div>
+              ) : (
+                <div className="flex gap-3 p-3 h-full">
+                  {signals.map(signal => (
+                    <div
+                      key={signal.id}
+                      className={`shrink-0 w-56 h-full rounded-lg border p-3 flex flex-col justify-between ${
+                        signal.strength === 'strong'
+                          ? 'border-green-500/50 bg-green-500/10'
+                          : signal.strength === 'moderate'
+                            ? 'border-yellow-500/50 bg-yellow-500/10'
+                            : 'border-gray-500/50 bg-gray-500/10'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            {signal.direction === 'up' ? (
+                              <TrendingUp className="w-3 h-3 text-green-400" />
+                            ) : (
+                              <TrendingDown className="w-3 h-3 text-red-400" />
+                            )}
+                            <span className="font-semibold text-sm">{signal.ticker}</span>
+                          </div>
+                          <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                            <Clock className="w-2.5 h-2.5" />
+                            {timeAgo(signal.timestamp)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1 truncate">{signal.title}</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs">
+                          <span className="text-green-400">{signal.edge}% edge</span>
+                          <span className={signal.side === 'YES' ? 'text-green-400' : 'text-red-400'}>
+                            {signal.side}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleTrade(signal)}
+                        className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 rounded text-xs font-medium transition-colors"
+                      >
+                        Trade @ {signal.entryPrice}¢
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
