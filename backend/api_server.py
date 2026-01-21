@@ -1208,6 +1208,60 @@ def add_user_trade():
                 'message': 'Live trading requires a Pro subscription'
             }), 403
 
+# === FOR LIVE TRADES: Execute on Kalshi ===
+        if not is_paper and data.get('platform') == 'kalshi':
+            from services.kalshi_service import KalshiClient
+            from models import ConnectedAccount
+            from utils.encryption import decrypt_value
+            
+            # Get user's Kalshi credentials
+            kalshi_account = ConnectedAccount.query.filter_by(
+                user_id=user.id, 
+                platform='kalshi'
+            ).first()
+            
+            if not kalshi_account:
+                return jsonify({
+                    'error': 'No Kalshi Account',
+                    'message': 'Please connect your Kalshi account first'
+                }), 400
+            
+            try:
+                # Decrypt credentials
+                api_key_id = decrypt_value(kalshi_account.api_key_id)
+                api_secret = decrypt_value(kalshi_account.api_secret)
+                
+                # Create Kalshi client
+                client = KalshiClient(api_key_id, api_secret)
+                
+                # Map frontend data to Kalshi order params
+                ticker = data.get('ticker')
+                action = 'buy'
+                side = 'yes' if data.get('type', 'Long') == 'Long' else 'no'
+                count = int(data.get('contracts', 1))
+                price = int(float(data.get('price', 50)) * 100)  # Convert to cents
+                
+                # Place order on Kalshi
+                success, result = client.place_order(
+                    ticker=ticker,
+                    action=action,
+                    side=side,
+                    count=count,
+                    order_type='limit',
+                    price=price
+                )
+                
+                if not success:
+                    return jsonify({
+                        'error': 'Kalshi Order Failed',
+                        'message': result.get('error', 'Failed to place order on Kalshi')
+                    }), 400
+                    
+            except Exception as e:
+                return jsonify({
+                    'error': 'Kalshi API Error',
+                    'message': str(e)
+                }), 500
     # Create new trade in database
     try:
         trade = Trade(
