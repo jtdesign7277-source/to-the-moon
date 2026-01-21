@@ -239,6 +239,7 @@ const Header = ({
     { id: 'leaderboard', label: 'Leaderboard', description: 'Top performing traders', icon: Trophy },
     { id: 'education', label: 'Education', description: 'Learn trading skills', icon: BookOpen },
     { id: 'discover', label: 'Discover', description: 'Explore opportunities', icon: Compass },
+    { id: 'scanner', label: 'Scanner', description: 'Find arbitrage opportunities', icon: Activity },
   ]
 
   // Check if any explore item is active
