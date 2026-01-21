@@ -305,6 +305,26 @@ const Dashboard = ({ onNavigate }) => {
       }
     },
     {
+      label: 'Open Bets',
+      value: openBets.length.toString(),
+      change: displayStats.unrealizedPnl !== 0 ? formatCurrency(displayStats.unrealizedPnl) : '—',
+      positive: displayStats.unrealizedPnl >= 0,
+      icon: Clock,
+      detailIcon: Activity,
+      color: 'teal',
+      details: {
+        title: 'Open Positions',
+        description: 'Active bets currently in your portfolio',
+        metrics: [
+          { label: 'Open Bets', value: openBets.length.toString(), icon: Activity },
+          { label: 'Unrealized P&L', value: formatCurrency(displayStats.unrealizedPnl), icon: DollarSign },
+          { label: 'Total Invested', value: formatCurrency(openBets.reduce((sum, b) => sum + (b.amount || 0), 0)), icon: Target },
+          { label: 'Avg Position', value: openBets.length > 0 ? formatCurrency(openBets.reduce((sum, b) => sum + (b.amount || 0), 0) / openBets.length) : '—', icon: Clock },
+        ],
+        tip: 'Monitor your open positions regularly and set stop-losses to manage risk.'
+      }
+    },
+    {
       label: 'Total Trades',
       value: displayStats.totalTrades.toLocaleString(),
       change: displayStats.openPositions > 0 ? `${displayStats.openPositions} open` : '—',
@@ -448,7 +468,7 @@ const Dashboard = ({ onNavigate }) => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon
           const showChange = stat.change !== '—'

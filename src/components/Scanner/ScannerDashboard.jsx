@@ -1129,11 +1129,9 @@ const ScannerDashboard = ({ onNavigate }) => {
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* CONTROL BUTTONS - Compact row */}
-          <div className="px-3 py-3 shrink-0 mt-auto border-t border-[#E5E7EB] bg-[#F9FAFB]">
-            <div className="flex gap-2">
+            {/* CONTROL BUTTONS - Right below strategy pills */}
+            <div className="flex gap-2 mt-3 pt-3 border-t border-[#E5E7EB]">
               <button
                 onClick={scannerState === 'scanning' ? stopScanning : startScanning}
                 disabled={!canStart}
