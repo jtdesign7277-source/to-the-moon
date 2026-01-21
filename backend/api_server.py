@@ -107,6 +107,10 @@ app.register_blueprint(live_trading_bp)
 from routes.trades import trades_bp
 app.register_blueprint(trades_bp, url_prefix='/api/trades')
 
+# Register scanner blueprint
+from routes.scanner import scanner_bp
+app.register_blueprint(scanner_bp)
+
 # JWT Configuration
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
 JWT_ALGORITHM = 'HS256'

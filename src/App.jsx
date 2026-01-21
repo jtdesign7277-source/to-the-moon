@@ -8,6 +8,7 @@ import {
   BookOpen,
   Compass,
   History,
+  Activity,
 } from 'lucide-react'
 
 // Context
@@ -28,6 +29,8 @@ import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
 import Accounts from './pages/Accounts'
 import StrategyBuilder from './pages/StrategyBuilder'
+
+import ScannerDashboard from './components/Scanner/ScannerDashboard';
 import Leaderboard from './pages/Leaderboard'
 import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
@@ -50,6 +53,12 @@ const NAV_ITEMS = [
     label: 'Trade History',
     shortLabel: 'History',
     icon: History,
+    requiresPro: false,
+  },{
+    id: 'scanner',
+    label: 'Scanner',
+    shortLabel: 'Scan',
+    icon: Activity,
     requiresPro: false,
   },
   {
@@ -94,6 +103,13 @@ const NAV_ITEMS = [
     icon: Compass,
     requiresPro: false,
   },
+  {
+  id: 'scanner',
+  label: 'Scanner',
+  shortLabel: 'Scanner',
+  icon: Activity,
+  requiresPro: false,
+},
 ]
 
 // Page renderer component
@@ -117,6 +133,9 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
       return <StrategyDiscovery />
     case 'legal':
       return <Legal initialTab={legalTab} />
+
+      case 'scanner':
+  return <ScannerDashboard />
     default:
       return <Dashboard onNavigate={onNavigate} />
   }
@@ -147,7 +166,7 @@ const AppContent = () => {
     const token = localStorage.getItem('ttm_access_token')
     if (token) {
       // Verify token and get user info
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
       fetch(`${API_URL}/api/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })

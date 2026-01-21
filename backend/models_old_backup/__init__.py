@@ -64,7 +64,19 @@ class Subscription(db.Model):
         }
 
     @property
+    def     @property
+    def is_active(self):
+        """Check if subscription is currently active."""
+        if self.status != 'active':
+            return False
+        if self.expires_at and self.expires_at < datetime.utcnow():
+            return False
+        return True
+
+    @property
     def is_pro(self):
+        """Check if this is an active Pro subscription."""
+        return self.is_activeis_pro(self):
         return self.tier == 'pro' and self.status == 'active'
 
 

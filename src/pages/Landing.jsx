@@ -14,7 +14,7 @@ import {
 import { trackWaitlistSignup } from '../utils/analytics'
 import LunaChatWidget from '../components/LunaChatWidget'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 // Animated counter hook for stats
 function useAnimatedCounter(target, duration = 2000) {
