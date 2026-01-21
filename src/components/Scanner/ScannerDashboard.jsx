@@ -781,7 +781,6 @@ const ScannerDashboard = ({ onNavigate }) => {
   
   // Open bets UI state (using global openBets from context)
   const [selectedBetSlip, setSelectedBetSlip] = useState(null);
-  const [showOpenBets, setShowOpenBets] = useState(true);
   
   const scanIntervalRef = useRef(null);
   const liveFeedIntervalRef = useRef(null);
@@ -1291,110 +1290,6 @@ const ScannerDashboard = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* OPEN BETS SECTION */}
-          <div className="border-b border-[#E5E7EB] shrink-0">
-            {/* Open Bets Header */}
-            <button
-              onClick={() => setShowOpenBets(!showOpenBets)}
-              className="w-full px-4 py-2.5 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between hover:bg-[#F3F4F6] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-[#10B981]" />
-                <span className="font-semibold text-[#111827] text-sm">Open Bets</span>
-                <span className="px-1.5 py-0.5 bg-[#10B981] text-white text-[10px] font-bold rounded-full min-w-[20px] text-center">
-                  {openBets.length}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-[11px] text-[#6B7280]">
-                  <span className="text-[#10B981] font-semibold">
-                    +${openBets.reduce((sum, bet) => sum + Math.max(0, bet.profit), 0).toFixed(2)}
-                  </span>
-                  <span className="mx-1">•</span>
-                  <span className="text-[#EF4444] font-semibold">
-                    ${openBets.reduce((sum, bet) => sum + Math.min(0, bet.profit), 0).toFixed(2)}
-                  </span>
-                </div>
-                {showOpenBets ? (
-                  <ChevronDown className="w-4 h-4 text-[#6B7280]" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-[#6B7280]" />
-                )}
-              </div>
-            </button>
-
-            {/* Open Bets List */}
-            {showOpenBets && (
-              <div className="max-h-[200px] overflow-y-auto bg-white">
-                {openBets.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Receipt className="w-8 h-8 text-[#D1D5DB] mb-2" />
-                    <p className="text-[#6B7280] text-sm">No open positions</p>
-                    <p className="text-[#9CA3AF] text-xs mt-1">Place a trade to see it here</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-[#E5E7EB]">
-                    {openBets.map((bet) => (
-                      <div
-                        key={bet.id}
-                        onClick={() => setSelectedBetSlip(bet)}
-                        className="px-4 py-3 flex items-center gap-4 hover:bg-[#F9FAFB] cursor-pointer transition-colors group"
-                      >
-                        {/* Position Indicator */}
-                        <div className={`w-1 h-10 rounded-full ${
-                          bet.profit >= 0 ? 'bg-[#10B981]' : 'bg-[#EF4444]'
-                        }`} />
-                        
-                        {/* Main Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-[#111827] text-sm">{bet.ticker}</span>
-                            <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded ${
-                              bet.platform === 'Kalshi' ? 'bg-[#DBEAFE] text-[#1D4ED8]' :
-                              bet.platform === 'Polymarket' ? 'bg-[#EDE9FE] text-[#7C3AED]' :
-                              'bg-[#FFEDD5] text-[#C2410C]'
-                            }`}>
-                              {bet.platform}
-                            </span>
-                            <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                              bet.position === 'YES' ? 'bg-[#D1FAE5] text-[#059669]' : 'bg-[#FEE2E2] text-[#DC2626]'
-                            }`}>
-                              {bet.position}
-                            </span>
-                          </div>
-                          <p className="text-[#6B7280] text-xs truncate mt-0.5">{bet.event}</p>
-                        </div>
-                        
-                        {/* Position Size */}
-                        <div className="text-right shrink-0">
-                          <p className="text-[#111827] font-medium text-sm">{bet.contracts} contracts</p>
-                          <p className="text-[#6B7280] text-[11px]">@ ${bet.entryPrice.toFixed(2)}</p>
-                        </div>
-                        
-                        {/* P&L */}
-                        <div className="text-right shrink-0 w-20">
-                          <p className={`font-mono font-bold text-sm ${bet.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                            {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
-                          </p>
-                          <p className={`text-[11px] font-medium ${bet.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                            {bet.profit >= 0 ? '+' : ''}{bet.profitPercent.toFixed(1)}%
-                          </p>
-                        </div>
-                        
-                        {/* View Button */}
-                        <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="px-2 py-1 text-[10px] font-medium bg-[#F3F4F6] text-[#374151] rounded border border-[#E5E7EB]">
-                            View Slip
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* ARBITRAGE DATA GRID - Below live feed */}
           <div className="flex-1 overflow-auto">
             <table className="w-full min-w-[900px] text-[13px]">
@@ -1532,6 +1427,124 @@ const ScannerDashboard = ({ onNavigate }) => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* ============================================ */}
+        {/* RIGHT PANEL - 280px FIXED, OPEN BETS */}
+        {/* ============================================ */}
+        <div className="w-72 bg-white border-l border-[#E5E7EB] flex flex-col shrink-0 overflow-hidden">
+          
+          {/* OPEN BETS HEADER */}
+          <div className="px-3 py-2 border-b border-[#E5E7EB] shrink-0 bg-[#F9FAFB]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-[#10B981]" />
+                <span className="text-[13px] font-semibold text-[#111827]">Open Bets</span>
+                <span className="px-1.5 py-0.5 bg-[#10B981] text-white text-[10px] font-bold rounded-full min-w-5 text-center">
+                  {openBets.length}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* P&L SUMMARY */}
+          <div className="px-3 py-2 border-b border-[#E5E7EB] shrink-0 bg-white">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[#6B7280]">Unrealized P&L</span>
+              <span className={`font-mono font-bold ${
+                openBets.reduce((sum, bet) => sum + bet.profit, 0) >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
+              }`}>
+                {openBets.reduce((sum, bet) => sum + bet.profit, 0) >= 0 ? '+' : ''}
+                ${openBets.reduce((sum, bet) => sum + bet.profit, 0).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] mt-1">
+              <span className="text-[#6B7280]">Total Invested</span>
+              <span className="font-mono text-[#111827]">
+                ${openBets.reduce((sum, bet) => sum + (bet.entryPrice * bet.contracts), 0).toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* OPEN BETS LIST */}
+          <div className="flex-1 overflow-y-auto">
+            {openBets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                <Receipt className="w-10 h-10 text-[#D1D5DB] mb-3" />
+                <p className="text-[#6B7280] text-sm font-medium">No open positions</p>
+                <p className="text-[#9CA3AF] text-xs mt-1">
+                  Scan for opportunities and place trades
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#E5E7EB]">
+                {openBets.map((bet) => (
+                  <div
+                    key={bet.id}
+                    onClick={() => setSelectedBetSlip(bet)}
+                    className="px-3 py-2.5 hover:bg-[#F9FAFB] cursor-pointer transition-colors group"
+                  >
+                    {/* Row 1: Ticker + Platform + Position */}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="font-mono font-bold text-[#111827] text-[12px]">{bet.ticker}</span>
+                      <span className={`px-1 py-0.5 text-[9px] font-semibold rounded ${
+                        bet.platform === 'Kalshi' ? 'bg-[#DBEAFE] text-[#1D4ED8]' :
+                        bet.platform === 'Polymarket' ? 'bg-[#EDE9FE] text-[#7C3AED]' :
+                        'bg-[#FFEDD5] text-[#C2410C]'
+                      }`}>
+                        {bet.platform}
+                      </span>
+                      <span className={`px-1 py-0.5 text-[9px] font-bold rounded ${
+                        bet.position === 'YES' ? 'bg-[#D1FAE5] text-[#059669]' : 'bg-[#FEE2E2] text-[#DC2626]'
+                      }`}>
+                        {bet.position}
+                      </span>
+                      {/* P&L indicator bar */}
+                      <div className={`ml-auto w-1.5 h-6 rounded-full ${
+                        bet.profit >= 0 ? 'bg-[#10B981]' : 'bg-[#EF4444]'
+                      }`} />
+                    </div>
+                    
+                    {/* Row 2: Event (truncated) */}
+                    <p className="text-[#6B7280] text-[11px] truncate mb-1.5">{bet.event}</p>
+                    
+                    {/* Row 3: Contracts + Entry + P&L */}
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] text-[#6B7280]">
+                        <span className="font-medium text-[#111827]">{bet.contracts}</span> @ ${bet.entryPrice.toFixed(2)}
+                      </div>
+                      <div className={`text-right`}>
+                        <span className={`font-mono font-bold text-[12px] ${bet.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                          {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
+                        </span>
+                        <span className={`ml-1 text-[10px] ${bet.profit >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                          ({bet.profit >= 0 ? '+' : ''}{bet.profitPercent.toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Hover: View Slip */}
+                    <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="w-full block text-center px-2 py-1.5 text-[10px] font-medium bg-[#F3F4F6] text-[#374151] rounded border border-[#E5E7EB]">
+                        View Bet Slip
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* QUICK ACTIONS FOOTER */}
+          <div className="px-3 py-2 border-t border-[#E5E7EB] bg-[#F9FAFB] shrink-0">
+            <button
+              onClick={() => onNavigate?.('history')}
+              className="w-full py-2 text-[11px] font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#E5E7EB] rounded-lg transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              View Trade History
+            </button>
           </div>
         </div>
       </div>
