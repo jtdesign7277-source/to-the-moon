@@ -14,13 +14,13 @@ const traders = [
 const getPodiumStyle = (rank) => {
   switch (rank) {
     case 1:
-      return 'bg-gradient-to-br from-yellow-400 to-amber-500'
+      return 'bg-linear-to-br from-yellow-400 to-amber-500'
     case 2:
-      return 'bg-gradient-to-br from-gray-300 to-gray-400'
+      return 'bg-linear-to-br from-gray-300 to-gray-400'
     case 3:
-      return 'bg-gradient-to-br from-amber-600 to-amber-700'
+      return 'bg-linear-to-br from-amber-600 to-amber-700'
     default:
-      return 'bg-gradient-to-br from-indigo-500 to-purple-600'
+      return 'bg-linear-to-br from-indigo-500 to-purple-600'
   }
 }
 

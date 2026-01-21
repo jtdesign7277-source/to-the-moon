@@ -66,7 +66,6 @@ const StrategyBacktestResults = ({
 
   // Generate cumulative P&L data from monthly returns
   const cumulativePnLData = (() => {
-    let cumulative = 0
     const baseMonths = monthlyReturns.length > 0
       ? monthlyReturns
       : [
@@ -78,15 +77,17 @@ const StrategyBacktestResults = ({
           { month: 'Dec', pnl: Math.round(profitLoss * 0.16) },
         ]
 
-    return baseMonths.map(item => {
-      cumulative += item.pnl
-      return {
+    return baseMonths.reduce((acc, item) => {
+      const prevCumulative = acc.length > 0 ? acc[acc.length - 1].cumulative : 0
+      const newCumulative = prevCumulative + item.pnl
+      acc.push({
         month: item.month,
         pnl: item.pnl,
-        cumulative,
-        capital: initialCapital + cumulative,
-      }
-    })
+        cumulative: newCumulative,
+        capital: initialCapital + newCumulative,
+      })
+      return acc
+    }, [])
   })()
 
   // Win/Loss distribution data
@@ -152,7 +153,7 @@ const StrategyBacktestResults = ({
   return (
     <div className="space-y-6">
       {/* Header with Strategy Name */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -462,7 +463,7 @@ const StrategyBacktestResults = ({
               </tr>
             </thead>
             <tbody>
-              {cumulativePnLData.map((month, index) => (
+              {cumulativePnLData.map((month, _index) => (
                 <tr key={month.month} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 text-sm font-medium text-gray-900">{month.month} 2024</td>
                   <td className={`py-3 px-4 text-sm text-right font-medium ${month.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -552,7 +553,7 @@ const StrategyBacktestResults = ({
       {/* Disclaimer */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
         <div className="flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <h4 className="font-medium text-amber-800 mb-1">Important Disclaimer</h4>
             <p className="text-sm text-amber-700">

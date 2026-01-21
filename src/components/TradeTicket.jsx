@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle, ShieldCheck } from 'lucide-react'
-import { liveTradeApi } from '../utils/api'
+// import { liveTradeApi } from '../utils/api' // Reserved for future use
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -37,13 +37,13 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
     setSubmitError(null)
     
     const entryPrice = (opportunity.price / 100).toFixed(2)
-    const exitPrice = position === 'yes' 
+    const _exitPrice = position === 'yes' 
       ? '1.00'  // Max payout for YES
       : '0.00'  // Max payout for NO
     
     // Calculate potential P&L
     const shares = parseFloat(amount) / (opportunity.price / 100)
-    const potentialPnl = position === 'yes'
+    const _potentialPnl = position === 'yes'
       ? (shares * 1.00 - parseFloat(amount)).toFixed(2)
       : (parseFloat(amount) - shares * 0).toFixed(2)
 
@@ -83,7 +83,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
         throw new Error(errorData.message || 'Failed to place trade')
       }
 
-      const result = await response.json()
+      const _result = await response.json()
       
       setSubmitSuccess(true)
       onSubmit?.({
@@ -130,7 +130,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white">
+        <div className="bg-linear-to-r from-indigo-500 to-purple-600 p-4 text-white">
           <div className="flex items-start justify-between">
             <div className="flex-1 pr-4">
               <div className="flex items-center gap-2 mb-2">
@@ -242,7 +242,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
 
           {/* Payout Estimate */}
           {amount && parseFloat(amount) > 0 && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+            <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
               <div className="flex items-center gap-2 text-green-700 mb-2">
                 <Percent className="w-4 h-4" />
                 <span className="text-sm font-medium">Potential Return</span>
@@ -263,7 +263,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
           {/* Trading Mode Notice */}
           {isLiveMode ? (
             <div className="flex items-start gap-2 text-green-700 bg-green-50 rounded-lg p-3 border border-green-200">
-              <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
               <p className="text-xs">
                 <span className="font-semibold">Live Trade</span> — This will execute with real money on {opportunity.platform}. 
                 Make sure your account is connected and funded.
@@ -271,7 +271,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
             </div>
           ) : (
             <div className="flex items-start gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
-              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
               <p className="text-xs">
                 <span className="font-medium">Paper Trade</span> — No real money will be used. 
                 Switch to Live mode in settings to place real trades.
@@ -282,7 +282,7 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
           {/* Error Display */}
           {submitError && (
             <div className="flex items-start gap-2 text-red-700 bg-red-50 rounded-lg p-3">
-              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
               <p className="text-xs">{submitError}</p>
             </div>
           )}

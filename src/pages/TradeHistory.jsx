@@ -375,7 +375,7 @@ const TradeHistory = () => {
 
       {/* Performance Insights */}
       {trades.length > 0 && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+        <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
               <Zap className="w-5 h-5 text-indigo-600" />

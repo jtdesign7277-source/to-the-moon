@@ -248,48 +248,53 @@ export function SubscriptionProvider({ children }) {
 // ============================================
 // HOOK
 // ============================================
+// Standalone hook for when used outside provider
+function useStandaloneSubscription() {
+  const [tier, setTier] = useState(SUBSCRIPTION_TIERS.FREE);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      if (!tokenManager.isAuthenticated()) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await subscriptionApi.getStatus();
+        setTier(response.data.tier || SUBSCRIPTION_TIERS.FREE);
+      } catch {
+        setTier(SUBSCRIPTION_TIERS.FREE);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStatus();
+  }, []);
+
+  return {
+    tier,
+    isPro: tier === SUBSCRIPTION_TIERS.PRO,
+    isFree: tier === SUBSCRIPTION_TIERS.FREE,
+    isLoading,
+    loading: isLoading,
+    error: null,
+    subscription: null,
+    upgradeToPro: async () => {},
+    cancelSubscription: async () => {},
+    refresh: () => {},
+    clearError: () => {},
+    requiresPro: () => true,
+    canAccess: () => tier === SUBSCRIPTION_TIERS.PRO,
+  };
+}
+
 export function useSubscription() {
   const context = useContext(SubscriptionContext);
+  const standalone = useStandaloneSubscription();
 
   // If used outside provider, return standalone hook behavior
   if (!context) {
-    // Fallback standalone implementation
-    const [tier, setTier] = useState(SUBSCRIPTION_TIERS.FREE);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-      const fetchStatus = async () => {
-        if (!tokenManager.isAuthenticated()) {
-          setIsLoading(false);
-          return;
-        }
-        try {
-          const response = await subscriptionApi.getStatus();
-          setTier(response.data.tier || SUBSCRIPTION_TIERS.FREE);
-        } catch {
-          setTier(SUBSCRIPTION_TIERS.FREE);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchStatus();
-    }, []);
-
-    return {
-      tier,
-      isPro: tier === SUBSCRIPTION_TIERS.PRO,
-      isFree: tier === SUBSCRIPTION_TIERS.FREE,
-      isLoading,
-      loading: isLoading,
-      error: null,
-      subscription: null,
-      upgradeToPro: async () => {},
-      cancelSubscription: async () => {},
-      refresh: () => {},
-      clearError: () => {},
-      requiresPro: () => true,
-      canAccess: () => tier === SUBSCRIPTION_TIERS.PRO,
-    };
+    return standalone;
   }
 
   return context;

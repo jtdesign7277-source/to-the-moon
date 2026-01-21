@@ -219,7 +219,7 @@ const LunaChatWidget = ({ user }) => {
       {showLunaChat && (
         <div className="fixed bottom-6 right-6 z-50 w-[380px] max-h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300 border border-gray-100">
           {/* Header */}
-          <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 px-4 py-3 flex items-center justify-between relative overflow-hidden">
+          <div className="bg-linear-to-r from-slate-800 via-slate-900 to-slate-800 px-4 py-3 flex items-center justify-between relative overflow-hidden">
             {/* Subtle background pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute w-1 h-1 bg-white rounded-full top-2 left-8 animate-pulse" />
@@ -262,7 +262,7 @@ const LunaChatWidget = ({ user }) => {
 
           {/* Human Support Header - shows when in human mode */}
           {talkToHuman && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2">
+            <div className="bg-linear-to-r from-emerald-500 to-teal-500 px-4 py-2">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-white" />
                 <span className="text-white text-sm font-medium">Human Support Mode</span>
@@ -274,14 +274,14 @@ const LunaChatWidget = ({ user }) => {
           {/* Chat Messages */}
           <div 
             ref={chatContainerRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white min-h-[300px] max-h-[380px]"
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-linear-to-b from-slate-50 to-white min-h-[300px] max-h-[380px]"
           >
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   {msg.role === 'assistant' && (
-                    <div className="flex-shrink-0 mt-1">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <div className="shrink-0 mt-1">
+                      <div className="w-7 h-7 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         <LunaAvatar size="xs" />
                       </div>
                     </div>
@@ -289,7 +289,7 @@ const LunaChatWidget = ({ user }) => {
                   <div>
                     <div className={`px-4 py-2.5 rounded-2xl text-sm ${
                       msg.role === 'user'
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
+                        ? 'bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
                         : 'bg-white border border-gray-200 text-gray-700 rounded-bl-md shadow-sm'
                     }`}>
                       <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -308,8 +308,8 @@ const LunaChatWidget = ({ user }) => {
             {isTyping && (
               <div className="flex justify-start">
                 <div className="flex gap-2 max-w-[85%]">
-                  <div className="flex-shrink-0 mt-1">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <div className="shrink-0 mt-1">
+                    <div className="w-7 h-7 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                       <LunaAvatar size="xs" />
                     </div>
                   </div>
@@ -365,7 +365,7 @@ const LunaChatWidget = ({ user }) => {
                 <button
                   onClick={talkToHuman ? handleSendHumanMessage : handleSendMessage}
                   disabled={!message.trim() || isTyping}
-                  className="p-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-lg transition-all ml-1"
+                  className="p-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-lg transition-all ml-1"
                 >
                   <Send className="w-4 h-4" />
                 </button>

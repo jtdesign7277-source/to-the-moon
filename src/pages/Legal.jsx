@@ -414,7 +414,7 @@ const RiskDisclaimer = () => (
   <div>
     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+        <AlertTriangle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
         <div>
           <p className="font-bold text-red-800">
             IMPORTANT: PLEASE READ THIS ENTIRE DOCUMENT CAREFULLY

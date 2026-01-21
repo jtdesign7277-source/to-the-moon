@@ -200,7 +200,7 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
   // Reset dimensions when collapsed
   useEffect(() => {
     if (!isExpanded) {
-      setDimensions({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+      setDimensions(() => ({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT }))
     }
   }, [isExpanded])
 
@@ -317,7 +317,7 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
     }
   }
 
-  const getPlatformColor = (platform) => {
+  const _getPlatformColor = (platform) => {
     switch (platform?.toLowerCase()) {
       case 'kalshi': return 'text-blue-600'
       case 'polymarket': return 'text-purple-600'

@@ -50,7 +50,7 @@ const Marketplace = () => {
             className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group"
           >
             {/* Card Header with Gradient */}
-            <div className="h-32 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center relative overflow-hidden">
+            <div className="h-32 bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJsLTItMmMwIDAtMiAyLTIgNHMyIDQgMiA0IDIgMiA0IDJsMiAyYzAgMCAyLTIgMi00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20" />
               <Activity className="w-12 h-12 text-white/80 group-hover:scale-110 transition-transform" />
               <span className="absolute top-3 right-3 px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs text-white font-medium">

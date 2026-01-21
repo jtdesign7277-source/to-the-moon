@@ -49,9 +49,9 @@ const TradeSlipViewer = ({ trade, onClose }) => {
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className={`p-4 text-white ${
-          isOpen ? 'bg-gradient-to-r from-indigo-500 to-purple-600' :
-          isWin ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-          'bg-gradient-to-r from-red-500 to-rose-600'
+          isOpen ? 'bg-linear-to-r from-indigo-500 to-purple-600' :
+          isWin ? 'bg-linear-to-r from-green-500 to-emerald-600' :
+          'bg-linear-to-r from-red-500 to-rose-600'
         }`}>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -146,14 +146,14 @@ const TradeSlipViewer = ({ trade, onClose }) => {
           {/* Trade Mode Notice */}
           {isPaperTrade ? (
             <div className="flex items-center gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
-              <DollarSign className="w-4 h-4 flex-shrink-0" />
+              <DollarSign className="w-4 h-4 shrink-0" />
               <p className="text-xs">
                 This is a <span className="font-medium">paper trade</span> — no real money involved.
               </p>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg p-3 border border-green-200">
-              <DollarSign className="w-4 h-4 flex-shrink-0" />
+              <DollarSign className="w-4 h-4 shrink-0" />
               <p className="text-xs">
                 This is a <span className="font-semibold">live trade</span> executed on {platform}.
               </p>

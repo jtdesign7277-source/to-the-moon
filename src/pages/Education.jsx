@@ -162,7 +162,7 @@ const Education = () => {
               <h4 className="font-semibold text-gray-900 mb-3">The Backtesting Process</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <span className="text-sm font-bold text-indigo-600">1</span>
                   </div>
                   <div>
@@ -171,7 +171,7 @@ const Education = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <span className="text-sm font-bold text-indigo-600">2</span>
                   </div>
                   <div>
@@ -180,7 +180,7 @@ const Education = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <span className="text-sm font-bold text-indigo-600">3</span>
                   </div>
                   <div>
@@ -189,7 +189,7 @@ const Education = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <span className="text-sm font-bold text-indigo-600">4</span>
                   </div>
                   <div>
@@ -227,26 +227,26 @@ const Education = () => {
               like trading based on tomorrow's news.
             </p>
 
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
+            <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-indigo-600" />
                 How We Eliminate Hindsight Bias
               </h4>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                   <span><strong>Entry decisions use only early price data</strong> - We look at the first third of a market's price history, not the resolution</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                   <span><strong>No knowledge of outcomes</strong> - The strategy doesn't know if a market resolved YES or NO when deciding to enter</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                   <span><strong>Realistic entry logic</strong> - Trades are based on price signals and momentum, not future events</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                   <span><strong>Win rates are NOT 100%</strong> - Our strategies lose trades, just like in real markets</span>
                 </li>
               </ul>
@@ -397,7 +397,7 @@ if trend > min_edge:
               It answers: "How much return am I getting for each unit of risk I'm taking?"
             </p>
 
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
+            <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
               <h4 className="font-semibold text-gray-900 mb-3">The Formula</h4>
               <div className="bg-white p-4 rounded-lg border border-green-200 mb-4">
                 <p className="font-mono text-lg text-center text-gray-800">
@@ -572,27 +572,27 @@ if trend > min_edge:
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
+            <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
               <h4 className="font-semibold text-gray-900 mb-3">Our Recommendations</h4>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                   <span><strong>Start with paper trading</strong> - Test strategies with virtual money first</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                   <span><strong>Use proper position sizing</strong> - Never risk more than you can afford to lose</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                   <span><strong>Diversify across strategies</strong> - Don't put all capital in one approach</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                   <span><strong>Monitor live performance</strong> - If results diverge significantly, pause and investigate</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                   <span><strong>Expect drawdowns</strong> - Even good strategies have losing streaks</span>
                 </li>
               </ul>
@@ -641,7 +641,7 @@ if trend > min_edge:
       </div>
 
       {/* Final CTA */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white">
+      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-3">Ready to Explore Strategies?</h2>
         <p className="text-indigo-100 mb-6 max-w-xl mx-auto">
           Now that you understand our methodology, explore our pre-built strategies

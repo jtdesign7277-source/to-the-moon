@@ -138,7 +138,7 @@ const AVAILABLE_PLATFORMS = [
 const Accounts = () => {
   const { tradingMode, setTradingMode, isPro, openUpgradeModal } = useApp()
   const { user } = useAuth()
-  const [showAddAccountModal, setShowAddAccountModal] = useState(false)
+  const [_showAddAccountModal, setShowAddAccountModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [apiCredentials, setApiCredentials] = useState({})
   const [showSecrets, setShowSecrets] = useState({})
@@ -301,7 +301,7 @@ const Accounts = () => {
     ? formatCurrency(paperPortfolio.currentBalance)
     : formatCurrency(accounts.reduce((sum, acc) => sum + (acc.rawBalance || 0), 0))
 
-  const openAddAccount = () => {
+  const _openAddAccount = () => {
     setShowAddAccountModal(true)
     setSelectedPlatform(null)
     setApiCredentials({})
@@ -434,7 +434,7 @@ const Accounts = () => {
       {tradingMode === 'paper' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
             <div>
               <h3 className="font-medium text-yellow-800">Paper Trading Mode Active</h3>
               <p className="text-sm text-yellow-700 mt-1">
@@ -596,7 +596,7 @@ const Accounts = () => {
             </div>
             
             {/* Ready for Live Trading CTA */}
-            <div className="mt-6 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+            <div className="mt-6 p-5 bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
               <div className="flex items-center gap-4">
                 <div className="text-3xl">🚀</div>
                 <div className="flex-1">
@@ -680,7 +680,7 @@ const Accounts = () => {
               </div>
 
               {/* Total Balance Summary */}
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
+              <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-indigo-100 text-sm">Total Across All Platforms</p>
@@ -788,7 +788,7 @@ const Accounts = () => {
                               <ol className="text-sm text-gray-600 space-y-1.5">
                                 {platform.setupSteps.map((step, i) => (
                                   <li key={i} className="flex items-start gap-2">
-                                    <span className="flex-shrink-0 w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
+                                    <span className="shrink-0 w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
                                       {i + 1}
                                     </span>
                                     <span className="pt-0.5">{step}</span>
@@ -823,7 +823,7 @@ const Accounts = () => {
                                         onChange={(e) => handleCredentialChange(field.id, e.target.value)}
                                         placeholder={field.placeholder}
                                         rows={6}
-                                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white font-mono text-xs resize-none"
+                                        className="w-full px-4 py-3 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white font-mono resize-none"
                                         style={{ whiteSpace: 'pre-wrap' }}
                                       />
                                     ) : (
@@ -856,7 +856,7 @@ const Accounts = () => {
                             {/* Security Notice */}
                             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                               <div className="flex items-start gap-2">
-                                <Shield className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                <Shield className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
                                 <div>
                                   <p className="text-xs font-medium text-green-800">Your credentials are secure</p>
                                   <p className="text-xs text-green-700 mt-0.5">
@@ -870,7 +870,7 @@ const Accounts = () => {
                             {connectionError && (
                               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                                 <div className="flex items-start gap-2">
-                                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                                   <div>
                                     <p className="text-xs font-medium text-red-800">Connection Failed</p>
                                     <p className="text-xs text-red-700 mt-0.5">

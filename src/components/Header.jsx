@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
@@ -121,7 +121,7 @@ const Header = ({
     { role: 'assistant', content: "Hi! 👋 I'm Luna, your AI assistant. Ask me anything about To The Moon!" }
   ])
   const [isAiTyping, setIsAiTyping] = useState(false)
-  const [talkToHuman, setTalkToHuman] = useState(false)
+  const [_talkToHuman, _setTalkToHuman] = useState(false)
   const chatContainerRef = useRef(null)
   const exploreRef = useRef(null)
   const profileRef = useRef(null)
@@ -147,7 +147,7 @@ const Header = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleSendAiMessage = async () => {
+  const _handleSendAiMessage = async () => {
     if (!supportMessage.trim() || isAiTyping) return
     
     const userMessage = supportMessage.trim()
@@ -183,7 +183,7 @@ const Header = ({
     }
   }
 
-  const handleSendHumanMessage = () => {
+  const _handleSendHumanMessage = () => {
     if (!supportMessage.trim()) return
     const subject = encodeURIComponent('Support Request - To The Moon')
     const body = encodeURIComponent(`From: ${user?.email}\n\nMessage:\n${supportMessage}`)
@@ -250,7 +250,7 @@ const Header = ({
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="xl:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -262,7 +262,7 @@ const Header = ({
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleNavigation('dashboard', false)}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
+              <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
                 <Rocket className="w-5 h-5 text-white" />
               </div>
               <span className="font-bold text-xl text-gray-900 hidden sm:block">
@@ -350,7 +350,7 @@ const Header = ({
           </nav>
 
           {/* Right side controls */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {/* Trading Mode Toggle */}
             <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
               <button
@@ -383,14 +383,14 @@ const Header = ({
 
             {/* Subscription Status / Upgrade Button */}
             {isPro ? (
-              <span className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-lg flex items-center gap-1.5 shadow-lg shadow-indigo-500/25">
+              <span className="px-3 py-1.5 bg-linear-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-lg flex items-center gap-1.5 shadow-lg shadow-indigo-500/25">
                 <Crown className="w-4 h-4" />
                 <span className="hidden sm:inline">PRO</span>
               </span>
             ) : (
               <button
                 onClick={openUpgradeModal}
-                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
+                className="px-3 sm:px-4 py-2 bg-linear-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
               >
                 <Crown className="w-4 h-4" />
                 <span className="hidden sm:inline">Upgrade</span>
@@ -405,7 +405,7 @@ const Header = ({
                   className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="relative">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+                    <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shrink-0 text-white font-semibold text-sm">
                       {(user.username || user.email)?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
@@ -422,7 +422,7 @@ const Header = ({
                   }`}
                 >
                   {/* Header with user info */}
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
+                  <div className="bg-linear-to-r from-indigo-500 to-purple-600 p-4">
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -515,7 +515,7 @@ const Header = ({
                         </div>
 
                         {/* Subscription Status */}
-                        <div className={`p-3 rounded-lg ${isPro ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100' : 'bg-gray-50'}`}>
+                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-50 to-purple-50 border border-indigo-100' : 'bg-gray-50'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600' : 'text-gray-400'}`} />
@@ -540,7 +540,7 @@ const Header = ({
                     {activeTab === 'suggest' && (
                       <div className="space-y-3 animate-in fade-in duration-200">
                         {/* Suggest Header - matches Support header style */}
-                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-3 -mt-1">
+                        <div className="bg-linear-to-r from-amber-500 to-orange-500 rounded-xl p-3 -mt-1">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
                               <Lightbulb className="w-6 h-6 text-white" />
@@ -566,13 +566,13 @@ const Header = ({
                           value={suggestionMessage}
                           onChange={(e) => setSuggestionMessage(e.target.value)}
                           placeholder="Describe your feature idea in detail..."
-                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-gradient-to-b from-gray-50 to-white"
+                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-linear-to-b from-gray-50 to-white"
                         />
                         
                         <button
                           onClick={handleSendSuggestion}
                           disabled={!suggestionMessage.trim()}
-                          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                          className="w-full py-3 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                         >
                           <Send className="w-4 h-4" />
                           Submit Suggestion

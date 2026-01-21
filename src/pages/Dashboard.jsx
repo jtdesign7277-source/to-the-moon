@@ -379,7 +379,7 @@ const Dashboard = ({ onNavigate }) => {
 
       {/* Pro Upgrade Banner */}
       {!isPro && (
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-lg shadow-indigo-500/25">
+        <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-lg shadow-indigo-500/25">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -743,11 +743,11 @@ const Dashboard = ({ onNavigate }) => {
           >
             {/* Header */}
             <div className={`px-6 py-4 ${
-              selectedStat.color === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-              selectedStat.color === 'red' ? 'bg-gradient-to-r from-red-500 to-rose-600' :
-              selectedStat.color === 'indigo' ? 'bg-gradient-to-r from-indigo-500 to-purple-600' :
-              selectedStat.color === 'purple' ? 'bg-gradient-to-r from-purple-500 to-violet-600' :
-              'bg-gradient-to-r from-amber-500 to-orange-600'
+              selectedStat.color === 'green' ? 'bg-linear-to-r from-green-500 to-emerald-600' :
+              selectedStat.color === 'red' ? 'bg-linear-to-r from-red-500 to-rose-600' :
+              selectedStat.color === 'indigo' ? 'bg-linear-to-r from-indigo-500 to-purple-600' :
+              selectedStat.color === 'purple' ? 'bg-linear-to-r from-purple-500 to-violet-600' :
+              'bg-linear-to-r from-amber-500 to-orange-600'
             } text-white`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -802,7 +802,7 @@ const Dashboard = ({ onNavigate }) => {
             </div>
 
             {/* Pro Tip */}
-            <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-t border-indigo-100">
+            <div className="px-6 py-4 bg-linear-to-r from-indigo-50 to-purple-50 border-t border-indigo-100">
               <div className="flex items-start gap-2">
                 <Zap className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
                 <p className="text-sm text-indigo-700">{selectedStat.details.tip}</p>

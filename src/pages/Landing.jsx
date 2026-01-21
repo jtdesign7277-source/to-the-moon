@@ -110,7 +110,7 @@ export default function Landing({ onEnterApp, onLegal }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-indigo-950 to-gray-900 overflow-hidden">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse" />
@@ -123,7 +123,7 @@ export default function Landing({ onEnterApp, onLegal }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
+              <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
                 <Rocket className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-white">ToTheMoon</span>
@@ -146,14 +146,14 @@ export default function Landing({ onEnterApp, onLegal }) {
             <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-md group-hover:bg-indigo-500/30 transition-colors" />
             <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse relative z-10" />
             <span className="text-sm text-indigo-300 font-medium relative z-10">Early Beta - Limited Spots</span>
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity" />
+            <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity" />
           </div>
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             Automate Your Trading
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Go To The Moon
             </span>
           </h1>
@@ -186,7 +186,7 @@ export default function Landing({ onEnterApp, onLegal }) {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {status === 'loading' ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -273,16 +273,16 @@ export default function Landing({ onEnterApp, onLegal }) {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Hover glow effect */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`} />
+                <div className={`absolute inset-0 bg-linear-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`} />
 
-                <div className={`relative w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 shadow-lg ${feature.shadowColor} group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`relative w-12 h-12 bg-linear-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 shadow-lg ${feature.shadowColor} group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="relative text-lg font-semibold text-white mb-2 group-hover:text-white transition-colors">{feature.title}</h3>
                 <p className="relative text-gray-400 text-sm leading-relaxed">{feature.description}</p>
 
                 {/* Bottom accent line */}
-                <div className={`absolute bottom-0 left-6 right-6 h-0.5 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-50 transition-opacity duration-300 rounded-full`} />
+                <div className={`absolute bottom-0 left-6 right-6 h-0.5 bg-linear-to-r ${feature.color} opacity-0 group-hover:opacity-50 transition-opacity duration-300 rounded-full`} />
               </div>
             ))}
           </div>
@@ -295,9 +295,9 @@ export default function Landing({ onEnterApp, onLegal }) {
           <div className="grid sm:grid-cols-3 gap-8 lg:gap-12">
             {/* Stat 1 - Waitlist */}
             <div className="relative group text-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-purple-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-indigo-600/10 to-purple-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
               <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-colors">
-                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-2">
                   {waitlistCount}+
                 </div>
                 <div className="text-gray-400 font-medium">Beta Waitlist</div>
@@ -310,9 +310,9 @@ export default function Landing({ onEnterApp, onLegal }) {
 
             {/* Stat 2 - Volume */}
             <div className="relative group text-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-blue-600/10 to-cyan-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
               <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-colors">
-                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
                   ${volumeCount}M+
                 </div>
                 <div className="text-gray-400 font-medium">Paper Traded Volume</div>
@@ -325,9 +325,9 @@ export default function Landing({ onEnterApp, onLegal }) {
 
             {/* Stat 3 - Templates */}
             <div className="relative group text-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-purple-600/10 to-pink-600/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
               <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-colors">
-                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                   {templatesCount}+
                 </div>
                 <div className="text-gray-400 font-medium">Strategy Templates</div>
@@ -344,7 +344,7 @@ export default function Landing({ onEnterApp, onLegal }) {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-indigo-500/30 rounded-3xl p-8 sm:p-12 lg:p-16">
+          <div className="relative overflow-hidden bg-linear-to-br from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-indigo-500/30 rounded-3xl p-8 sm:p-12 lg:p-16">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
@@ -382,7 +382,7 @@ export default function Landing({ onEnterApp, onLegal }) {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <Rocket className="w-5 h-5 text-white" />
               </div>
               <div>

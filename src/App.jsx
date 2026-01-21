@@ -141,25 +141,25 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
   }
 }
 
+// Helper to determine initial view based on URL
+const getInitialView = () => {
+  if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
+    return 'admin'
+  }
+  if (window.location.pathname === '/reset-password' || window.location.search.includes('token=')) {
+    return 'auth'
+  }
+  return 'landing'
+}
+
 // Main app content (needs to be inside AppProvider)
 const AppContent = () => {
-  const [view, setView] = useState('landing') // 'landing' | 'auth' | 'app' | 'admin' | 'legal'
+  const [view, setView] = useState(getInitialView) // 'landing' | 'auth' | 'app' | 'admin' | 'legal'
   const [user, setUser] = useState(null)
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [legalTab, setLegalTab] = useState('terms')
   const { isPro, openUpgradeModal, setIsPro } = useApp()
-
-  // Check for admin route or reset-password route on mount
-  useEffect(() => {
-    if (window.location.pathname === '/admin' || window.location.hash === '#admin') {
-      setView('admin')
-    }
-    // Check for password reset token in URL
-    if (window.location.pathname === '/reset-password' || window.location.search.includes('token=')) {
-      setView('auth')
-    }
-  }, [])
 
   // Check for existing auth on mount
   useEffect(() => {

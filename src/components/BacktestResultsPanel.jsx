@@ -3,7 +3,7 @@
  * Displays comprehensive backtest results with charts and metrics
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   AreaChart,
   Area,
@@ -80,7 +80,7 @@ const generateTradeDistribution = (stats) => {
 
   // Simulate trade distribution buckets
   const avgWin = Math.abs(stats.avgWin || 50)
-  const avgLoss = Math.abs(stats.avgLoss || 30)
+  const _avgLoss = Math.abs(stats.avgLoss || 30)
 
   return [
     { range: `$0-${Math.round(avgWin * 0.5)}`, wins: Math.round(stats.totalTrades * 0.15), losses: Math.round(stats.totalTrades * 0.08) },
@@ -107,7 +107,7 @@ const RiskBadge = ({ level }) => {
 }
 
 // Metric card component
-const MetricCard = ({ icon: Icon, label, value, subValue, trend, color = 'indigo' }) => {
+const MetricCard = ({ icon: _Icon, label, value, subValue, trend, color = 'indigo' }) => {
   const colorStyles = {
     indigo: 'bg-indigo-50 text-indigo-600',
     green: 'bg-green-50 text-green-600',
@@ -166,7 +166,7 @@ const BacktestResultsPanel = ({
   initialCapital = 10000,
 }) => {
   const [activeTab, setActiveTab] = useState('overview')
-  const [showDetails, setShowDetails] = useState(false)
+  const [_showDetails, _setShowDetails] = useState(false)
 
   // Use strategy data or provided stats
   const stats = backtestStats || strategy?.backtestStats || {}
@@ -520,7 +520,7 @@ const BacktestResultsPanel = ({
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-100">
-                      {cumulativeData.slice(1).map((row, index) => (
+                      {cumulativeData.slice(1).map((row, _index) => (
                         <tr key={row.month} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.month}</td>
                           <td className={`px-4 py-3 text-sm text-right font-medium ${
@@ -640,7 +640,7 @@ const BacktestResultsPanel = ({
       {/* Disclaimer */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+          <Info className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-medium text-gray-600">Important Disclaimer</p>
             <p className="text-xs text-gray-500 mt-1">

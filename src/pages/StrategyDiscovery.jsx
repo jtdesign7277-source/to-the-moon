@@ -264,7 +264,7 @@ const ComparisonPanel = ({ strategies, onRemove, onClose }) => {
         <div className="p-6 overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {/* Radar Chart */}
-            <div className="w-80 h-64 flex-shrink-0">
+            <div className="w-80 h-64 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#e5e7eb" />
@@ -361,7 +361,7 @@ const StrategyDetailModal = ({ strategy, onClose, onFork }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
       <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600">
+        <div className="p-6 border-b border-gray-100 bg-linear-to-r from-indigo-500 to-purple-600">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <div className="text-5xl bg-white/20 rounded-xl p-3">{strategy.icon}</div>
@@ -521,7 +521,7 @@ const StrategyDetailModal = ({ strategy, onClose, onFork }) => {
           </button>
           <button
             onClick={() => onFork(strategy)}
-            className="flex-1 px-4 py-3 text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-colors font-medium flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 text-white bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-colors font-medium flex items-center justify-center gap-2"
           >
             <GitFork className="w-4 h-4" />
             Fork & Customize

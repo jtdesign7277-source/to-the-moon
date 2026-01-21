@@ -1093,10 +1093,11 @@ const StrategyBuilder = () => {
       case 1: return customStrategy.name.length > 0 && customStrategy.type
       case 2: return customStrategy.markets.length > 0
       case 3: return customStrategy.entryConditions.length > 0
-      case 4:
+      case 4: {
         // Check if at least one advanced exit condition is enabled
         const hasAdvancedExit = Object.values(customStrategy.advancedExitConditions || {}).some(c => c.enabled)
         return hasAdvancedExit
+      }
       default: return true
     }
   }
@@ -1677,7 +1678,7 @@ const StrategyBuilder = () => {
               )}
             </div>
           ) : (
-            <div className="h-80 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+            <div className="h-80 bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
               <div className="text-center">
                 <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 font-medium">Select a template or create your own</p>
@@ -1943,7 +1944,7 @@ const StrategyBuilder = () => {
                 className={`w-full py-3 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
                   capitalError || deploySettings.capital <= 0 || isLoadingBalance
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500'
+                    : 'bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500'
                 }`}
               >
                 <Rocket className="w-5 h-5" />
@@ -2121,7 +2122,7 @@ const StrategyBuilder = () => {
                                 </div>
                               </button>
                               {isEnabled && (
-                                <Check className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                                <Check className="w-5 h-5 text-indigo-600 shrink-0" />
                               )}
                             </div>
 
@@ -2169,7 +2170,7 @@ const StrategyBuilder = () => {
                   <div className="border-t border-gray-200 pt-6">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                           <GitBranch className="w-4 h-4" />
                           Conditional Rules (If-Then)
                         </label>
@@ -2194,7 +2195,7 @@ const StrategyBuilder = () => {
                           return (
                             <div
                               key={rule.id}
-                              className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200"
+                              className="p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200"
                             >
                               <div className="flex items-center justify-between mb-3">
                                 <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded">
@@ -2214,7 +2215,7 @@ const StrategyBuilder = () => {
                                 <select
                                   value={rule.trigger}
                                   onChange={(e) => updateConditionalRule(rule.id, 'trigger', e.target.value)}
-                                  className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                  className="flex-1 min-w-35 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 >
                                   {RULE_TRIGGERS.map(t => (
                                     <option key={t.id} value={t.id}>{t.icon} {t.label}</option>
@@ -2259,7 +2260,7 @@ const StrategyBuilder = () => {
                                 <select
                                   value={rule.action}
                                   onChange={(e) => updateConditionalRule(rule.id, 'action', e.target.value)}
-                                  className="flex-1 min-w-[160px] px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  className="flex-1 min-w-40 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                   {RULE_ACTIONS.map(a => (
                                     <option key={a.id} value={a.id}>{a.icon} {a.label}</option>
@@ -2459,7 +2460,7 @@ const StrategyBuilder = () => {
               ) : (
                 <button
                   onClick={saveCustomStrategy}
-                  className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center gap-2"
+                  className="px-6 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center gap-2"
                 >
                   <Zap className="w-4 h-4" />
                   {editingStrategyId ? 'Save Changes' : 'Create Strategy'}

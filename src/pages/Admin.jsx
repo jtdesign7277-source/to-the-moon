@@ -125,11 +125,11 @@ export default function Admin({ onBack }) {
   // Login screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-gray-900 via-indigo-950 to-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
             <div className="flex items-center justify-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function Admin({ onBack }) {
               <button
                 type="submit"
                 disabled={loading || !adminKey}
-                className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
@@ -190,7 +190,7 @@ export default function Admin({ onBack }) {
 
   // Admin dashboard
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-indigo-950 to-gray-900 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -217,7 +217,7 @@ export default function Admin({ onBack }) {
             <button
               onClick={exportCSV}
               disabled={waitlist.length === 0}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl text-white font-medium transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl text-white font-medium transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               Export CSV
@@ -309,7 +309,7 @@ export default function Admin({ onBack }) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                             {entry.email.charAt(0).toUpperCase()}
                           </div>
                           <span className="text-white">{entry.email}</span>
