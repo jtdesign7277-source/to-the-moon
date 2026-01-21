@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   TrendingUp, TrendingDown, Check, X, Clock, Calendar, DollarSign,
   Target, Activity, Filter, Search, ChevronDown, Download, BarChart3,
@@ -10,24 +10,91 @@ import { trackPageView } from '../utils/analytics'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 const TradeHistory = () => {
-  const { tradingMode, isPro } = useApp()
-  const [trades, setTrades] = useState([])
+  const { 
+    tradingMode, 
+    isPro,
+    // Global state
+    openBets,
+    tradeHistory: globalTradeHistory,
+    portfolioStats,
+    deleteTrade,
+  } = useApp()
+  
+  const [apiTrades, setApiTrades] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState('all') // all, won, lost, open
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest') // newest, oldest, pnl-high, pnl-low
-  const [stats, setStats] = useState({
-    totalTrades: 0,
-    wonTrades: 0,
-    lostTrades: 0,
-    openTrades: 0,
-    winRate: 0,
-    totalPnl: 0,
-    avgWin: 0,
-    avgLoss: 0,
-    bestTrade: 0,
-    worstTrade: 0,
-  })
+
+  // Merge global trade history with API trades
+  const trades = useMemo(() => {
+    // Convert open bets to trade format for "open" filter
+    const openPositions = openBets.map(bet => ({
+      id: bet.id,
+      pair: bet.ticker,
+      event: bet.event,
+      platform: bet.platform,
+      type: bet.position,
+      entry: bet.entryPrice,
+      exit: bet.currentPrice,
+      pnl: `${bet.profit >= 0 ? '+' : ''}$${bet.profit.toFixed(2)}`,
+      pnlValue: bet.profit,
+      status: 'Open',
+      timestamp: bet.placedAt,
+      strategy: bet.strategy,
+      contracts: bet.contracts,
+    }))
+    
+    // Convert closed trades from global history
+    const closedTrades = globalTradeHistory.map(trade => ({
+      id: trade.id,
+      pair: trade.ticker,
+      event: trade.event,
+      platform: trade.platform,
+      type: trade.position,
+      entry: trade.entryPrice,
+      exit: trade.exitPrice,
+      pnl: `${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}`,
+      pnlValue: trade.pnl,
+      status: trade.status === 'won' ? 'Won' : 'Lost',
+      timestamp: trade.settledAt,
+      strategy: trade.strategy,
+      contracts: trade.contracts,
+      outcome: trade.outcome,
+    }))
+    
+    // Merge with API trades (dedupe by id)
+    const allTrades = [...openPositions, ...closedTrades]
+    const tradeIds = new Set(allTrades.map(t => t.id))
+    const uniqueApiTrades = apiTrades.filter(t => !tradeIds.has(t.id))
+    
+    return [...allTrades, ...uniqueApiTrades]
+  }, [openBets, globalTradeHistory, apiTrades])
+
+  // Calculate stats from merged data
+  const stats = useMemo(() => {
+    const wonTrades = trades.filter(t => t.status === 'Won')
+    const lostTrades = trades.filter(t => t.status === 'Lost')
+    const openTrades = trades.filter(t => t.status === 'Open')
+    const closedTrades = wonTrades.length + lostTrades.length
+    
+    const totalPnl = trades.reduce((sum, t) => sum + (t.pnlValue || 0), 0)
+    const wonPnl = wonTrades.reduce((sum, t) => sum + (t.pnlValue || 0), 0)
+    const lostPnl = lostTrades.reduce((sum, t) => sum + Math.abs(t.pnlValue || 0), 0)
+    
+    return {
+      totalTrades: trades.length,
+      wonTrades: wonTrades.length,
+      lostTrades: lostTrades.length,
+      openTrades: openTrades.length,
+      winRate: closedTrades > 0 ? Math.round((wonTrades.length / closedTrades) * 100) : 0,
+      totalPnl,
+      avgWin: wonTrades.length > 0 ? wonPnl / wonTrades.length : 0,
+      avgLoss: lostTrades.length > 0 ? lostPnl / lostTrades.length : 0,
+      bestTrade: portfolioStats.bestTrade,
+      worstTrade: portfolioStats.worstTrade,
+    }
+  }, [trades, portfolioStats])
 
   useEffect(() => {
     trackPageView('Trade History')
@@ -51,8 +118,7 @@ const TradeHistory = () => {
 
       if (response.ok) {
         const data = await response.json()
-        setTrades(data.trades || [])
-        setStats(data.stats || stats)
+        setApiTrades(data.trades || [])
       }
     } catch (error) {
       console.error('Failed to fetch trade history:', error)

@@ -18,7 +18,17 @@ import { Play, Pause, AlertCircle } from 'lucide-react'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const Dashboard = ({ onNavigate }) => {
-  const { tradingMode, isPro, openUpgradeModal, user } = useApp()
+  const { 
+    tradingMode, 
+    isPro, 
+    openUpgradeModal, 
+    user,
+    // Global betting state
+    openBets,
+    tradeHistory,
+    portfolioStats,
+    getPortfolioByPlatform,
+  } = useApp()
 
   // Active strategies state
   const [activeStrategies, setActiveStrategies] = useState([])
@@ -214,31 +224,50 @@ const Dashboard = ({ onNavigate }) => {
     return `${prefix}${value.toFixed(1)}%`
   }
 
+  // Merge API userData with global portfolioStats for display
+  // portfolioStats from context takes precedence for bet-related data
+  const displayStats = {
+    totalPnl: portfolioStats.totalPnl || userData.totalPnl,
+    winRate: portfolioStats.winRate || userData.winRate,
+    totalTrades: portfolioStats.totalTrades + portfolioStats.openPositions || userData.totalTrades,
+    openPositions: portfolioStats.openPositions,
+    winningTrades: portfolioStats.winningTrades,
+    losingTrades: portfolioStats.losingTrades,
+    realizedPnl: portfolioStats.realizedPnl,
+    unrealizedPnl: portfolioStats.unrealizedPnl,
+    bestTrade: portfolioStats.bestTrade,
+    worstTrade: portfolioStats.worstTrade,
+    activeStrategies: userData.activeStrategies,
+    totalBalance: userData.totalBalance,
+    monthlyChange: userData.monthlyChange,
+  }
+
   const stats = [
     {
       label: 'Total P&L',
-      value: formatCurrency(userData.totalPnl),
-      change: formatPercent(userData.monthlyChange),
-      positive: userData.totalPnl >= 0,
+      value: formatCurrency(displayStats.totalPnl),
+      change: formatPercent(displayStats.monthlyChange),
+      positive: displayStats.totalPnl >= 0,
       icon: TrendingUp,
       detailIcon: DollarSign,
-      color: userData.totalPnl >= 0 ? 'green' : 'red',
+      color: displayStats.totalPnl >= 0 ? 'green' : 'red',
       details: {
         title: 'Profit & Loss Overview',
         description: 'Your total earnings from all trading activity',
         metrics: [
-          { label: 'Total P&L', value: formatCurrency(userData.totalPnl), icon: DollarSign },
-          { label: 'Monthly Change', value: formatPercent(userData.monthlyChange), icon: Calendar },
-          { label: 'Best Trade', value: userData.totalTrades > 0 ? '+$50.00' : '—', icon: ArrowUpRight },
-          { label: 'Worst Trade', value: userData.totalTrades > 0 ? '-$20.00' : '—', icon: ArrowDownRight },
+          { label: 'Total P&L', value: formatCurrency(displayStats.totalPnl), icon: DollarSign },
+          { label: 'Realized P&L', value: formatCurrency(displayStats.realizedPnl), icon: Check },
+          { label: 'Unrealized P&L', value: formatCurrency(displayStats.unrealizedPnl), icon: Clock },
+          { label: 'Best Trade', value: displayStats.bestTrade > 0 ? formatCurrency(displayStats.bestTrade) : '—', icon: ArrowUpRight },
+          { label: 'Worst Trade', value: displayStats.worstTrade < 0 ? formatCurrency(displayStats.worstTrade) : '—', icon: ArrowDownRight },
         ],
         tip: 'Pro tip: Diversify across multiple strategies to reduce volatility.'
       }
     },
     {
       label: 'Win Rate',
-      value: userData.totalTrades > 0 ? `${userData.winRate}%` : '—',
-      change: userData.totalTrades > 0 ? '+0%' : '—',
+      value: displayStats.totalTrades > 0 ? `${displayStats.winRate}%` : '—',
+      change: displayStats.totalTrades > 0 ? '+0%' : '—',
       positive: true,
       icon: Activity,
       detailIcon: Target,
@@ -247,18 +276,18 @@ const Dashboard = ({ onNavigate }) => {
         title: 'Win Rate Analysis',
         description: 'Percentage of profitable trades out of total trades',
         metrics: [
-          { label: 'Win Rate', value: userData.totalTrades > 0 ? `${userData.winRate}%` : '—', icon: Target },
-          { label: 'Winning Trades', value: userData.totalTrades > 0 ? Math.round(userData.totalTrades * userData.winRate / 100).toString() : '0', icon: Check },
-          { label: 'Losing Trades', value: userData.totalTrades > 0 ? Math.round(userData.totalTrades * (100 - userData.winRate) / 100).toString() : '0', icon: X },
-          { label: 'Avg Win Size', value: userData.totalTrades > 0 ? '+$25.00' : '—', icon: ArrowUpRight },
+          { label: 'Win Rate', value: displayStats.totalTrades > 0 ? `${displayStats.winRate}%` : '—', icon: Target },
+          { label: 'Winning Trades', value: displayStats.winningTrades.toString(), icon: Check },
+          { label: 'Losing Trades', value: displayStats.losingTrades.toString(), icon: X },
+          { label: 'Open Positions', value: displayStats.openPositions.toString(), icon: Clock },
         ],
         tip: 'A win rate above 50% combined with good risk management leads to profitability.'
       }
     },
     {
       label: 'Active Strategies',
-      value: userData.activeStrategies.toString(),
-      change: userData.activeStrategies > 0 ? '+0' : '—',
+      value: displayStats.activeStrategies.toString(),
+      change: displayStats.activeStrategies > 0 ? '+0' : '—',
       positive: true,
       icon: Wrench,
       detailIcon: Zap,
@@ -267,18 +296,18 @@ const Dashboard = ({ onNavigate }) => {
         title: 'Strategy Overview',
         description: 'Automated strategies currently running on your account',
         metrics: [
-          { label: 'Active Strategies', value: userData.activeStrategies.toString(), icon: Zap },
-          { label: 'Total Capital', value: formatCurrency(userData.totalBalance || 0), icon: DollarSign },
-          { label: 'Avg Allocation', value: userData.activeStrategies > 0 ? formatCurrency((userData.totalBalance || 0) / userData.activeStrategies) : '—', icon: Target },
-          { label: 'Last Execution', value: userData.activeStrategies > 0 ? '2 min ago' : '—', icon: Clock },
+          { label: 'Active Strategies', value: displayStats.activeStrategies.toString(), icon: Zap },
+          { label: 'Total Capital', value: formatCurrency(displayStats.totalBalance || 0), icon: DollarSign },
+          { label: 'Avg Allocation', value: displayStats.activeStrategies > 0 ? formatCurrency((displayStats.totalBalance || 0) / displayStats.activeStrategies) : '—', icon: Target },
+          { label: 'Last Execution', value: displayStats.activeStrategies > 0 ? '2 min ago' : '—', icon: Clock },
         ],
         tip: 'Running multiple uncorrelated strategies can improve overall returns.'
       }
     },
     {
       label: 'Total Trades',
-      value: userData.totalTrades.toLocaleString(),
-      change: userData.totalTrades > 0 ? '+0' : '—',
+      value: displayStats.totalTrades.toLocaleString(),
+      change: displayStats.openPositions > 0 ? `${displayStats.openPositions} open` : '—',
       positive: true,
       icon: LayoutDashboard,
       detailIcon: Activity,
@@ -287,10 +316,10 @@ const Dashboard = ({ onNavigate }) => {
         title: 'Trading Activity',
         description: 'Summary of all trades executed on your account',
         metrics: [
-          { label: 'Total Trades', value: userData.totalTrades.toLocaleString(), icon: Activity },
-          { label: 'Open Positions', value: recentTrades.filter(t => t.status === 'Open').length.toString(), icon: Clock },
-          { label: 'Closed Trades', value: (userData.totalTrades - recentTrades.filter(t => t.status === 'Open').length).toString(), icon: Check },
-          { label: 'Avg Trade Size', value: userData.totalTrades > 0 ? '$50.00' : '—', icon: DollarSign },
+          { label: 'Total Trades', value: displayStats.totalTrades.toLocaleString(), icon: Activity },
+          { label: 'Open Positions', value: displayStats.openPositions.toString(), icon: Clock },
+          { label: 'Closed Trades', value: portfolioStats.totalTrades.toString(), icon: Check },
+          { label: 'Win Rate', value: `${displayStats.winRate}%`, icon: Target },
         ],
         tip: 'Consistent trading with proper position sizing is key to long-term success.'
       }
@@ -315,8 +344,8 @@ const Dashboard = ({ onNavigate }) => {
     trackButtonClick('View All Trades', 'dashboard')
   }
 
-  // Check if user has any data
-  const hasData = userData.totalTrades > 0 || recentTrades.length > 0
+  // Check if user has any data - include global state
+  const hasData = userData.totalTrades > 0 || recentTrades.length > 0 || openBets.length > 0 || tradeHistory.length > 0
 
   // Empty state for charts
   const emptyPerformanceData = [
@@ -337,13 +366,28 @@ const Dashboard = ({ onNavigate }) => {
   
   const chartData = performanceData.length > 0 ? performanceData : emptyPerformanceData
   
-  // Ensure portfolioData always has colors
-  const pieData = portfolioData.length > 0 
-    ? portfolioData.map((item, i) => ({
-        ...item,
-        color: item.color || portfolioColors[i % portfolioColors.length]
+  // Use global portfolio breakdown from context
+  const platformBreakdown = getPortfolioByPlatform()
+  const totalInvested = platformBreakdown.reduce((sum, p) => sum + p.value, 0)
+  
+  // Generate pie data from global state
+  const pieData = platformBreakdown.length > 0 
+    ? platformBreakdown.map((item, i) => ({
+        name: item.name,
+        value: totalInvested > 0 ? Math.round((item.value / totalInvested) * 100) : 0,
+        color: item.name === 'Kalshi' ? '#3B82F6' : 
+               item.name === 'Polymarket' ? '#8B5CF6' : 
+               item.name === 'Manifold' ? '#F97316' : 
+               portfolioColors[i % portfolioColors.length],
+        count: item.count,
+        profit: item.profit,
       }))
-    : emptyPortfolioData
+    : portfolioData.length > 0 
+      ? portfolioData.map((item, i) => ({
+          ...item,
+          color: item.color || portfolioColors[i % portfolioColors.length]
+        }))
+      : emptyPortfolioData
 
   if (isLoading) {
     return (
