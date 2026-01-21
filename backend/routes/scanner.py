@@ -54,20 +54,32 @@ def start_scanner_endpoint():
     Start the market scanner.
     POST /api/scanner/start
     Body: {
-        "platforms": ["kalshi"],  // optional
-        "scanInterval": 5.0,      // optional, seconds
-        "categories": [],          // optional
-        "minVolume": 100,          // optional
-        "watchKeywords": []        // optional
+        "platforms": ["kalshi"],  // which platforms to scan
+        "minEdge": 2.5,           // minimum edge % to generate signal
+        "maxPosition": 350,       // max position size in USD
+        "stopLoss": 15,           // stop loss %
+        "takeProfit": 15,         // take profit %
     }
     """
     try:
         data = request.get_json() or {}
         
-        # Build config from request
+        # Get platforms from request (frontend sends array of strings)
+        requested_platforms = data.get('platforms', ['kalshi'])
+        
+        # Map to Platform enum (only kalshi is live for now)
+        platforms = []
+        for p in requested_platforms:
+            if p.lower() == 'kalshi':
+                platforms.append(Platform.KALSHI)
+        
+        if not platforms:
+            platforms = [Platform.KALSHI]  # Default to Kalshi
+        
+        # Build scanner config
         config = ScannerConfig(
-            platforms=[Platform.KALSHI],  # Start with Kalshi only
-            scan_interval=data.get('scanInterval', 5.0),
+            platforms=platforms,
+            scan_interval=30.0,  # Scan every 30 seconds for continuous scanning
             categories=data.get('categories', []),
             min_volume=data.get('minVolume', 100),
             watch_keywords=data.get('watchKeywords', []),
@@ -76,14 +88,21 @@ def start_scanner_endpoint():
         # Start scanner
         scanner = start_scanner(config)
         
-        # Start engine
+        # Configure arbitrage engine with user's risk settings
         arb_config = ArbitrageConfig(
-            min_mispricing_edge=data.get('minMispricingEdge', 2.0),
+            min_mispricing_edge=data.get('minEdge', 2.5),
             min_momentum_change=data.get('minMomentumChange', 10.0),
             min_spread_edge=data.get('minSpreadEdge', 3.0),
         )
         engine = get_engine()
         engine.config = arb_config
+        
+        # Store user's risk settings for signal generation
+        engine.user_config = {
+            'maxPosition': data.get('maxPosition', 350),
+            'stopLoss': data.get('stopLoss', 15),
+            'takeProfit': data.get('takeProfit', 15),
+        }
         
         # Connect engine to scanner for real-time analysis
         def analyze_on_update(market):
@@ -94,13 +113,18 @@ def start_scanner_endpoint():
         scanner.on_price_update(analyze_on_update)
         scanner.on_new_market(analyze_on_update)
         
+        logger.info(f"Scanner started with platforms={requested_platforms}, minEdge={data.get('minEdge', 2.5)}")
+        
         return jsonify({
             'success': True,
             'message': 'Scanner started',
+            'running': True,
             'config': {
-                'scanInterval': config.scan_interval,
-                'platforms': [p.value for p in config.platforms],
-                'minVolume': config.min_volume,
+                'platforms': requested_platforms,
+                'minEdge': data.get('minEdge', 2.5),
+                'maxPosition': data.get('maxPosition', 350),
+                'stopLoss': data.get('stopLoss', 15),
+                'takeProfit': data.get('takeProfit', 15),
             }
         }), 200
         
@@ -141,9 +165,20 @@ def get_scanner_status():
         scanner = get_scanner()
         engine = get_engine()
         
+        scanner_stats = scanner.get_stats()
+        engine_stats = engine.get_stats()
+        active_signals = engine.get_active_signals()
+        
+        # Return in format expected by frontend
         return jsonify({
-            'scanner': scanner.get_stats(),
-            'engine': engine.get_stats(),
+            'running': scanner_stats.get('isRunning', False),
+            'lastScan': scanner_stats.get('lastScanTime'),
+            'scanCount': scanner_stats.get('scanCount', 0),
+            'signalCount': len(active_signals),
+            'signals': [s.to_dict() for s in active_signals[:20]],
+            'config': scanner_stats.get('config'),
+            'scanner': scanner_stats,
+            'engine': engine_stats,
         }), 200
         
     except Exception as e:

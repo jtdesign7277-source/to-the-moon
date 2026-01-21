@@ -1,7 +1,9 @@
 /**
- * Unified Scanner Dashboard
- * Combines the best features from both scanner implementations
- * Real-time market scanner for Kalshi prediction markets
+ * Scanner Dashboard v2
+ * - Platform selection (Kalshi, Polymarket, Manifold, etc.)
+ * - Risk presets (Conservative, Moderate, Aggressive, Custom)
+ * - Continuous background scanning
+ * - Persistent signals storage with timestamps
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -16,100 +18,268 @@ import {
   Bell,
   Zap,
   Target,
-  BarChart2,
   Settings,
-  Search,
+  Check,
+  Clock,
+  Trash2,
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  Shield,
+  Flame,
+  Scale,
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // ============================================
+// PLATFORM DEFINITIONS
+// ============================================
+
+const PLATFORMS = [
+  {
+    id: 'kalshi',
+    name: 'Kalshi',
+    icon: '🎯',
+    description: 'Prediction Market',
+    details: ['Regulated in US', 'Real USD trading'],
+    status: 'live', // 'live' | 'coming_soon'
+  },
+  {
+    id: 'polymarket',
+    name: 'Polymarket',
+    icon: '📊',
+    description: 'Prediction Market',
+    details: ['Crypto-based (USDC)', 'Global access'],
+    status: 'coming_soon',
+  },
+  {
+    id: 'manifold',
+    name: 'Manifold Markets',
+    icon: '🔮',
+    description: 'Prediction Market',
+    details: ['Free to use', 'Play money (Mana)'],
+    status: 'coming_soon',
+  },
+  {
+    id: 'predictit',
+    name: 'PredictIt',
+    icon: '🏛️',
+    description: 'Prediction Market',
+    details: ['Political markets', 'US-based'],
+    status: 'coming_soon',
+  },
+  {
+    id: 'betfair',
+    name: 'Betfair Exchange',
+    icon: '🏇',
+    description: 'Betting Exchange',
+    details: ['Sports & politics', 'High liquidity'],
+    status: 'coming_soon',
+  },
+  {
+    id: 'metaculus',
+    name: 'Metaculus',
+    icon: '🔬',
+    description: 'Forecasting Platform',
+    details: ['Reputation-based', 'Science focus'],
+    status: 'coming_soon',
+  },
+];
+
+// ============================================
+// RISK PRESETS
+// ============================================
+
+const RISK_PRESETS = {
+  conservative: {
+    label: 'Conservative',
+    icon: Shield,
+    color: 'green',
+    minEdge: 5,
+    maxPosition: 100,
+    stopLoss: 10,
+    takeProfit: 10,
+  },
+  moderate: {
+    label: 'Moderate',
+    icon: Scale,
+    color: 'yellow',
+    minEdge: 2.5,
+    maxPosition: 350,
+    stopLoss: 15,
+    takeProfit: 15,
+  },
+  aggressive: {
+    label: 'Aggressive',
+    icon: Flame,
+    color: 'red',
+    minEdge: 1.5,
+    maxPosition: 1000,
+    stopLoss: 25,
+    takeProfit: 25,
+  },
+};
+
+// ============================================
+// STORAGE KEYS
+// ============================================
+
+const STORAGE_KEYS = {
+  PLATFORMS: 'ttm_scanner_platforms',
+  RISK_SETTINGS: 'ttm_scanner_risk',
+  SIGNALS: 'ttm_scanner_signals',
+};
+
+// ============================================
 // COMPONENTS
 // ============================================
 
-// Stat Card Component
-function StatCard({ label, value, icon, color = 'purple' }) {
-  const colorStyles = {
-    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    yellow: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    pink: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-    red: 'bg-red-500/20 text-red-400 border-red-500/30',
-  };
-
+// Platform Card
+function PlatformCard({ platform, selected, onToggle }) {
+  const isLive = platform.status === 'live';
+  
   return (
-    <div className={`rounded-xl p-4 border ${colorStyles[color]} backdrop-blur-sm`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-gray-400">{label}</p>
-          <p className="text-2xl font-bold mt-1 text-white">{value}</p>
+    <button
+      onClick={() => isLive && onToggle(platform.id)}
+      disabled={!isLive}
+      className={`relative p-4 rounded-xl border-2 transition-all text-left ${
+        selected
+          ? 'border-indigo-500 bg-indigo-500/20'
+          : isLive
+            ? 'border-slate-600 bg-slate-800/50 hover:border-slate-500'
+            : 'border-slate-700 bg-slate-800/30 opacity-60 cursor-not-allowed'
+      }`}
+    >
+      {/* Selection indicator */}
+      {selected && (
+        <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+          <Check className="w-3 h-3 text-white" />
         </div>
-        <div className={`p-2 rounded-lg ${colorStyles[color]}`}>
-          {icon}
-        </div>
+      )}
+      
+      {/* Status badge */}
+      <div className={`absolute top-2 right-2 ${selected ? 'hidden' : ''}`}>
+        {isLive ? (
+          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+            LIVE
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 bg-slate-600/50 text-slate-400 text-xs rounded-full">
+            SOON
+          </span>
+        )}
       </div>
-    </div>
+      
+      <div className="text-2xl mb-2">{platform.icon}</div>
+      <h3 className="font-semibold text-white">{platform.name}</h3>
+      <p className="text-xs text-gray-400 mb-2">{platform.description}</p>
+      <div className="space-y-0.5">
+        {platform.details.map((detail, i) => (
+          <p key={i} className="text-xs text-gray-500">{detail}</p>
+        ))}
+      </div>
+    </button>
   );
 }
 
-// Signal Card Component with expandable details
-function SignalCard({ signal, onExecute }) {
-  const [expanded, setExpanded] = useState(false);
+// Risk Preset Button
+function RiskPresetButton({ preset, presetKey, selected, onClick }) {
+  const Icon = preset.icon;
+  const colors = {
+    green: 'border-green-500 bg-green-500/20 text-green-400',
+    yellow: 'border-yellow-500 bg-yellow-500/20 text-yellow-400',
+    red: 'border-red-500 bg-red-500/20 text-red-400',
+  };
+  
+  return (
+    <button
+      onClick={() => onClick(presetKey)}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+        selected
+          ? colors[preset.color]
+          : 'border-slate-600 bg-slate-800/50 text-gray-400 hover:border-slate-500'
+      }`}
+    >
+      <Icon className="w-4 h-4" />
+      <span className="font-medium">{preset.label}</span>
+    </button>
+  );
+}
 
+// Signal Card
+function SignalCard({ signal, onTrade, onDismiss }) {
+  const [expanded, setExpanded] = useState(false);
+  
+  const getTimeAgo = (timestamp) => {
+    if (!timestamp) return 'Just now';
+    const seconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  };
+  
   const strengthColors = {
     strong: 'border-green-500 bg-green-500/10',
     moderate: 'border-yellow-500 bg-yellow-500/10',
     weak: 'border-gray-500 bg-gray-500/10',
-    high: 'border-green-500 bg-green-500/10',
-    medium: 'border-yellow-500 bg-yellow-500/10',
-    low: 'border-red-500 bg-red-500/10',
   };
-
-  const strength = signal.strength || signal.riskLevel || 'moderate';
-  const edge = signal.edge || signal.edgePercentage || 0;
-  const confidence = signal.confidence ? 
-    (signal.confidence > 1 ? signal.confidence : signal.confidence * 100) : 0;
-
+  
+  const isStale = signal.timestamp && 
+    (Date.now() - new Date(signal.timestamp).getTime()) > 10 * 60 * 1000; // 10 min
+  
   return (
-    <div className={`rounded-xl border-2 p-4 ${strengthColors[strength]} backdrop-blur-sm`}>
+    <div className={`rounded-xl border-2 p-4 ${strengthColors[signal.strength]} ${isStale ? 'opacity-50' : ''}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            {signal.direction === 'up' || signal.recommendedSide === 'YES' ? (
+            {signal.direction === 'up' ? (
               <TrendingUp className="w-4 h-4 text-green-400" />
             ) : (
               <TrendingDown className="w-4 h-4 text-red-400" />
             )}
             <span className="font-semibold text-white">{signal.ticker}</span>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-              strength === 'strong' || strength === 'high' ? 'bg-green-500/30 text-green-300' :
-              strength === 'moderate' || strength === 'medium' ? 'bg-yellow-500/30 text-yellow-300' :
+              signal.strength === 'strong' ? 'bg-green-500/30 text-green-300' :
+              signal.strength === 'moderate' ? 'bg-yellow-500/30 text-yellow-300' :
               'bg-gray-500/30 text-gray-300'
             }`}>
-              {strength.toUpperCase()}
+              {signal.strength.toUpperCase()}
             </span>
-            {signal.signalType && (
-              <span className="px-2 py-0.5 bg-blue-500/30 text-blue-300 rounded text-xs">
-                {signal.signalType}
-              </span>
-            )}
+            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
+              {signal.platform}
+            </span>
           </div>
-          <p className="text-sm text-gray-300 mt-2">{signal.reason || signal.description || signal.title}</p>
+          
+          <p className="text-sm text-gray-300 mt-2">{signal.reason}</p>
+          
           <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-            <span>Edge: <span className="text-green-400 font-medium">{edge.toFixed(1)}%</span></span>
-            <span>Confidence: <span className="text-blue-400 font-medium">{confidence.toFixed(0)}%</span></span>
+            <span>Edge: <span className="text-green-400 font-medium">{signal.edge?.toFixed(1)}%</span></span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {getTimeAgo(signal.timestamp)}
+              {isStale && <span className="text-yellow-500">(stale)</span>}
+            </span>
           </div>
         </div>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="p-1 hover:bg-white/10 rounded ml-2"
-        >
-          {expanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-        </button>
+        
+        <div className="flex items-center gap-1 ml-2">
+          <button
+            onClick={() => onDismiss(signal.id)}
+            className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400"
+            title="Dismiss"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="p-1 hover:bg-white/10 rounded"
+          >
+            {expanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+          </button>
+        </div>
       </div>
 
       {expanded && (
@@ -117,111 +287,32 @@ function SignalCard({ signal, onExecute }) {
           <div className="grid grid-cols-2 gap-3 text-sm mb-4">
             <div>
               <span className="text-gray-400">Entry Price:</span>
-              <span className="ml-2 font-medium text-white">{signal.entryPrice || signal.currentPrice || '-'}¢</span>
+              <span className="ml-2 font-medium text-white">{signal.entryPrice}¢</span>
             </div>
             <div>
               <span className="text-gray-400">Target:</span>
-              <span className="ml-2 font-medium text-green-400">{signal.targetPrice || '-'}¢</span>
+              <span className="ml-2 font-medium text-green-400">{signal.targetPrice}¢</span>
             </div>
-            {signal.expectedProfit && (
-              <div>
-                <span className="text-gray-400">Expected Profit:</span>
-                <span className="ml-2 font-medium text-green-400">${signal.expectedProfit.toFixed(2)}</span>
-              </div>
-            )}
-            {signal.recommendedQuantity && (
-              <div>
-                <span className="text-gray-400">Qty:</span>
-                <span className="ml-2 font-medium text-white">{signal.recommendedQuantity} contracts</span>
-              </div>
-            )}
+            <div>
+              <span className="text-gray-400">Side:</span>
+              <span className={`ml-2 font-medium ${signal.side === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
+                {signal.side}
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-400">Expected:</span>
+              <span className="ml-2 font-medium text-green-400">+${signal.expectedProfit?.toFixed(2)}</span>
+            </div>
           </div>
-          {signal.reasoning && (
-            <p className="text-xs text-gray-400 mb-4">{signal.reasoning}</p>
-          )}
           <button
-            onClick={() => onExecute?.(signal)}
-            className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors text-sm"
+            onClick={() => onTrade(signal)}
+            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors text-sm"
           >
-            Execute Trade
+            Place Trade
           </button>
         </div>
       )}
     </div>
-  );
-}
-
-// Market Row Component
-function MarketRow({ market }) {
-  const spread = market.yes_ask && market.yes_bid
-    ? ((market.yes_ask - market.yes_bid) * 100).toFixed(0)
-    : market.yesAsk && market.yesBid
-      ? ((market.yesAsk - market.yesBid) * 100).toFixed(0)
-      : '-';
-
-  const volume = market.volume24h || market.volume || 0;
-  const yesBid = market.yes_bid || market.yesBid || 0;
-  const yesAsk = market.yes_ask || market.yesAsk || 0;
-  const noBid = market.no_bid || market.noBid || 0;
-  const noAsk = market.no_ask || market.noAsk || 0;
-
-  return (
-    <tr className="hover:bg-slate-700/50 transition-colors border-b border-slate-700">
-      <td className="px-4 py-3">
-        <div className="max-w-xs">
-          <p className="font-medium text-white truncate">{market.title || market.ticker}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500">{market.ticker}</span>
-            {market.platform && (
-              <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
-                {market.platform}
-              </span>
-            )}
-            {market.category && (
-              <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded">
-                {market.category}
-              </span>
-            )}
-          </div>
-        </div>
-      </td>
-      <td className="px-4 py-3 text-right">
-        <span className="text-green-400 font-medium">
-          {yesBid ? `${(yesBid * 100).toFixed(0)}¢` : '-'}
-        </span>
-        <span className="text-gray-500 mx-1">/</span>
-        <span className="text-red-400 font-medium">
-          {yesAsk ? `${(yesAsk * 100).toFixed(0)}¢` : '-'}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-right">
-        <span className="text-green-400 font-medium">
-          {noBid ? `${(noBid * 100).toFixed(0)}¢` : '-'}
-        </span>
-        <span className="text-gray-500 mx-1">/</span>
-        <span className="text-red-400 font-medium">
-          {noAsk ? `${(noAsk * 100).toFixed(0)}¢` : '-'}
-        </span>
-      </td>
-      <td className="px-4 py-3 text-right text-gray-300">
-        ${volume.toLocaleString()}
-      </td>
-      <td className="px-4 py-3 text-right">
-        <span className={`font-medium ${parseInt(spread) > 5 ? 'text-yellow-400' : 'text-gray-400'}`}>
-          {spread}¢
-        </span>
-      </td>
-      <td className="px-4 py-3 text-center">
-        <a
-          href={`https://kalshi.com/markets/${market.ticker}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300"
-        >
-          View <ExternalLink className="w-3 h-3" />
-        </a>
-      </td>
-    </tr>
   );
 }
 
@@ -230,37 +321,42 @@ function MarketRow({ market }) {
 // ============================================
 
 const ScannerDashboard = () => {
+  // Load saved preferences from localStorage
+  const loadSavedPreferences = () => {
+    try {
+      const platforms = localStorage.getItem(STORAGE_KEYS.PLATFORMS);
+      const risk = localStorage.getItem(STORAGE_KEYS.RISK_SETTINGS);
+      const signals = localStorage.getItem(STORAGE_KEYS.SIGNALS);
+      return {
+        platforms: platforms ? JSON.parse(platforms) : ['kalshi'],
+        risk: risk ? JSON.parse(risk) : { preset: 'moderate', ...RISK_PRESETS.moderate },
+        signals: signals ? JSON.parse(signals) : [],
+      };
+    } catch {
+      return {
+        platforms: ['kalshi'],
+        risk: { preset: 'moderate', ...RISK_PRESETS.moderate },
+        signals: [],
+      };
+    }
+  };
+  
+  const saved = loadSavedPreferences();
+  
   // State
-  const [isScanning, setIsScanning] = useState(false);
-  const [markets, setMarkets] = useState([]);
-  const [signals, setSignals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedPlatforms, setSelectedPlatforms] = useState(saved.platforms);
+  const [riskPreset, setRiskPreset] = useState(saved.risk.preset || 'moderate');
+  const [riskSettings, setRiskSettings] = useState({
+    minEdge: saved.risk.minEdge || 2.5,
+    maxPosition: saved.risk.maxPosition || 350,
+    stopLoss: saved.risk.stopLoss || 15,
+    takeProfit: saved.risk.takeProfit || 15,
+  });
+  const [signals, setSignals] = useState(saved.signals);
+  const [scannerStatus, setScannerStatus] = useState({ running: false, lastScan: null });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('markets');
-  const [showSettings, setShowSettings] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-
-  // Stats
-  const [scannerStats, setScannerStats] = useState({
-    totalMarkets: 0,
-    scanCount: 0,
-    activeSignals: 0,
-    totalSignalsDetected: 0,
-  });
-
-  // Config
-  const [config, setConfig] = useState({
-    minEdgePercent: 3,
-    refreshInterval: 30,
-    platform: 'kalshi',
-    category: '',
-  });
-
-  // Filters
-  const [filters, setFilters] = useState({
-    search: '',
-    sort: 'volume',
-  });
+  const [activeTab, setActiveTab] = useState('setup'); // 'setup' | 'signals'
 
   // Auth headers
   const getAuthHeaders = () => {
@@ -271,109 +367,86 @@ const ScannerDashboard = () => {
     };
   };
 
-  // Fetch markets
-  const fetchMarkets = useCallback(async () => {
-    try {
-      const params = new URLSearchParams({
-        platform: config.platform,
-        sort: filters.sort,
-        limit: '50'
-      });
-      if (config.category) params.append('category', config.category);
-      if (filters.search) params.append('search', filters.search);
+  // Save preferences to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PLATFORMS, JSON.stringify(selectedPlatforms));
+  }, [selectedPlatforms]);
 
-      const response = await fetch(`${API_BASE}/api/scanner/markets?${params}`, {
-        headers: getAuthHeaders()
-      });
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.RISK_SETTINGS, JSON.stringify({
+      preset: riskPreset,
+      ...riskSettings
+    }));
+  }, [riskPreset, riskSettings]);
 
-      if (response.ok) {
-        const data = await response.json();
-        setMarkets(data.markets || []);
-        setScannerStats(prev => ({
-          ...prev,
-          totalMarkets: data.markets?.length || 0,
-          scanCount: prev.scanCount + 1,
-        }));
-        setError(null);
-      } else {
-        // Use mock data if API not available
-        setMarkets(generateMockMarkets());
-        setScannerStats(prev => ({
-          ...prev,
-          totalMarkets: 10,
-          scanCount: prev.scanCount + 1,
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching markets:', err);
-      setMarkets(generateMockMarkets());
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SIGNALS, JSON.stringify(signals));
+  }, [signals]);
+
+  // Toggle platform selection
+  const togglePlatform = (platformId) => {
+    setSelectedPlatforms(prev => 
+      prev.includes(platformId)
+        ? prev.filter(p => p !== platformId)
+        : [...prev, platformId]
+    );
+  };
+
+  // Apply risk preset
+  const applyPreset = (presetKey) => {
+    setRiskPreset(presetKey);
+    if (presetKey !== 'custom') {
+      const preset = RISK_PRESETS[presetKey];
+      setRiskSettings({
+        minEdge: preset.minEdge,
+        maxPosition: preset.maxPosition,
+        stopLoss: preset.stopLoss,
+        takeProfit: preset.takeProfit,
+      });
     }
-  }, [config.platform, config.category, filters.sort, filters.search]);
+  };
 
-  // Fetch signals
-  const fetchSignals = useCallback(async () => {
-    try {
-      const params = new URLSearchParams({
-        min_edge: config.minEdgePercent.toString()
-      });
-
-      const response = await fetch(`${API_BASE}/api/scanner/signals?${params}`, {
-        headers: getAuthHeaders()
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSignals(data.signals || []);
-        setScannerStats(prev => ({
-          ...prev,
-          activeSignals: data.signals?.length || 0,
-          totalSignalsDetected: data.dailyCount || prev.totalSignalsDetected,
-        }));
-      } else {
-        setSignals(generateMockSignals());
-        setScannerStats(prev => ({
-          ...prev,
-          activeSignals: 2,
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching signals:', err);
-      setSignals(generateMockSignals());
-    }
-  }, [config.minEdgePercent]);
+  // Update individual risk setting (switches to custom)
+  const updateRiskSetting = (key, value) => {
+    setRiskPreset('custom');
+    setRiskSettings(prev => ({ ...prev, [key]: value }));
+  };
 
   // Start scanner
   const startScanner = async () => {
+    if (selectedPlatforms.length === 0) {
+      setError('Please select at least one platform');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    
     try {
       const response = await fetch(`${API_BASE}/api/scanner/start`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          platforms: [config.platform],
-          scanInterval: config.refreshInterval,
-          minMispricingEdge: config.minEdgePercent,
+          platforms: selectedPlatforms,
+          minEdge: riskSettings.minEdge,
+          maxPosition: riskSettings.maxPosition,
+          stopLoss: riskSettings.stopLoss,
+          takeProfit: riskSettings.takeProfit,
         })
       });
 
       if (response.ok) {
-        setIsScanning(true);
-        fetchMarkets();
-        fetchSignals();
+        setScannerStatus({ running: true, lastScan: new Date().toISOString() });
+        setActiveTab('signals');
       } else {
-        // Still start local scanning even if backend not available
-        setIsScanning(true);
-        fetchMarkets();
-        fetchSignals();
+        const data = await response.json();
+        setError(data.error || 'Failed to start scanner');
       }
     } catch (err) {
-      // Start local scanning on error
-      setIsScanning(true);
-      fetchMarkets();
-      fetchSignals();
+      console.error('Start scanner error:', err);
+      // For demo, still show as running
+      setScannerStatus({ running: true, lastScan: new Date().toISOString() });
+      setActiveTab('signals');
     } finally {
       setLoading(false);
     }
@@ -387,57 +460,77 @@ const ScannerDashboard = () => {
         method: 'POST',
         headers: getAuthHeaders()
       });
+      setScannerStatus({ running: false, lastScan: null });
     } catch (err) {
-      console.error('Error stopping scanner:', err);
+      console.error('Stop scanner error:', err);
+      setScannerStatus({ running: false, lastScan: null });
     } finally {
-      setIsScanning(false);
       setLoading(false);
     }
   };
 
-  // Toggle scanner
-  const toggleScanner = () => {
-    if (isScanning) {
-      stopScanner();
-    } else {
-      startScanner();
+  // Fetch scanner status and signals
+  const fetchStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/scanner/status`, {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setScannerStatus({
+          running: data.running,
+          lastScan: data.lastScan,
+        });
+        if (data.signals && data.signals.length > 0) {
+          setSignals(prev => {
+            const existingIds = new Set(prev.map(s => s.id));
+            const newSignals = data.signals.filter(s => !existingIds.has(s.id));
+            return [...newSignals, ...prev];
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Fetch status error:', err);
     }
-  };
+  }, []);
 
-  // Execute trade
-  const handleExecuteTrade = (signal) => {
-    // TODO: Integrate with trade execution
-    console.log('Execute trade:', signal);
-    alert(`Trade execution for ${signal.ticker} - Coming soon!`);
-  };
-
-  // Initial load
+  // Poll for new signals
   useEffect(() => {
-    fetchMarkets();
-    fetchSignals();
-  }, [fetchMarkets, fetchSignals]);
-
-  // Auto-refresh when scanning
-  useEffect(() => {
-    if (!autoRefresh || !isScanning) return;
-
-    const interval = setInterval(() => {
-      fetchMarkets();
-      fetchSignals();
-    }, config.refreshInterval * 1000);
-
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 10000); // Poll every 10 seconds
     return () => clearInterval(interval);
-  }, [autoRefresh, isScanning, config.refreshInterval, fetchMarkets, fetchSignals]);
+  }, [fetchStatus]);
 
-  // Filter markets
-  const filteredMarkets = markets.filter(market =>
-    market.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
-    market.ticker?.toLowerCase().includes(filters.search.toLowerCase())
-  );
+  // Handle trade
+  const handleTrade = (signal) => {
+    console.log('Trade signal:', signal);
+    alert(`Opening trade ticket for ${signal.ticker} - ${signal.side} @ ${signal.entryPrice}¢`);
+  };
+
+  // Dismiss signal
+  const dismissSignal = (signalId) => {
+    setSignals(prev => prev.filter(s => s.id !== signalId));
+  };
+
+  // Clear all signals
+  const clearAllSignals = () => {
+    setSignals([]);
+  };
+
+  // Remove stale signals (older than 30 min)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
+      setSignals(prev => prev.filter(s => 
+        !s.timestamp || new Date(s.timestamp).getTime() > thirtyMinAgo
+      ));
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -445,263 +538,252 @@ const ScannerDashboard = () => {
               <Activity className="w-8 h-8 text-indigo-400" />
               Market Scanner
             </h1>
-            <p className="text-gray-400 mt-1">Real-time arbitrage detection across prediction markets</p>
+            <p className="text-gray-400 mt-1">
+              {scannerStatus.running 
+                ? '🟢 Scanning continuously in background...'
+                : 'Configure platforms and risk settings, then start scanning'
+              }
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Auto-refresh toggle */}
-            <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`p-2 rounded-lg transition ${
-                autoRefresh
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-slate-700 text-gray-400'
-              }`}
-              title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-            >
-              <RefreshCw className={`w-5 h-5 ${autoRefresh && isScanning ? 'animate-spin' : ''}`}
-                style={{ animationDuration: '3s' }} />
-            </button>
-
-            {/* Settings */}
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className={`p-2 rounded-lg transition ${
-                showSettings ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-700 text-gray-400 hover:bg-slate-600'
-              }`}
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-
-            {/* Scanner toggle */}
-            <button
-              onClick={toggleScanner}
-              disabled={loading}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50 ${
-                isScanning
-                  ? 'bg-red-600 hover:bg-red-700'
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
-            >
-              {isScanning ? (
-                <>
-                  <Square className="w-5 h-5" />
-                  Stop
-                </>
-              ) : (
-                <>
-                  <Play className="w-5 h-5" />
-                  Start
-                </>
-              )}
-            </button>
+            {scannerStatus.running ? (
+              <button
+                onClick={stopScanner}
+                disabled={loading}
+                className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                <Square className="w-5 h-5" />
+                Stop Scanner
+              </button>
+            ) : (
+              <button
+                onClick={startScanner}
+                disabled={loading || selectedPlatforms.length === 0}
+                className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                <Play className="w-5 h-5" />
+                Start Scanner
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Error */}
         {error && (
           <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" />
             {error}
-          </div>
-        )}
-
-        {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <StatCard
-            label="Markets"
-            value={scannerStats.totalMarkets}
-            icon={<BarChart2 className="w-5 h-5" />}
-            color="purple"
-          />
-          <StatCard
-            label="Active Signals"
-            value={scannerStats.activeSignals}
-            icon={<Bell className="w-5 h-5" />}
-            color="green"
-          />
-          <StatCard
-            label="Total Detected"
-            value={scannerStats.totalSignalsDetected}
-            icon={<Zap className="w-5 h-5" />}
-            color="yellow"
-          />
-          <StatCard
-            label="Scans"
-            value={scannerStats.scanCount}
-            icon={<RefreshCw className="w-5 h-5" />}
-            color="blue"
-          />
-          <StatCard
-            label="Min Edge"
-            value={`${config.minEdgePercent}%`}
-            icon={<Target className="w-5 h-5" />}
-            color="pink"
-          />
-        </div>
-
-        {/* Settings Panel */}
-        {showSettings && (
-          <div className="mb-6 bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border border-slate-700">
-            <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Scanner Settings
-            </h3>
-            <div className="grid md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Minimum Edge %</label>
-                <input
-                  type="number"
-                  value={config.minEdgePercent}
-                  onChange={(e) => setConfig(prev => ({ ...prev, minEdgePercent: parseInt(e.target.value) || 1 }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  min="1"
-                  max="20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Refresh Interval (sec)</label>
-                <input
-                  type="number"
-                  value={config.refreshInterval}
-                  onChange={(e) => setConfig(prev => ({ ...prev, refreshInterval: parseInt(e.target.value) || 10 }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  min="10"
-                  max="300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Platform</label>
-                <select
-                  value={config.platform}
-                  onChange={(e) => setConfig(prev => ({ ...prev, platform: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="kalshi">Kalshi</option>
-                  <option value="polymarket">Polymarket</option>
-                  <option value="manifold">Manifold</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Category</label>
-                <select
-                  value={config.category}
-                  onChange={(e) => setConfig(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">All Categories</option>
-                  <option value="politics">Politics</option>
-                  <option value="crypto">Crypto</option>
-                  <option value="economics">Economics</option>
-                  <option value="sports">Sports</option>
-                </select>
-              </div>
-            </div>
+            <button onClick={() => setError(null)} className="ml-auto text-red-300 hover:text-white">✕</button>
           </div>
         )}
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-slate-800/50 p-1 rounded-lg inline-flex">
           <button
-            onClick={() => setActiveTab('markets')}
-            className={`px-5 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'markets'
+            onClick={() => setActiveTab('setup')}
+            className={`px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              activeTab === 'setup'
                 ? 'bg-indigo-600 text-white'
                 : 'text-gray-400 hover:text-white hover:bg-slate-700'
             }`}
           >
-            Markets ({filteredMarkets.length})
+            <Settings className="w-4 h-4" />
+            Setup
           </button>
           <button
             onClick={() => setActiveTab('signals')}
-            className={`px-5 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
               activeTab === 'signals'
                 ? 'bg-indigo-600 text-white'
                 : 'text-gray-400 hover:text-white hover:bg-slate-700'
             }`}
           >
-            Signals ({signals.length})
+            <Bell className="w-4 h-4" />
+            Signals
+            {signals.length > 0 && (
+              <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                {signals.length}
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Markets Tab */}
-        {activeTab === 'markets' && (
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden">
-            {/* Search Bar */}
-            <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
-              <h2 className="font-semibold text-white">Live Markets</h2>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search markets..."
-                    value={filters.search}
-                    onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="pl-9 pr-4 py-1.5 text-sm bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        {/* Setup Tab */}
+        {activeTab === 'setup' && (
+          <div className="space-y-6">
+            {/* Platforms Section */}
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-indigo-400" />
+                Select Platforms to Scan
+              </h2>
+              <p className="text-gray-400 text-sm mb-4">
+                Choose which prediction markets the scanner should monitor. More platforms = more opportunities.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {PLATFORMS.map(platform => (
+                  <PlatformCard
+                    key={platform.id}
+                    platform={platform}
+                    selected={selectedPlatforms.includes(platform.id)}
+                    onToggle={togglePlatform}
                   />
-                </div>
-                <select
-                  value={filters.sort}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
-                  className="px-3 py-1.5 text-sm bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="volume">By Volume</option>
-                  <option value="spread">By Spread</option>
-                  <option value="price_change">By Change</option>
-                </select>
+                ))}
               </div>
             </div>
 
-            {/* Table */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <RefreshCw className="w-6 h-6 animate-spin text-indigo-400" />
+            {/* Risk Settings Section */}
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-400" />
+                Risk Settings
+              </h2>
+              
+              {/* Presets */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {Object.entries(RISK_PRESETS).map(([key, preset]) => (
+                  <RiskPresetButton
+                    key={key}
+                    preset={preset}
+                    presetKey={key}
+                    selected={riskPreset === key}
+                    onClick={applyPreset}
+                  />
+                ))}
+                <button
+                  onClick={() => setRiskPreset('custom')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                    riskPreset === 'custom'
+                      ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
+                      : 'border-slate-600 bg-slate-800/50 text-gray-400 hover:border-slate-500'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="font-medium">Custom</span>
+                </button>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-700/50">
-                    <tr>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Market</th>
-                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Yes Bid/Ask</th>
-                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">No Bid/Ask</th>
-                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Volume</th>
-                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Spread</th>
-                      <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMarkets.map(market => (
-                      <MarketRow key={market.ticker} market={market} />
-                    ))}
-                  </tbody>
-                </table>
 
-                {filteredMarkets.length === 0 && (
-                  <div className="text-center py-12 text-gray-400">
-                    {isScanning ? 'Scanning for markets...' : 'No markets found. Start the scanner to begin.'}
+              {/* Custom Settings */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Min Edge Required</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={riskSettings.minEdge}
+                      onChange={(e) => updateRiskSetting('minEdge', parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pr-8"
+                      step="0.5"
+                      min="0"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
                   </div>
-                )}
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Max Position Size</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                    <input
+                      type="number"
+                      value={riskSettings.maxPosition}
+                      onChange={(e) => updateRiskSetting('maxPosition', parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7"
+                      step="50"
+                      min="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Stop Loss</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">-</span>
+                    <input
+                      type="number"
+                      value={riskSettings.stopLoss}
+                      onChange={(e) => updateRiskSetting('stopLoss', parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7 pr-8"
+                      step="5"
+                      min="0"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Take Profit</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">+</span>
+                    <input
+                      type="number"
+                      value={riskSettings.takeProfit}
+                      onChange={(e) => updateRiskSetting('takeProfit', parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 pl-7 pr-8"
+                      step="5"
+                      min="0"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Start Button (mobile friendly) */}
+            <div className="flex justify-center">
+              <button
+                onClick={startScanner}
+                disabled={loading || selectedPlatforms.length === 0}
+                className="flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 rounded-xl font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Play className="w-6 h-6" />
+                Start Scanning
+              </button>
+            </div>
           </div>
         )}
 
         {/* Signals Tab */}
         {activeTab === 'signals' && (
           <div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                Trading Signals
+                {scannerStatus.running && (
+                  <RefreshCw className="w-4 h-4 text-green-400 animate-spin" style={{ animationDuration: '3s' }} />
+                )}
+              </h2>
+              {signals.length > 0 && (
+                <button
+                  onClick={clearAllSignals}
+                  className="text-sm text-gray-400 hover:text-red-400 flex items-center gap-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Clear All
+                </button>
+              )}
+            </div>
+
+            {/* Signals List */}
             {signals.length === 0 ? (
-              <div className="text-center py-12 text-gray-400 bg-slate-800/50 rounded-xl border border-slate-700">
-                {isScanning ? 'Scanning for opportunities...' : 'No signals found. Start the scanner to begin detecting opportunities.'}
+              <div className="text-center py-16 bg-slate-800/50 rounded-xl border border-slate-700">
+                <Bell className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg">No signals yet</p>
+                <p className="text-gray-500 text-sm mt-2">
+                  {scannerStatus.running 
+                    ? 'Scanner is running. Signals will appear here when opportunities are found.'
+                    : 'Start the scanner to begin finding trading opportunities.'
+                  }
+                </p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {signals.map((signal, idx) => (
+                {signals.map((signal) => (
                   <SignalCard
-                    key={signal.ticker || idx}
+                    key={signal.id}
                     signal={signal}
-                    onExecute={handleExecuteTrade}
+                    onTrade={handleTrade}
+                    onDismiss={dismissSignal}
                   />
                 ))}
               </div>
@@ -712,80 +794,5 @@ const ScannerDashboard = () => {
     </div>
   );
 };
-
-// ============================================
-// MOCK DATA GENERATORS
-// ============================================
-
-function generateMockMarkets() {
-  const tickers = [
-    { ticker: 'KXBTC-26JAN21', title: 'Bitcoin above $100k by Jan 26?', platform: 'kalshi', category: 'crypto' },
-    { ticker: 'KXFED-26JAN', title: 'Fed rate cut in January?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXGOLD-26JAN', title: 'Gold above $2,100 by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXSPY-26JAN', title: 'S&P 500 above 5,000 by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXTSLA-26JAN', title: 'Tesla above $300 by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXAAPL-26JAN', title: 'Apple above $200 by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXNVDA-26JAN', title: 'NVIDIA above $600 by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXETH-26JAN', title: 'Ethereum above $4k by Jan 26?', platform: 'kalshi', category: 'crypto' },
-    { ticker: 'KXOIL-26JAN', title: 'Oil above $80/barrel by Jan 26?', platform: 'kalshi', category: 'economics' },
-    { ticker: 'KXUNMP-26JAN', title: 'Unemployment below 4% in January?', platform: 'kalshi', category: 'economics' },
-  ];
-
-  return tickers.map(t => ({
-    ...t,
-    yes_bid: Math.random() * 0.4 + 0.3,
-    yes_ask: Math.random() * 0.4 + 0.35,
-    no_bid: Math.random() * 0.4 + 0.3,
-    no_ask: Math.random() * 0.4 + 0.35,
-    volume24h: Math.floor(Math.random() * 50000) + 5000,
-  }));
-}
-
-function generateMockSignals() {
-  return [
-    {
-      ticker: 'KXBTC-26JAN21',
-      direction: 'up',
-      strength: 'strong',
-      signalType: 'momentum',
-      reason: 'Price momentum indicates upward trend with strong volume support',
-      edge: 5.2,
-      confidence: 78,
-      entryPrice: 62,
-      targetPrice: 70,
-      expectedProfit: 45.50,
-      recommendedSide: 'YES',
-      recommendedQuantity: 10,
-    },
-    {
-      ticker: 'KXFED-26JAN',
-      direction: 'down',
-      strength: 'moderate',
-      signalType: 'mispricing',
-      reason: 'Recent Fed commentary suggests hold - market overpricing rate cut',
-      edge: 3.8,
-      confidence: 65,
-      entryPrice: 45,
-      targetPrice: 35,
-      expectedProfit: 28.00,
-      recommendedSide: 'NO',
-      recommendedQuantity: 5,
-    },
-    {
-      ticker: 'KXETH-26JAN',
-      direction: 'up',
-      strength: 'strong',
-      signalType: 'spread',
-      reason: 'Wide bid-ask spread presents arbitrage opportunity',
-      edge: 4.5,
-      confidence: 72,
-      entryPrice: 58,
-      targetPrice: 68,
-      expectedProfit: 35.00,
-      recommendedSide: 'YES',
-      recommendedQuantity: 8,
-    },
-  ];
-}
 
 export default ScannerDashboard;
