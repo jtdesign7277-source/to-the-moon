@@ -731,38 +731,69 @@ const Header = ({
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-gray-200 bg-white animate-in slide-in-from-top-2 duration-200">
-          <div className="px-4 py-3 space-y-1">
-            {/* Mobile Trading Toggle */}
-            <div className="flex items-center justify-between py-2 mb-2 border-b border-gray-100 pb-3">
-              <span className="text-sm font-medium text-gray-700">Trading Mode</span>
-              <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setTradingMode('paper')}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                    tradingMode === 'paper'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600'
-                  }`}
-                >
-                  Paper
-                </button>
-                <button
-                  onClick={() => setTradingMode('live')}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                    tradingMode === 'live'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600'
-                  }`}
-                >
-                  Live
-                </button>
-              </div>
+      {/* Mobile Sliding Drawer */}
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 xl:hidden transition-opacity duration-300 ${
+          mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+      
+      {/* Drawer */}
+      <div 
+        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 xl:hidden transform transition-transform duration-300 ease-out ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
+              <Rocket className="w-5 h-5 text-white" />
             </div>
+            <span className="font-bold text-lg text-gray-900">TO THE MOON</span>
+          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            {/* Navigation Items */}
+        {/* Drawer Content */}
+        <div className="flex flex-col h-[calc(100%-72px)] overflow-y-auto">
+          {/* Trading Mode Toggle */}
+          <div className="p-4 border-b border-gray-100">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Trading Mode</p>
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setTradingMode('paper')}
+                className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  tradingMode === 'paper'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600'
+                }`}
+              >
+                Paper
+              </button>
+              <button
+                onClick={() => setTradingMode('live')}
+                className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                  tradingMode === 'live'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600'
+                }`}
+              >
+                Live
+              </button>
+            </div>
+          </div>
+
+          {/* Main Navigation */}
+          <div className="p-4 space-y-1">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main</p>
             {mainNavItems.map((item) => {
               const Icon = item.icon
               const isActive = currentPage === item.id
@@ -770,10 +801,10 @@ const Header = ({
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.id, item.requiresPro)}
-                  className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-between ${
+                  className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between ${
                     isActive
                       ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -786,56 +817,59 @@ const Header = ({
                 </button>
               )
             })}
-
-            {/* Explore Section */}
-            <div className="pt-2 mt-2 border-t border-gray-100">
-              <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Explore
-              </p>
-              {exploreItems.map((item) => {
-                const Icon = item.icon
-                const isActive = currentPage === item.id
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavigation(item.id, false)}
-                    className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                      isActive
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {item.label}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Mobile User Info & Logout */}
-            {user && (
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <div className="px-4 py-2 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={onLogout}
-                  className="w-full mt-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-3"
-                >
-                  <LogOut className="w-5 h-5" />
-                  Log Out
-                </button>
-              </div>
-            )}
           </div>
+
+          {/* Explore Section */}
+          <div className="p-4 pt-0 space-y-1 flex-1">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Explore</p>
+            {exploreItems.map((item) => {
+              const Icon = item.icon
+              const isActive = currentPage === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.id, false)}
+                  className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
+                    isActive
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {item.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* User Section - Pinned to bottom */}
+          {user && (
+            <div className="mt-auto p-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.username}</p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
+                {isPro && (
+                  <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-full">
+                    PRO
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => { setMobileMenuOpen(false); onLogout(); }}
+                className="w-full px-4 py-2.5 text-red-600 hover:bg-red-100 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Log Out
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </header>
   )
 }
