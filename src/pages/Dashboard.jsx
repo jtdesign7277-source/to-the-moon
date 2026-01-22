@@ -28,6 +28,10 @@ const Dashboard = ({ onNavigate }) => {
     openBets,
     tradeHistory,
     portfolioStats,
+    strategyBets,
+    addStrategyBet,
+    updateStrategyBetPrice,
+    settleStrategyBet,
     getPortfolioByPlatform,
   } = useApp()
 
@@ -171,6 +175,96 @@ const Dashboard = ({ onNavigate }) => {
     
     return () => clearInterval(interval)
   }, [activeStrategies])
+
+  // Simulate strategy bets being placed by active strategies
+  useEffect(() => {
+    if (activeStrategies.length === 0 || !addStrategyBet) return
+    
+    // Sample markets that strategies might trade
+    const sampleMarkets = [
+      { ticker: 'FED-JAN', event: 'Fed raises rates in January', platform: 'Kalshi' },
+      { ticker: 'BTC-90K', event: 'Bitcoin above $90K by Feb', platform: 'Kalshi' },
+      { ticker: 'INAUG', event: 'Inauguration proceeds without incident', platform: 'Manifold' },
+      { ticker: 'AAPL-ER', event: 'Apple beats Q1 earnings', platform: 'Polymarket' },
+      { ticker: 'NVDA-200', event: 'NVIDIA hits $200 by March', platform: 'Kalshi' },
+      { ticker: 'OIL-80', event: 'Oil stays above $80/barrel', platform: 'Manifold' },
+    ]
+    
+    // Only simulate if we have fewer than 3 strategy bets (to not overwhelm)
+    const maxSimulatedBets = 3
+    
+    // Simulate a new bet every 20-40 seconds when strategies are running
+    const interval = setInterval(() => {
+      if (strategyBets.length >= maxSimulatedBets) return
+      
+      // 30% chance to place a bet each interval
+      if (Math.random() > 0.30) return
+      
+      const strategy = activeStrategies[Math.floor(Math.random() * activeStrategies.length)]
+      const market = sampleMarkets[Math.floor(Math.random() * sampleMarkets.length)]
+      
+      // Don't duplicate existing bets
+      if (strategyBets.some(b => b.ticker === market.ticker)) return
+      
+      const position = Math.random() > 0.5 ? 'YES' : 'NO'
+      const entryPrice = 0.30 + Math.random() * 0.40 // 0.30 - 0.70
+      const contracts = Math.floor(20 + Math.random() * 80)
+      
+      addStrategyBet({
+        ticker: market.ticker,
+        event: market.event,
+        platform: market.platform,
+        position,
+        contracts,
+        entryPrice: Math.round(entryPrice * 100) / 100,
+        strategy: strategy.name,
+        strategyId: strategy.id,
+        strategyIcon: strategy.icon || '⚡',
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week
+      })
+    }, 25000) // Every 25 seconds
+    
+    return () => clearInterval(interval)
+  }, [activeStrategies, strategyBets, addStrategyBet])
+
+  // Simulate price updates for strategy bets
+  useEffect(() => {
+    if (!strategyBets || strategyBets.length === 0 || !updateStrategyBetPrice) return
+    
+    const interval = setInterval(() => {
+      strategyBets.forEach(bet => {
+        // Small random price movement
+        const direction = Math.random() > 0.45 ? 1 : -1 // Slightly bullish bias
+        const movement = direction * (Math.random() * 0.03)
+        const newPrice = Math.max(0.01, Math.min(0.99, (bet.currentPrice || bet.entryPrice) + movement))
+        updateStrategyBetPrice(bet.id, Math.round(newPrice * 100) / 100)
+      })
+    }, 8000) // Every 8 seconds
+    
+    return () => clearInterval(interval)
+  }, [strategyBets, updateStrategyBetPrice])
+
+  // Simulate settling strategy bets (auto-close after some time)
+  useEffect(() => {
+    if (!strategyBets || strategyBets.length === 0 || !settleStrategyBet) return
+    
+    const interval = setInterval(() => {
+      strategyBets.forEach(bet => {
+        const ageMinutes = (Date.now() - new Date(bet.placedAt).getTime()) / 60000
+        
+        // 10% chance to settle after 2 minutes, increasing over time
+        const settleChance = Math.min(0.3, 0.1 + (ageMinutes - 2) * 0.05)
+        if (ageMinutes > 2 && Math.random() < settleChance) {
+          // Determine outcome based on current price movement
+          const won = bet.profit >= 0
+          const outcome = bet.position === 'YES' ? (won ? 'YES' : 'NO') : (won ? 'NO' : 'YES')
+          settleStrategyBet(bet.id, outcome, bet.currentPrice)
+        }
+      })
+    }, 15000) // Check every 15 seconds
+    
+    return () => clearInterval(interval)
+  }, [strategyBets, settleStrategyBet])
 
   // Fetch user data from API - filtered by trading mode
   const fetchUserData = async () => {
@@ -644,6 +738,92 @@ const Dashboard = ({ onNavigate }) => {
                       <div className="p-2 bg-green-50 rounded-lg">
                         <Play className="w-4 h-4 text-green-600" />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Strategy Bets - Live trades executed by automated strategies */}
+      {strategyBets && strategyBets.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <Rocket className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
+                <p className="text-xs text-gray-500">{strategyBets.length} live position{strategyBets.length !== 1 ? 's' : ''} from automated strategies</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+              AUTO
+            </span>
+          </div>
+          
+          <div className="divide-y divide-gray-100">
+            {strategyBets.map(bet => {
+              const isProfit = (bet.profit || 0) >= 0
+              const timeSincePlaced = bet.placedAt ? Math.floor((Date.now() - new Date(bet.placedAt).getTime()) / 60000) : 0
+              const timeLabel = timeSincePlaced < 60 
+                ? `${timeSincePlaced}m ago` 
+                : timeSincePlaced < 1440 
+                  ? `${Math.floor(timeSincePlaced / 60)}h ago`
+                  : `${Math.floor(timeSincePlaced / 1440)}d ago`
+              
+              return (
+                <div 
+                  key={bet.id}
+                  className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Left: Strategy & Market Info */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex flex-col items-center">
+                        <span className="text-lg">{bet.strategyIcon || '⚡'}</span>
+                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                          bet.position === 'YES' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {bet.position}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{bet.ticker}</p>
+                        <p className="text-xs text-gray-500 truncate">{bet.event}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] text-purple-600 font-medium">{bet.strategy}</span>
+                          <span className="text-[10px] text-gray-400">•</span>
+                          <span className="text-[10px] text-gray-400">{bet.platform}</span>
+                          <span className="text-[10px] text-gray-400">•</span>
+                          <span className="text-[10px] text-gray-400">{timeLabel}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Right: Trade Details & P&L */}
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs text-gray-500">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
+                        <p className="text-xs text-gray-400">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
+                      </div>
+                      <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
+                        isProfit ? 'bg-green-50' : 'bg-red-50'
+                      }`}>
+                        <p className={`text-sm font-semibold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                          {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
+                        </p>
+                        <p className={`text-[10px] ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+                          {isProfit ? '+' : ''}{(bet.profitPercent || 0).toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Live" />
                     </div>
                   </div>
                 </div>

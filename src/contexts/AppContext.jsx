@@ -157,7 +157,7 @@ export function AppProvider({ children }) {
   // GLOBAL BETTING/TRADING STATE
   // ============================================
   
-  // Open bets - positions that are still active
+  // Open bets - positions that are still active (manual trades)
   const [openBets, setOpenBets] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.OPEN_BETS)
@@ -174,6 +174,24 @@ export function AppProvider({ children }) {
       console.error('Failed to load open bets:', e)
     }
     return INITIAL_OPEN_BETS
+  })
+
+  // Strategy bets - positions executed by automated strategies
+  const [strategyBets, setStrategyBets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ttm_strategy_bets')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return parsed.map(bet => ({
+          ...bet,
+          placedAt: new Date(bet.placedAt),
+          expiresAt: bet.expiresAt ? new Date(bet.expiresAt) : null,
+        }))
+      }
+    } catch (e) {
+      console.error('Failed to load strategy bets:', e)
+    }
+    return []
   })
 
   // Trade history - closed/settled positions
@@ -219,6 +237,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.TRADE_HISTORY, JSON.stringify(tradeHistory))
   }, [tradeHistory])
+
+  useEffect(() => {
+    localStorage.setItem('ttm_strategy_bets', JSON.stringify(strategyBets))
+  }, [strategyBets])
 
   // ============================================
   // CALCULATE PORTFOLIO STATS
@@ -379,6 +401,86 @@ export function AppProvider({ children }) {
     setTradeHistory(prev => prev.filter(t => t.id !== tradeId))
   }, [])
 
+  // ============================================
+  // STRATEGY BET ACTIONS
+  // ============================================
+
+  // Add a bet executed by a strategy
+  const addStrategyBet = useCallback((betData) => {
+    const newBet = {
+      id: `strat-bet-${Date.now()}`,
+      ...betData,
+      placedAt: new Date(),
+      status: 'active',
+      profit: 0,
+      profitPercent: 0,
+      currentPrice: betData.entryPrice,
+      isStrategyBet: true,
+    }
+    setStrategyBets(prev => [newBet, ...prev])
+    return newBet
+  }, [])
+
+  // Update a strategy bet's price
+  const updateStrategyBetPrice = useCallback((betId, newPrice) => {
+    setStrategyBets(prev => prev.map(bet => {
+      if (bet.id !== betId) return bet
+      const profit = (newPrice - bet.entryPrice) * bet.contracts * (bet.position === 'YES' ? 1 : -1)
+      const profitPercent = ((newPrice - bet.entryPrice) / bet.entryPrice) * 100 * (bet.position === 'YES' ? 1 : -1)
+      return {
+        ...bet,
+        currentPrice: newPrice,
+        profit,
+        profitPercent,
+      }
+    }))
+  }, [])
+
+  // Settle/close a strategy bet (removes it from active list)
+  const settleStrategyBet = useCallback((betId, outcome, exitPrice) => {
+    const bet = strategyBets.find(b => b.id === betId)
+    if (!bet) return null
+
+    const won = (bet.position === 'YES' && outcome === 'YES') || (bet.position === 'NO' && outcome === 'NO')
+    const finalExitPrice = exitPrice ?? (won ? 1.00 : 0.00)
+    const pnl = won 
+      ? bet.contracts * (1 - bet.entryPrice) 
+      : -bet.contracts * bet.entryPrice
+
+    const settledTrade = {
+      id: `strat-trade-${Date.now()}`,
+      ticker: bet.ticker,
+      event: bet.event,
+      platform: bet.platform,
+      position: bet.position,
+      contracts: bet.contracts,
+      entryPrice: bet.entryPrice,
+      exitPrice: finalExitPrice,
+      pnl,
+      pnlPercent: (pnl / (bet.entryPrice * bet.contracts)) * 100,
+      placedAt: bet.placedAt,
+      settledAt: new Date(),
+      status: won ? 'won' : 'lost',
+      strategy: bet.strategy,
+      strategyId: bet.strategyId,
+      outcome,
+      isStrategyBet: true,
+    }
+
+    // Remove from strategy bets
+    setStrategyBets(prev => prev.filter(b => b.id !== betId))
+    
+    // Add to trade history
+    setTradeHistory(prev => [settledTrade, ...prev])
+
+    return settledTrade
+  }, [strategyBets])
+
+  // Remove a strategy bet without settling
+  const removeStrategyBet = useCallback((betId) => {
+    setStrategyBets(prev => prev.filter(b => b.id !== betId))
+  }, [])
+
   // Get portfolio breakdown by platform
   const getPortfolioByPlatform = useCallback(() => {
     const platforms = {}
@@ -506,6 +608,7 @@ export function AppProvider({ children }) {
     openBets,
     tradeHistory,
     portfolioStats,
+    strategyBets,
 
     // === Betting Actions ===
     placeBet,
@@ -514,6 +617,12 @@ export function AppProvider({ children }) {
     settleBet,
     deleteBet,
     deleteTrade,
+
+    // === Strategy Bet Actions ===
+    addStrategyBet,
+    updateStrategyBetPrice,
+    settleStrategyBet,
+    removeStrategyBet,
 
     // === Portfolio Breakdown ===
     getPortfolioByPlatform,
@@ -535,12 +644,17 @@ export function AppProvider({ children }) {
     openBets,
     tradeHistory,
     portfolioStats,
+    strategyBets,
     placeBet,
     updateBetPrice,
     closeBet,
     settleBet,
     deleteBet,
     deleteTrade,
+    addStrategyBet,
+    updateStrategyBetPrice,
+    settleStrategyBet,
+    removeStrategyBet,
     getPortfolioByPlatform,
     getPortfolioByStrategy,
   ])
