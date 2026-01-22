@@ -295,15 +295,13 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
                     {dayData.day}
                   </span>
                   
-                  {/* P&L Amount - Centered */}
+                  {/* P&L Amount - Bottom Right */}
                   {dayData.hasTrades && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-sm font-bold ${
-                        Math.abs(dayData.pnl) / maxPnL > 0.4 ? '' : dayData.pnl >= 0 ? 'text-green-700' : 'text-red-700'
-                      }`}>
-                        {dayData.pnl >= 0 ? '+' : ''}{dayData.pnl.toFixed(0)}
-                      </span>
-                    </div>
+                    <span className={`absolute bottom-1.5 right-2 text-xs font-bold ${
+                      dayData.pnl >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {dayData.pnl >= 0 ? '+' : '-'}${Math.abs(dayData.pnl).toFixed(0)}
+                    </span>
                   )}
                 </>
               )}
