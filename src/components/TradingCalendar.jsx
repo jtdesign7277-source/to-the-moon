@@ -1,9 +1,26 @@
-import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Calendar, X } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Calendar, X, FileText, Check, Trash2 } from 'lucide-react'
+
+// Notes storage key
+const NOTES_STORAGE_KEY = 'ttm_calendar_notes'
 
 const TradingCalendar = ({ trades = [], onDayClick }) => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(null)
+  const [noteModalDay, setNoteModalDay] = useState(null)
+  const [noteText, setNoteText] = useState('')
+  const [notes, setNotes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY) || '{}')
+    } catch {
+      return {}
+    }
+  })
+
+  // Save notes to localStorage
+  useEffect(() => {
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes))
+  }, [notes])
 
   // Get month/year info
   const year = currentDate.getFullYear()
@@ -77,12 +94,14 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
     // Actual days
     for (let day = 1; day <= daysInMonth; day++) {
       const key = `${year}-${month}-${day}`
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` // YYYY-MM-DD format
       const dayData = dailyPnL[key]
       const isToday = new Date().toDateString() === new Date(year, month, day).toDateString()
       
       days.push({
         day,
         key,
+        dateKey,
         pnl: dayData?.pnl || 0,
         trades: dayData?.trades || [],
         wins: dayData?.wins || 0,
@@ -125,6 +144,42 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
 
   const goToToday = () => {
     setCurrentDate(new Date())
+  }
+
+  // Note functions
+  const openNoteModal = (dayKey, e) => {
+    e.stopPropagation()
+    setNoteModalDay(dayKey)
+    setNoteText(notes[dayKey] || '')
+  }
+
+  const saveNote = () => {
+    if (noteModalDay) {
+      if (noteText.trim()) {
+        setNotes(prev => ({ ...prev, [noteModalDay]: noteText.trim() }))
+      } else {
+        // Remove empty notes
+        setNotes(prev => {
+          const newNotes = { ...prev }
+          delete newNotes[noteModalDay]
+          return newNotes
+        })
+      }
+    }
+    setNoteModalDay(null)
+    setNoteText('')
+  }
+
+  const deleteNote = () => {
+    if (noteModalDay) {
+      setNotes(prev => {
+        const newNotes = { ...prev }
+        delete newNotes[noteModalDay]
+        return newNotes
+      })
+    }
+    setNoteModalDay(null)
+    setNoteText('')
   }
 
   const handleDayClick = (dayData) => {
@@ -222,6 +277,17 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
             >
               {dayData.day && (
                 <>
+                  {/* Notepad Icon */}
+                  <button
+                    onClick={(e) => openNoteModal(e, dayData.dateKey)}
+                    className={`absolute top-0.5 left-0.5 p-0.5 rounded hover:bg-white/50 transition-colors z-10 ${
+                      notes[dayData.dateKey] ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                    title={notes[dayData.dateKey] ? 'View/Edit Note' : 'Add Note'}
+                  >
+                    <FileText className="w-3 h-3" />
+                  </button>
+                  
                   <span className={`text-sm font-medium ${
                     dayData.hasTrades && Math.abs(dayData.pnl) / maxPnL > 0.4 ? '' : 'text-gray-700'
                   }`}>
@@ -301,6 +367,77 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Note Modal */}
+      {noteModalDay && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" 
+          onClick={() => setNoteModalDay(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-semibold text-gray-900">
+                  {new Date(noteModalDay + 'T12:00:00').toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </h3>
+              </div>
+              <button
+                onClick={() => setNoteModalDay(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Daily Notes
+              </label>
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="What went well today? What could be improved? Any lessons learned..."
+                className="w-full h-32 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              />
+              
+              <div className="flex items-center justify-between mt-4">
+                {notes[noteModalDay] && (
+                  <button
+                    onClick={deleteNote}
+                    className="flex items-center gap-1.5 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                )}
+                <div className={`flex items-center gap-2 ${!notes[noteModalDay] ? 'ml-auto' : ''}`}>
+                  <button
+                    onClick={() => setNoteModalDay(null)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveNote}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                  >
+                    <Check className="w-4 h-4" />
+                    Save
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
