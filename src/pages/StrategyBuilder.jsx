@@ -1745,12 +1745,11 @@ const StrategyBuilder = () => {
               <div className="border-t border-gray-100">
                 <AdvancedFilters
                   filters={advancedFilters}
-                  onFiltersChange={setAdvancedFilters}
-                  onApply={() => {
+                  onChange={(newFilters) => {
+                    setAdvancedFilters(newFilters)
+                  }}
+                  onReset={() => {
                     setShowFiltersPanel(false)
-                    if (activeStrategy) {
-                      rerunBacktest()
-                    }
                   }}
                 />
               </div>
