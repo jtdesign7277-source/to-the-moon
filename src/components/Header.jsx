@@ -235,7 +235,7 @@ const Header = ({
 
   // Items to show in main nav (keep clean)
   const mainNavItems = navItems.filter(item => 
-    ['dashboard', 'history', 'accounts', 'strategy'].includes(item.id)
+    ['dashboard', 'scanner', 'accounts', 'strategy'].includes(item.id)
   )
 
   // Items for the dropdown
@@ -244,7 +244,7 @@ const Header = ({
     { id: 'leaderboard', label: 'Leaderboard', description: 'Top performing traders', icon: Trophy },
     { id: 'education', label: 'Education', description: 'Learn trading skills', icon: BookOpen },
     { id: 'discover', label: 'Discover', description: 'Explore opportunities', icon: Compass },
-    { id: 'scanner', label: 'Scanner', description: 'Find arbitrage opportunities', icon: Activity },
+    { id: 'history', label: 'Trade History', description: 'View past trades', icon: History },
   ]
 
   // Check if any explore item is active
