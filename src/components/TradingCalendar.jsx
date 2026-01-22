@@ -109,27 +109,27 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
               <div
                 key={day}
                 onClick={() => hasTrades && onDayClick && onDayClick(dayData)}
-                className={`aspect-square rounded-xl border-2 p-2 transition-all duration-200 ease-out ${bgClass} ${borderClass} ${hasTrades ? 'cursor-pointer active:scale-95 shadow-sm hover:shadow-md' : ''} ${isToday ? 'ring-2 ring-indigo-400 ring-offset-2' : ''} relative flex flex-col`}
+                className={`aspect-square rounded-xl border-2 p-1.5 sm:p-2 transition-all duration-200 ease-out ${bgClass} ${borderClass} ${hasTrades ? 'cursor-pointer active:scale-95 shadow-sm hover:shadow-md' : ''} ${isToday ? 'ring-2 ring-indigo-400 ring-offset-2' : ''} relative flex flex-col`}
               >
                 <div className="flex items-start justify-between">
                   {hasTrades && (
-                    <div className={`p-1 rounded-lg ${isProfit ? 'bg-emerald-200/60' : 'bg-red-200/60'}`}>
-                      <FileText className={`w-4 h-4 ${isProfit ? 'text-emerald-600' : 'text-red-600'}`} />
+                    <div className={`p-1.5 sm:p-2 rounded-lg ${isProfit ? 'bg-emerald-200/60' : 'bg-red-200/60'}`}>
+                      <FileText className={`w-5 h-5 sm:w-6 sm:h-6 ${isProfit ? 'text-emerald-600' : 'text-red-600'}`} />
                     </div>
                   )}
-                  {!hasTrades && <div className="w-6 h-6" />}
-                  <span className={`text-sm font-semibold ${hasTrades ? (isProfit ? 'text-emerald-800' : 'text-red-800') : 'text-gray-500'}`}>{String(day).padStart(2, '0')}</span>
+                  {!hasTrades && <div className="w-8 h-8 sm:w-10 sm:h-10" />}
+                  <span className={`text-sm sm:text-base font-bold ${hasTrades ? (isProfit ? 'text-emerald-800' : 'text-red-800') : 'text-gray-500'}`}>{day}</span>
                 </div>
                 
                 {hasTrades && (
                   <div className="flex-1 flex items-center justify-center">
-                    <span className={`text-base font-bold ${textClass}`}>{formatPnl(pnl)}</span>
+                    <span className={`text-lg sm:text-xl font-bold ${textClass}`}>{formatPnl(pnl)}</span>
                   </div>
                 )}
                 
                 {hasTrades && (
                   <div className="flex justify-end">
-                    <span className={`text-[10px] font-medium ${isProfit ? 'text-emerald-600' : 'text-red-600'}`}>{tradeCount} trade{tradeCount !== 1 ? 's' : ''}</span>
+                    <span className={`text-xs sm:text-sm font-semibold px-1.5 py-0.5 rounded-md ${isProfit ? 'bg-emerald-200/80 text-emerald-700' : 'bg-red-200/80 text-red-700'}`}>{tradeCount} trade{tradeCount !== 1 ? 's' : ''}</span>
                   </div>
                 )}
               </div>
