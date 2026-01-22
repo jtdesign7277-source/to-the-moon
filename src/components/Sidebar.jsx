@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { 
   Menu, 
-  X, 
   Rocket, 
   Crown, 
   LogOut, 
@@ -56,18 +55,16 @@ const Sidebar = ({
               <Rocket className="w-5 h-5 text-white" />
             </div>
             
-            {/* Hamburger Toggle Button - Below Rocket */}
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
-              title={isExpanded ? 'Collapse menu' : 'Expand menu'}
-            >
-              {isExpanded ? (
-                <X className="w-5 h-5 text-gray-500" />
-              ) : (
+            {/* Hamburger Toggle Button - Below Rocket (only show when collapsed on desktop) */}
+            {!isExpanded && (
+              <button
+                onClick={() => setIsExpanded(true)}
+                className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                title="Expand menu"
+              >
                 <Menu className="w-5 h-5 text-gray-500" />
-              )}
-            </button>
+              </button>
+            )}
             
             {/* App Name - Only when expanded */}
             {isExpanded && (
@@ -223,10 +220,10 @@ const Sidebar = ({
         </div>
       </div>
 
-      {/* Backdrop when expanded on mobile */}
+      {/* Backdrop - click anywhere outside to close (both mobile and desktop) */}
       {isExpanded && (
         <div 
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/10 lg:bg-transparent z-40 cursor-pointer"
           onClick={() => setIsExpanded(false)}
         />
       )}
