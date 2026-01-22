@@ -27,6 +27,9 @@ stripe==7.8.0
 requests==2.31.0
 httpx==0.26.0
 
+# Kalshi Official SDK for live trading
+kalshi_python_sync>=0.1.0
+
 # OpenAI for AI Chat Assistant
 openai==1.12.0
 

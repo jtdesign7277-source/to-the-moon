@@ -1,6 +1,7 @@
 """
 Scanner API Routes
 Endpoints for the market scanner and arbitrage engine.
+Includes live Kalshi market data via SDK.
 """
 from flask import Blueprint, request, jsonify, g
 from functools import wraps
@@ -13,6 +14,9 @@ from services.scanner.market_scanner import (
     get_scanner, start_scanner, Platform, ScannerConfig
 )
 from services.scanner.arbitrage_engine import get_engine, ArbitrageConfig
+from services.kalshi_sdk_service import (
+    get_kalshi_client, get_live_markets, get_market_price, get_market_orderbook_depth
+)
 
 logger = logging.getLogger(__name__)
 
@@ -323,4 +327,271 @@ def refresh_markets():
         
     except Exception as e:
         logger.error(f"Error refreshing markets: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================
+# LIVE KALSHI MARKET DATA ENDPOINTS (SDK)
+# ============================================
+
+@scanner_bp.route('/live/markets', methods=['GET'])
+@token_required
+def get_live_kalshi_markets():
+    """
+    Get real-time markets from Kalshi via SDK.
+    GET /api/scanner/live/markets?status=open&limit=100&category=politics
+    
+    Returns actual Kalshi market data for the scanner.
+    """
+    try:
+        status = request.args.get('status', 'open')
+        limit = int(request.args.get('limit', 100))
+        category = request.args.get('category')
+        
+        client = get_kalshi_client()
+        success, data = client.get_markets(status=status, limit=limit)
+        
+        if not success:
+            return jsonify({'error': data.get('error', 'Failed to fetch markets')}), 500
+        
+        markets = data.get('markets', [])
+        
+        # Filter by category if specified
+        if category:
+            markets = [m for m in markets if m.get('category') == category]
+        
+        # Transform to scanner-friendly format
+        scanner_markets = []
+        for m in markets:
+            # Calculate edge/opportunity metrics
+            yes_bid = m.get('yes_bid') or 0
+            yes_ask = m.get('yes_ask') or 0
+            spread = yes_ask - yes_bid if yes_ask and yes_bid else 0
+            spread_pct = (spread / yes_ask * 100) if yes_ask else 0
+            
+            scanner_markets.append({
+                'ticker': m.get('ticker'),
+                'title': m.get('title'),
+                'platform': 'kalshi',
+                'category': m.get('category', 'other'),
+                'status': m.get('status'),
+                # Prices (in cents, 0-100)
+                'yesBid': yes_bid,
+                'yesAsk': yes_ask,
+                'noBid': m.get('no_bid') or 0,
+                'noAsk': m.get('no_ask') or 0,
+                'lastPrice': m.get('last_price'),
+                # Volume & liquidity
+                'volume': m.get('volume', 0),
+                'volume24h': m.get('volume_24h', 0),
+                'openInterest': m.get('open_interest', 0),
+                # Spread analysis
+                'spread': spread,
+                'spreadPct': round(spread_pct, 2),
+                # Timing
+                'closeTime': m.get('close_time'),
+                'expirationTime': m.get('expiration_time'),
+                # Related
+                'seriesTicker': m.get('series_ticker'),
+                'eventTicker': m.get('event_ticker'),
+            })
+        
+        return jsonify({
+            'markets': scanner_markets,
+            'count': len(scanner_markets),
+            'source': 'kalshi_live',
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching live markets: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@scanner_bp.route('/live/markets/<ticker>', methods=['GET'])
+@token_required
+def get_live_market_detail(ticker):
+    """
+    Get detailed info for a specific Kalshi market.
+    GET /api/scanner/live/markets/TICKER-123
+    """
+    try:
+        client = get_kalshi_client()
+        success, data = client.get_market(ticker)
+        
+        if not success:
+            return jsonify({'error': data.get('error', 'Market not found')}), 404
+        
+        # Also fetch order book depth
+        ob_success, orderbook = client.get_orderbook(ticker, depth=5)
+        
+        return jsonify({
+            'market': data,
+            'orderbook': orderbook if ob_success else None,
+            'source': 'kalshi_live',
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching market {ticker}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@scanner_bp.route('/live/events', methods=['GET'])
+@token_required
+def get_live_events():
+    """
+    Get events (groups of related markets) from Kalshi.
+    GET /api/scanner/live/events?status=open&limit=50
+    """
+    try:
+        status = request.args.get('status', 'open')
+        limit = int(request.args.get('limit', 50))
+        
+        client = get_kalshi_client()
+        success, data = client.get_events(status=status, limit=limit)
+        
+        if not success:
+            return jsonify({'error': data.get('error', 'Failed to fetch events')}), 500
+        
+        return jsonify({
+            'events': data.get('events', []),
+            'count': data.get('count', 0),
+            'source': 'kalshi_live',
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching events: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@scanner_bp.route('/live/orderbook/<ticker>', methods=['GET'])
+@token_required
+def get_live_orderbook(ticker):
+    """
+    Get order book for a specific market.
+    GET /api/scanner/live/orderbook/TICKER-123?depth=10
+    """
+    try:
+        depth = int(request.args.get('depth', 10))
+        
+        client = get_kalshi_client()
+        success, data = client.get_orderbook(ticker, depth=depth)
+        
+        if not success:
+            return jsonify({'error': data.get('error', 'Failed to fetch orderbook')}), 404
+        
+        return jsonify({
+            'orderbook': data,
+            'source': 'kalshi_live',
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching orderbook {ticker}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@scanner_bp.route('/live/opportunities', methods=['GET'])
+@token_required
+def get_live_opportunities():
+    """
+    Analyze live markets and return trading opportunities.
+    GET /api/scanner/live/opportunities?minEdge=2.5&minVolume=100&limit=20
+    
+    This is the main endpoint for the scanner to get actionable opportunities.
+    """
+    try:
+        min_edge = float(request.args.get('minEdge', 2.5))
+        min_volume = int(request.args.get('minVolume', 100))
+        limit = int(request.args.get('limit', 20))
+        
+        # Fetch live markets
+        markets = get_live_markets(status='open', limit=200)
+        
+        if not markets:
+            return jsonify({
+                'opportunities': [],
+                'count': 0,
+                'message': 'No markets available or SDK not configured',
+            }), 200
+        
+        opportunities = []
+        
+        for m in markets:
+            # Skip low volume markets
+            volume = m.get('volume', 0) or 0
+            if volume < min_volume:
+                continue
+            
+            yes_bid = m.get('yes_bid') or 0
+            yes_ask = m.get('yes_ask') or 0
+            no_bid = m.get('no_bid') or 0
+            no_ask = m.get('no_ask') or 0
+            
+            # Calculate spread edge
+            if yes_ask > 0 and yes_bid > 0:
+                spread = yes_ask - yes_bid
+                spread_edge = (spread / yes_ask) * 100
+            else:
+                spread_edge = 0
+            
+            # Look for mispricing (yes + no should = 100)
+            if yes_ask and no_ask:
+                total = yes_ask + no_ask
+                mispricing_edge = abs(100 - total)
+            else:
+                mispricing_edge = 0
+            
+            # Calculate combined opportunity score
+            edge = max(spread_edge, mispricing_edge)
+            
+            if edge >= min_edge:
+                # Determine signal type
+                if mispricing_edge > spread_edge:
+                    signal_type = 'mispricing'
+                    signal_reason = f"Yes+No={yes_ask+no_ask}¢ (should be 100¢)"
+                    recommended_side = 'yes' if yes_ask + no_ask > 100 else 'no'
+                else:
+                    signal_type = 'spread'
+                    signal_reason = f"Spread {spread}¢ ({spread_edge:.1f}%)"
+                    recommended_side = 'yes'
+                
+                opportunities.append({
+                    'ticker': m.get('ticker'),
+                    'title': m.get('title'),
+                    'platform': 'kalshi',
+                    'category': m.get('category', 'other'),
+                    'signalType': signal_type,
+                    'edge': round(edge, 2),
+                    'confidence': min(0.9, 0.5 + (edge / 20)),  # Simple confidence calc
+                    'reason': signal_reason,
+                    'recommendedSide': recommended_side,
+                    'recommendedAction': 'buy',
+                    # Current prices
+                    'yesBid': yes_bid,
+                    'yesAsk': yes_ask,
+                    'noBid': no_bid,
+                    'noAsk': no_ask,
+                    # Volume
+                    'volume': volume,
+                    'volume24h': m.get('volume_24h', 0),
+                    # Timing
+                    'closeTime': m.get('close_time'),
+                })
+        
+        # Sort by edge (highest first) and limit
+        opportunities.sort(key=lambda x: x['edge'], reverse=True)
+        opportunities = opportunities[:limit]
+        
+        return jsonify({
+            'opportunities': opportunities,
+            'count': len(opportunities),
+            'totalScanned': len(markets),
+            'filters': {
+                'minEdge': min_edge,
+                'minVolume': min_volume,
+            },
+            'source': 'kalshi_live',
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error analyzing opportunities: {e}")
         return jsonify({'error': str(e)}), 500

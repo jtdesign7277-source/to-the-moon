@@ -321,6 +321,10 @@ export const liveTradeApi = {
   placeOrder: (orderData) =>
     api.post('/live/order', orderData),
 
+  /** Place order via SDK (enhanced) */
+  placeSDKOrder: (orderData) =>
+    api.post('/live/sdk/order', orderData),
+
   /** Get list of orders */
   getOrders: (params = {}) =>
     api.get('/live/orders', { params }),
@@ -356,6 +360,69 @@ export const liveTradeApi = {
   /** Emergency kill switch - cancel all orders */
   killSwitch: () =>
     api.post('/live/kill-switch'),
+
+  /** Get full portfolio via SDK */
+  getSDKPortfolio: () =>
+    api.get('/live/sdk/portfolio'),
+
+  /** Execute a scanner signal (one-click trading) */
+  executeSignal: (signalData) =>
+    api.post('/live/sdk/execute-signal', signalData),
+};
+
+// ============================================
+// SCANNER ENDPOINTS (Live Market Data)
+// ============================================
+export const scannerApi = {
+  /** Start the market scanner */
+  start: (config) =>
+    api.post('/scanner/start', config),
+
+  /** Stop the scanner */
+  stop: () =>
+    api.post('/scanner/stop'),
+
+  /** Get scanner status */
+  getStatus: () =>
+    api.get('/scanner/status'),
+
+  /** Get markets from scanner */
+  getMarkets: (params = {}) =>
+    api.get('/scanner/markets', { params }),
+
+  /** Get active trading signals */
+  getSignals: (params = {}) =>
+    api.get('/scanner/signals', { params }),
+
+  /** Clear all signals */
+  clearSignals: () =>
+    api.post('/scanner/signals/clear'),
+
+  /** Force market refresh */
+  refresh: () =>
+    api.post('/scanner/refresh'),
+
+  // ===== LIVE KALSHI DATA (SDK) =====
+
+  /** Get real-time Kalshi markets */
+  getLiveMarkets: (params = {}) =>
+    api.get('/scanner/live/markets', { params }),
+
+  /** Get specific market details */
+  getLiveMarket: (ticker) =>
+    api.get(`/scanner/live/markets/${ticker}`),
+
+  /** Get events (grouped markets) */
+  getLiveEvents: (params = {}) =>
+    api.get('/scanner/live/events', { params }),
+
+  /** Get order book for a market */
+  getOrderbook: (ticker, depth = 10) =>
+    api.get(`/scanner/live/orderbook/${ticker}`, { params: { depth } }),
+
+  /** Get analyzed trading opportunities */
+  getLiveOpportunities: (params = {}) =>
+    api.get('/scanner/live/opportunities', { params }),
 };
 
 // ============================================

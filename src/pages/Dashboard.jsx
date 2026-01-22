@@ -9,6 +9,7 @@ import {
   DollarSign, Target, Zap, Calendar, ArrowUpRight, ArrowDownRight, Clock
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { useLivePortfolio } from '../hooks/useLiveMarkets'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 import LiveScanner from '../components/LiveScanner'
 import TradeSlipViewer from '../components/TradeSlipViewer'
@@ -52,6 +53,16 @@ const Dashboard = ({ onNavigate }) => {
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [performancePeriod, setPerformancePeriod] = useState('1M') // 1D, 1W, 1M, 6M, 1Y
   const [selectedStat, setSelectedStat] = useState(null) // For stat card modal
+
+  // Live portfolio from Kalshi (when in live mode and account connected)
+  const { 
+    portfolio: livePortfolio, 
+    hasAccount: hasKalshiAccount,
+    refresh: refreshLivePortfolio 
+  } = useLivePortfolio({ 
+    enabled: tradingMode === 'live',
+    pollInterval: 60000 
+  })
 
   // Track page view when dashboard loads
   useEffect(() => {
@@ -179,13 +190,23 @@ const Dashboard = ({ onNavigate }) => {
 
       if (response.ok) {
         const data = await response.json()
+        
+        // If in live mode and have Kalshi portfolio, use that balance
+        let totalBalance = data.totalBalance || 0
+        let connectedAccounts = data.connectedAccounts || 0
+        
+        if (tradingMode === 'live' && livePortfolio?.balance) {
+          totalBalance = livePortfolio.balance.balance || totalBalance
+          connectedAccounts = Math.max(1, connectedAccounts)
+        }
+        
         setUserData({
           totalPnl: data.totalPnl || 0,
           winRate: data.winRate || 0,
           activeStrategies: data.activeStrategies || 0,
           totalTrades: data.totalTrades || 0,
-          connectedAccounts: data.connectedAccounts || 0,
-          totalBalance: data.totalBalance || 0,
+          connectedAccounts,
+          totalBalance,
           monthlyChange: data.monthlyChange || 0,
         })
         setRecentTrades(data.recentTrades || [])

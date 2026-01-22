@@ -563,3 +563,331 @@ def kill_switch():
         'failed_orders': failed,
         'message': f'Cancelled {len(cancelled)} orders, {len(failed)} failed'
     })
+
+
+# ============================================
+# SDK-BASED TRADING ENDPOINTS (Enhanced)
+# ============================================
+
+@live_trading_bp.route('/api/live/sdk/order', methods=['POST'])
+@require_auth
+def place_sdk_order():
+    """
+    Place an order using the Kalshi SDK (enhanced version).
+    
+    Request body:
+    {
+        "ticker": "KXBTC-24JAN20-B50000",
+        "action": "buy",
+        "side": "yes",
+        "count": 10,
+        "type": "limit",
+        "price": 45,
+        "clientOrderId": "optional-uuid"
+    }
+    """
+    from services.kalshi_sdk_service import get_authenticated_client
+    from routes.accounts import decrypt_credential
+    
+    user = g.user
+    data = request.get_json() or {}
+    
+    # Validate required fields
+    required = ['ticker', 'action', 'side', 'count']
+    missing = [f for f in required if f not in data]
+    if missing:
+        return jsonify({'error': f'Missing required fields: {", ".join(missing)}'}), 400
+    
+    # Get connected account
+    account = ConnectedAccount.query.filter_by(
+        user_id=user.id,
+        platform='kalshi',
+        status='connected'
+    ).first()
+    
+    if not account:
+        return jsonify({'error': 'No connected Kalshi account found'}), 400
+    
+    try:
+        api_key_id = decrypt_credential(account.api_key_id)
+        api_secret = decrypt_credential(account.api_secret)
+    except Exception as e:
+        return jsonify({'error': 'Failed to decrypt credentials'}), 500
+    
+    # Create authenticated SDK client
+    sdk_client = get_authenticated_client(api_key_id, api_secret)
+    
+    if not sdk_client.is_authenticated:
+        return jsonify({'error': 'SDK authentication failed'}), 401
+    
+    # Extract parameters
+    ticker = data['ticker']
+    action = data['action']
+    side = data['side']
+    count = int(data['count'])
+    order_type = data.get('type', 'limit')
+    price = data.get('price')
+    client_order_id = data.get('clientOrderId')
+    
+    # Validation
+    if order_type == 'limit' and price is None:
+        return jsonify({'error': 'Price required for limit orders'}), 400
+    
+    if price is not None:
+        price = int(price)
+        if price < 1 or price > 99:
+            return jsonify({'error': 'Price must be 1-99 cents'}), 400
+    
+    if count > 100:
+        return jsonify({'error': 'Max 100 contracts per order'}), 400
+    
+    # Verify balance first
+    balance_success, balance_data = sdk_client.get_balance()
+    if not balance_success:
+        return jsonify({'error': 'Failed to verify balance'}), 500
+    
+    available = balance_data.get('available_balance', 0)
+    max_cost = (count * (price if price else 99)) / 100
+    
+    if action == 'buy' and max_cost > available:
+        return jsonify({
+            'error': f'Insufficient funds. Need ${max_cost:.2f}, have ${available:.2f}'
+        }), 400
+    
+    # Place order via SDK
+    logger.info(f"SDK order: {action} {count} {side} on {ticker} @ {price}¢")
+    
+    success, result = sdk_client.place_order(
+        ticker=ticker,
+        action=action,
+        side=side,
+        count=count,
+        order_type=order_type,
+        price=price,
+        client_order_id=client_order_id
+    )
+    
+    if not success:
+        logger.error(f"SDK order failed: {result}")
+        return jsonify({'error': result.get('error', 'Order failed')}), 400
+    
+    # Log to database
+    try:
+        trade = Trade(
+            user_id=user.id,
+            pair=ticker,
+            trade_type=f'{action}_{side}',
+            entry=price / 100 if price else 0,
+            amount=count,
+            platform='kalshi',
+            status='executed',
+            is_paper=False,
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(trade)
+        account.last_balance_update = datetime.utcnow()
+        db.session.commit()
+    except Exception as e:
+        logger.error(f"Failed to log trade: {e}")
+    
+    return jsonify({
+        'success': True,
+        'order': result,
+        'message': f'Order placed: {action} {count} {side} @ {price}¢'
+    }), 201
+
+
+@live_trading_bp.route('/api/live/sdk/portfolio', methods=['GET'])
+@require_auth
+def get_sdk_portfolio():
+    """
+    Get complete portfolio data via SDK.
+    Returns balance, positions, and recent trades.
+    """
+    from services.kalshi_sdk_service import get_authenticated_client
+    from routes.accounts import decrypt_credential
+    
+    user = g.user
+    
+    account = ConnectedAccount.query.filter_by(
+        user_id=user.id,
+        platform='kalshi',
+        status='connected'
+    ).first()
+    
+    if not account:
+        return jsonify({'error': 'No connected Kalshi account'}), 400
+    
+    try:
+        api_key_id = decrypt_credential(account.api_key_id)
+        api_secret = decrypt_credential(account.api_secret)
+    except Exception as e:
+        return jsonify({'error': 'Credential error'}), 500
+    
+    sdk_client = get_authenticated_client(api_key_id, api_secret)
+    
+    if not sdk_client.is_authenticated:
+        return jsonify({'error': 'Authentication failed'}), 401
+    
+    # Fetch all portfolio data
+    balance_success, balance_data = sdk_client.get_balance()
+    positions_success, positions_data = sdk_client.get_positions()
+    fills_success, fills_data = sdk_client.get_fills(limit=50)
+    orders_success, orders_data = sdk_client.get_orders(status='resting', limit=50)
+    
+    # Calculate total portfolio value
+    total_exposure = 0
+    if positions_success:
+        for pos in positions_data.get('positions', []):
+            total_exposure += pos.get('market_exposure', 0)
+    
+    portfolio = {
+        'balance': balance_data if balance_success else {'error': 'Failed to fetch'},
+        'positions': positions_data.get('positions', []) if positions_success else [],
+        'positionCount': len(positions_data.get('positions', [])) if positions_success else 0,
+        'totalExposure': total_exposure,
+        'recentFills': fills_data.get('fills', []) if fills_success else [],
+        'openOrders': orders_data.get('orders', []) if orders_success else [],
+        'openOrderCount': len(orders_data.get('orders', [])) if orders_success else 0,
+        'account': {
+            'id': account.id,
+            'platform': account.platform,
+            'status': account.status,
+            'lastUpdate': account.last_balance_update.isoformat() if account.last_balance_update else None
+        }
+    }
+    
+    # Update cached balance
+    if balance_success:
+        account.balance = balance_data.get('balance', 0)
+        account.last_balance_update = datetime.utcnow()
+        db.session.commit()
+    
+    return jsonify(portfolio)
+
+
+@live_trading_bp.route('/api/live/sdk/execute-signal', methods=['POST'])
+@require_auth
+def execute_signal():
+    """
+    Execute a trading signal from the scanner.
+    This is the main endpoint for one-click trading from opportunities.
+    
+    Request body:
+    {
+        "ticker": "MARKET-TICKER",
+        "side": "yes",
+        "action": "buy",
+        "contracts": 10,
+        "price": 45,
+        "signalId": "optional-signal-reference"
+    }
+    """
+    from services.kalshi_sdk_service import get_authenticated_client, get_market_price
+    from routes.accounts import decrypt_credential
+    
+    user = g.user
+    data = request.get_json() or {}
+    
+    ticker = data.get('ticker')
+    side = data.get('side', 'yes')
+    action = data.get('action', 'buy')
+    contracts = int(data.get('contracts', 1))
+    price = data.get('price')
+    
+    if not ticker:
+        return jsonify({'error': 'Ticker required'}), 400
+    
+    # Get current market price if no price specified
+    if price is None:
+        market = get_market_price(ticker)
+        if market:
+            if side == 'yes':
+                price = market.get('yes_ask') or market.get('last_price')
+            else:
+                price = market.get('no_ask') or (100 - (market.get('last_price') or 50))
+        
+        if not price:
+            return jsonify({'error': 'Could not determine market price'}), 400
+    
+    price = int(price)
+    
+    # Get connected account
+    account = ConnectedAccount.query.filter_by(
+        user_id=user.id,
+        platform='kalshi',
+        status='connected'
+    ).first()
+    
+    if not account:
+        return jsonify({
+            'error': 'Connect a Kalshi account to execute trades',
+            'code': 'NO_ACCOUNT'
+        }), 400
+    
+    try:
+        api_key_id = decrypt_credential(account.api_key_id)
+        api_secret = decrypt_credential(account.api_secret)
+    except Exception:
+        return jsonify({'error': 'Credential error'}), 500
+    
+    sdk_client = get_authenticated_client(api_key_id, api_secret)
+    
+    if not sdk_client.is_authenticated:
+        return jsonify({'error': 'Authentication failed'}), 401
+    
+    # Quick balance check
+    balance_success, balance_data = sdk_client.get_balance()
+    if balance_success:
+        available = balance_data.get('available_balance', 0)
+        cost = (contracts * price) / 100
+        if action == 'buy' and cost > available:
+            return jsonify({
+                'error': f'Insufficient funds: need ${cost:.2f}, have ${available:.2f}'
+            }), 400
+    
+    # Execute the trade
+    logger.info(f"Executing signal: {action} {contracts} {side} on {ticker} @ {price}¢")
+    
+    success, result = sdk_client.place_order(
+        ticker=ticker,
+        action=action,
+        side=side,
+        count=contracts,
+        order_type='limit',
+        price=price
+    )
+    
+    if not success:
+        return jsonify({'error': result.get('error', 'Execution failed')}), 400
+    
+    # Log trade
+    try:
+        trade = Trade(
+            user_id=user.id,
+            pair=ticker,
+            trade_type=f'{action}_{side}',
+            entry=price / 100,
+            amount=contracts,
+            platform='kalshi',
+            status='executed',
+            is_paper=False,
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(trade)
+        db.session.commit()
+    except Exception as e:
+        logger.error(f"Trade logging failed: {e}")
+    
+    return jsonify({
+        'success': True,
+        'order': result,
+        'executed': {
+            'ticker': ticker,
+            'side': side,
+            'action': action,
+            'contracts': contracts,
+            'price': price,
+            'cost': (contracts * price) / 100
+        }
+    }), 201
