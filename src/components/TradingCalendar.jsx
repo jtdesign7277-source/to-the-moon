@@ -147,7 +147,7 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
   }
 
   // Note functions
-  const openNoteModal = (dayKey, e) => {
+  const openNoteModal = (e, dayKey) => {
     e.stopPropagation()
     setNoteModalDay(dayKey)
     setNoteText(notes[dayKey] || '')
@@ -268,7 +268,7 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
               key={dayData.key}
               onClick={() => dayData.day && handleDayClick(dayData)}
               className={`
-                aspect-square p-1 rounded-lg flex flex-col items-center justify-center relative
+                aspect-square p-2 rounded-lg relative
                 transition-all duration-200
                 ${dayData.day ? 'cursor-pointer hover:ring-2 hover:ring-indigo-300' : ''}
                 ${dayData.isToday ? 'ring-2 ring-indigo-500' : ''}
@@ -277,28 +277,33 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
             >
               {dayData.day && (
                 <>
-                  {/* Notepad Icon */}
+                  {/* Notepad Icon - Top Left */}
                   <button
                     onClick={(e) => openNoteModal(e, dayData.dateKey)}
-                    className={`absolute top-0.5 left-0.5 p-0.5 rounded hover:bg-white/50 transition-colors z-10 ${
+                    className={`absolute top-1.5 left-1.5 p-1 rounded hover:bg-white/30 transition-colors z-10 ${
                       notes[dayData.dateKey] ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
                     }`}
                     title={notes[dayData.dateKey] ? 'View/Edit Note' : 'Add Note'}
                   >
-                    <FileText className="w-3 h-3" />
+                    <FileText className="w-4 h-4" />
                   </button>
                   
-                  <span className={`text-sm font-medium ${
+                  {/* Date Number - Top Right */}
+                  <span className={`absolute top-1.5 right-2 text-sm font-semibold ${
                     dayData.hasTrades && Math.abs(dayData.pnl) / maxPnL > 0.4 ? '' : 'text-gray-700'
                   }`}>
                     {dayData.day}
                   </span>
+                  
+                  {/* P&L Amount - Centered */}
                   {dayData.hasTrades && (
-                    <span className={`text-[10px] font-medium ${
-                      Math.abs(dayData.pnl) / maxPnL > 0.4 ? '' : dayData.pnl >= 0 ? 'text-green-700' : 'text-red-700'
-                    }`}>
-                      {dayData.pnl >= 0 ? '+' : ''}{dayData.pnl.toFixed(0)}
-                    </span>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-sm font-bold ${
+                        Math.abs(dayData.pnl) / maxPnL > 0.4 ? '' : dayData.pnl >= 0 ? 'text-green-700' : 'text-red-700'
+                      }`}>
+                        {dayData.pnl >= 0 ? '+' : ''}{dayData.pnl.toFixed(0)}
+                      </span>
+                    </div>
                   )}
                 </>
               )}
