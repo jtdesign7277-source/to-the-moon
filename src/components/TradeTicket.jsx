@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react'
-import { X, TrendingUp, TrendingDown, AlertCircle, ExternalLink, Zap, DollarSign, Percent, CheckCircle, ShieldCheck } from 'lucide-react'
-// import { liveTradeApi } from '../utils/api' // Reserved for future use
+import { X, Target, Zap, DollarSign, Clock, Calendar, Receipt, CheckCircle, AlertCircle } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', isPro = false }) => {
-  const [position, setPosition] = useState('yes') // 'yes' or 'no'
-  const [amount, setAmount] = useState('')
+  const [position, setPosition] = useState('YES')
+  const [contracts, setContracts] = useState(100)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState(null)
   
   const isLiveMode = tradingMode === 'live'
 
-  // Close on escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose()
@@ -24,10 +22,15 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
 
   if (!opportunity) return null
 
+  // Calculate values
+  const entryPrice = opportunity.price / 100 // Convert cents to dollars
+  const totalCost = (entryPrice * contracts).toFixed(2)
+  const potentialPayout = (contracts * 1.00).toFixed(2) // $1 per contract if wins
+  const potentialProfit = (potentialPayout - totalCost).toFixed(2)
+
   const handleSubmit = async () => {
-    if (!amount || parseFloat(amount) <= 0) return
+    if (contracts <= 0) return
     
-    // For live mode, require Pro subscription
     if (isLiveMode && !isPro) {
       setSubmitError('Pro subscription required for live trading')
       return
@@ -35,29 +38,18 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
     
     setIsSubmitting(true)
     setSubmitError(null)
-    
-    const entryPrice = (opportunity.price / 100).toFixed(2)
-    const _exitPrice = position === 'yes' 
-      ? '1.00'  // Max payout for YES
-      : '0.00'  // Max payout for NO
-    
-    // Calculate potential P&L
-    const shares = parseFloat(amount) / (opportunity.price / 100)
-    const _potentialPnl = position === 'yes'
-      ? (shares * 1.00 - parseFloat(amount)).toFixed(2)
-      : (parseFloat(amount) - shares * 0).toFixed(2)
 
     const tradeData = {
       pair: `${opportunity.market} (${opportunity.platform})`,
-      type: position === 'yes' ? 'Long' : 'Short',
-      entry: `$${entryPrice}`,
+      type: position === 'YES' ? 'Long' : 'Short',
+      entry: `$${entryPrice.toFixed(2)}`,
       exit: 'Pending',
-      pnl: `$${parseFloat(amount).toFixed(2)}`,
+      pnl: `$${totalCost}`,
       status: 'Open',
       platform: opportunity.platform,
-      strategy: opportunity.strategy,
-      amount: parseFloat(amount),
-      is_paper: !isLiveMode  // Track paper vs live
+      strategy: opportunity.strategy || 'Manual',
+      amount: parseFloat(totalCost),
+      is_paper: !isLiveMode
     }
 
     try {
@@ -82,18 +74,16 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
         const errorData = await response.json()
         throw new Error(errorData.message || 'Failed to place trade')
       }
-
-      const _result = await response.json()
       
       setSubmitSuccess(true)
       onSubmit?.({
         ...opportunity,
         ...tradeData,
         position,
+        contracts,
         timestamp: new Date().toISOString()
       })
       
-      // Close after showing success
       setTimeout(() => {
         setIsSubmitting(false)
         onClose()
@@ -106,212 +96,193 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
     }
   }
 
-  const getPlatformColor = (platform) => {
+  const getPlatformStyle = (platform) => {
     switch (platform?.toLowerCase()) {
-      case 'kalshi': return 'bg-blue-100 text-blue-700 border-blue-200'
-      case 'polymarket': return 'bg-purple-100 text-purple-700 border-purple-200'
-      case 'predictit': return 'bg-green-100 text-green-700 border-green-200'
-      case 'manifold': return 'bg-orange-100 text-orange-700 border-orange-200'
-      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+      case 'kalshi': return 'bg-[#DBEAFE] text-[#1D4ED8]'
+      case 'polymarket': return 'bg-[#EDE9FE] text-[#7C3AED]'
+      case 'manifold': return 'bg-[#FFEDD5] text-[#C2410C]'
+      default: return 'bg-[#F3F4F6] text-[#374151]'
     }
   }
 
-  const estimatedPayout = amount ? (parseFloat(amount) / (opportunity.price / 100)).toFixed(2) : '0.00'
-  const potentialProfit = amount ? (estimatedPayout - parseFloat(amount)).toFixed(2) : '0.00'
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="bg-linear-to-r from-indigo-500 to-purple-600 p-4 text-white">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 pr-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getPlatformColor(opportunity.platform)}`}>
-                  {opportunity.platform}
-                </span>
-                {opportunity.edge > 0 && (
-                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-100 border border-green-400/30">
-                    +{opportunity.edge}% edge
-                  </span>
-                )}
-              </div>
-              <h2 className="font-semibold text-lg leading-tight">
-                {opportunity.market}
-              </h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl w-[520px] max-w-[95vw]">
+        {/* Header - Matches Bet Slip exactly */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] bg-[#F9FAFB] rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[#10B981]/10 rounded-lg">
+              <Receipt className="w-5 h-5 text-[#10B981]" />
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div>
+              <h3 className="font-bold text-[#111827] text-lg">Bet Slip</h3>
+              <p className="text-xs text-[#6B7280] font-mono">New Trade</p>
+            </div>
           </div>
+          <button onClick={onClose} className="text-[#9CA3AF] hover:text-[#374151] transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
-
+        
         {/* Content */}
-        <div className="p-4 space-y-4">
-          {/* Strategy Badge */}
-          {opportunity.strategy && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
-              <Zap className="w-4 h-4 text-indigo-500" />
-              <span>Found by: <span className="font-medium text-gray-900">{opportunity.strategy}</span></span>
-            </div>
-          )}
-
-          {/* Current Price Display */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Current Price</span>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-gray-900">{opportunity.price}¢</span>
-                <span className="text-sm text-gray-500 ml-1">/ share</span>
-              </div>
-            </div>
-            {opportunity.volume && (
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
-                <span className="text-xs text-gray-500">24h Volume</span>
-                <span className="text-xs font-medium text-gray-700">${opportunity.volume.toLocaleString()}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Position Selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setPosition('yes')}
-                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium transition-all ${
-                  position === 'yes'
-                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <TrendingUp className="w-4 h-4" />
-                Yes / Long
-              </button>
-              <button
-                onClick={() => setPosition('no')}
-                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium transition-all ${
-                  position === 'no'
-                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <TrendingDown className="w-4 h-4" />
-                No / Short
-              </button>
+        <div className="p-5 space-y-4">
+          {/* Market Info */}
+          <div className="text-center pb-4 border-b border-[#E5E7EB]">
+            <p className="text-lg font-semibold text-[#111827]">{opportunity.market}</p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              {opportunity.ticker && (
+                <span className="text-sm text-[#6B7280] font-mono">{opportunity.ticker}</span>
+              )}
+              <span className={`px-2 py-0.5 text-xs font-semibold rounded ${getPlatformStyle(opportunity.platform)}`}>
+                {opportunity.platform}
+              </span>
             </div>
           </div>
+          
+          {/* Position Selector - Grid layout like Bet Slip */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="flex items-center gap-2 text-[#6B7280] text-xs mb-2">
+                <Target className="w-3.5 h-3.5" />
+                Position
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPosition('YES')}
+                  className={`flex-1 px-3 py-2 text-sm font-bold rounded transition-all ${
+                    position === 'YES' 
+                      ? 'bg-[#D1FAE5] text-[#059669] ring-2 ring-[#10B981]' 
+                      : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#10B981]'
+                  }`}
+                >
+                  YES
+                </button>
+                <button
+                  onClick={() => setPosition('NO')}
+                  className={`flex-1 px-3 py-2 text-sm font-bold rounded transition-all ${
+                    position === 'NO' 
+                      ? 'bg-[#FEE2E2] text-[#DC2626] ring-2 ring-[#EF4444]' 
+                      : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#EF4444]'
+                  }`}
+                >
+                  NO
+                </button>
+              </div>
+            </div>
+            <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]">
+              <div className="flex items-center gap-2 text-[#6B7280] text-xs mb-2">
+                <Zap className="w-3.5 h-3.5" />
+                Strategy
+              </div>
+              <span className="text-[#111827] font-semibold text-sm">{opportunity.strategy || 'Manual'}</span>
+            </div>
+          </div>
 
-          {/* Amount Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-            <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* Contracts Input */}
+          <div className="bg-[#F9FAFB] rounded-xl p-4 border border-[#E5E7EB]">
+            <div className="flex items-center gap-2 text-[#6B7280] text-xs mb-2">
+              <DollarSign className="w-3.5 h-3.5" />
+              Contracts
+            </div>
+            <div className="flex items-center gap-3">
               <input
                 type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                min="0"
-                step="1"
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg font-medium"
+                value={contracts}
+                onChange={(e) => setContracts(Math.max(1, parseInt(e.target.value) || 1))}
+                min="1"
+                className="flex-1 px-3 py-2 border border-[#E5E7EB] rounded-lg text-lg font-bold text-[#111827] focus:ring-2 focus:ring-[#10B981] focus:border-transparent outline-none"
               />
-            </div>
-            <div className="flex gap-2 mt-2">
-              {[5, 10, 25, 50, 100].map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => setAmount(preset.toString())}
-                  className="flex-1 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  ${preset}
-                </button>
-              ))}
+              <div className="flex gap-1">
+                {[10, 50, 100, 200].map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => setContracts(preset)}
+                    className={`px-2 py-1.5 text-xs font-medium rounded transition-colors ${
+                      contracts === preset
+                        ? 'bg-[#10B981] text-white'
+                        : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#10B981]'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* Payout Estimate */}
-          {amount && parseFloat(amount) > 0 && (
-            <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-              <div className="flex items-center gap-2 text-green-700 mb-2">
-                <Percent className="w-4 h-4" />
-                <span className="text-sm font-medium">Potential Return</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-green-600">If {position === 'yes' ? 'Yes' : 'No'} wins</p>
-                  <p className="text-2xl font-bold text-green-700">${estimatedPayout}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-green-600">Profit</p>
-                  <p className="text-lg font-bold text-green-700">+${potentialProfit}</p>
-                </div>
-              </div>
+          
+          {/* Price Info - Matches Bet Slip exactly */}
+          <div className="bg-[#F9FAFB] rounded-xl p-4 space-y-3 text-sm font-mono border border-[#E5E7EB]">
+            <div className="flex justify-between">
+              <span className="text-[#6B7280] flex items-center gap-2">
+                <DollarSign className="w-3.5 h-3.5" />
+                Entry Price
+              </span>
+              <span className="text-[#111827] font-medium">${entryPrice.toFixed(2)}</span>
             </div>
-          )}
-
+            <div className="flex justify-between">
+              <span className="text-[#6B7280]">Total Cost</span>
+              <span className="text-[#111827] font-medium">${totalCost}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#6B7280]">Potential Payout</span>
+              <span className="text-[#111827] font-medium">${potentialPayout}</span>
+            </div>
+            <div className="flex justify-between border-t border-[#E5E7EB] pt-3 mt-3">
+              <span className="text-[#111827] font-bold">Potential Profit</span>
+              <span className="font-bold text-[#10B981]">
+                +${potentialProfit} (+{((parseFloat(potentialProfit) / parseFloat(totalCost)) * 100).toFixed(1)}%)
+              </span>
+            </div>
+          </div>
+          
           {/* Trading Mode Notice */}
           {isLiveMode ? (
-            <div className="flex items-start gap-2 text-green-700 bg-green-50 rounded-lg p-3 border border-green-200">
-              <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
-              <p className="text-xs">
-                <span className="font-semibold">Live Trade</span> — This will execute with real money on {opportunity.platform}. 
-                Make sure your account is connected and funded.
-              </p>
+            <div className="flex items-center justify-center">
+              <span className="px-4 py-2 bg-[#D1FAE5] text-[#059669] text-sm font-semibold rounded-full flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse" />
+                Live Trading
+              </span>
             </div>
           ) : (
-            <div className="flex items-start gap-2 text-amber-700 bg-amber-50 rounded-lg p-3">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-              <p className="text-xs">
-                <span className="font-medium">Paper Trade</span> — No real money will be used. 
-                Switch to Live mode in settings to place real trades.
-              </p>
+            <div className="flex items-center justify-center">
+              <span className="px-4 py-2 bg-[#FEF3C7] text-[#D97706] text-sm font-semibold rounded-full flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#F59E0B] rounded-full" />
+                Paper Trading
+              </span>
             </div>
           )}
 
           {/* Error Display */}
           {submitError && (
-            <div className="flex items-start gap-2 text-red-700 bg-red-50 rounded-lg p-3">
+            <div className="flex items-start gap-2 text-[#DC2626] bg-[#FEF2F2] rounded-lg p-3 border border-[#FECACA]">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-              <p className="text-xs">{submitError}</p>
+              <p className="text-sm">{submitError}</p>
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="p-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+        
+        {/* Footer - Matches Bet Slip exactly */}
+        <div className="flex gap-3 px-5 py-4 border-t border-[#E5E7EB] bg-[#F9FAFB] rounded-b-2xl">
           {submitSuccess ? (
-            <div className={`flex-1 py-3 px-4 ${isLiveMode ? 'bg-green-600' : 'bg-green-500'} text-white font-medium rounded-xl flex items-center justify-center gap-2`}>
+            <div className="flex-1 px-4 py-2.5 bg-[#10B981] text-white rounded-lg font-semibold flex items-center justify-center gap-2">
               <CheckCircle className="w-5 h-5" />
-              {isLiveMode ? 'Live Trade Placed!' : 'Paper Trade Placed!'}
+              {isLiveMode ? 'Trade Executed!' : 'Paper Trade Placed!'}
             </div>
           ) : (
             <>
               <button
                 onClick={onClose}
-                className="flex-1 py-3 px-4 text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors"
+                className="flex-1 px-4 py-2.5 bg-white hover:bg-[#F3F4F6] text-[#374151] rounded-lg transition-colors border border-[#D1D5DB] font-medium"
               >
-                Cancel
+                Close
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={!amount || parseFloat(amount) <= 0 || isSubmitting}
-                className={`flex-1 py-3 px-4 font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${
-                  !amount || parseFloat(amount) <= 0 || isSubmitting
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : position === 'yes'
-                      ? 'bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/25'
-                      : 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25'
+                disabled={contracts <= 0 || isSubmitting}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 ${
+                  contracts <= 0 || isSubmitting
+                    ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+                    : 'bg-[#10B981] hover:bg-[#059669] text-white'
                 }`}
               >
                 {isSubmitting ? (
@@ -320,30 +291,12 @@ const TradeTicket = ({ opportunity, onClose, onSubmit, tradingMode = 'paper', is
                     Placing...
                   </>
                 ) : (
-                  <>
-                    <Zap className="w-4 h-4" />
-                    Place Trade
-                  </>
+                  'Place Trade'
                 )}
               </button>
             </>
           )}
         </div>
-
-        {/* External Link */}
-        {opportunity.url && (
-          <div className="px-4 pb-4 bg-gray-50">
-            <a
-              href={opportunity.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              <ExternalLink className="w-4 h-4" />
-              View on {opportunity.platform}
-            </a>
-          </div>
-        )}
       </div>
     </div>
   )

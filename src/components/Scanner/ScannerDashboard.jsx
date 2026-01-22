@@ -1597,10 +1597,10 @@ const ScannerDashboard = ({ onNavigate }) => {
               ticker: selectedOpportunity.ticker,
               event: selectedOpportunity.event,
               platform: 'Kalshi',
-              position: trade.position?.toUpperCase() || 'YES',
-              contracts: Math.round(trade.amount / selectedOpportunity.kalshiPrice),
+              position: trade.position || 'YES',
+              contracts: trade.contracts || 100,
               entryPrice: selectedOpportunity.kalshiPrice,
-              potentialPayout: trade.amount * 2,
+              potentialPayout: (trade.contracts || 100) * 1.00,
               expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
               strategy: 'Scanner',
             });
