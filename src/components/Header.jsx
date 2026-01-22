@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity, CheckCircle, XCircle, Banknote, Clock } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
@@ -122,9 +122,11 @@ const Header = ({
   ])
   const [isAiTyping, setIsAiTyping] = useState(false)
   const [_talkToHuman, _setTalkToHuman] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const chatContainerRef = useRef(null)
   const exploreRef = useRef(null)
   const profileRef = useRef(null)
+  const notificationsRef = useRef(null)
 
   // Scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -141,6 +143,9 @@ const Header = ({
       }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false)
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -376,10 +381,138 @@ const Header = ({
             </div>
 
             {/* Notifications */}
-            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
+            <div className="relative" ref={notificationsRef}>
+              <button 
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+              
+              {/* Notifications Dropdown - Kalshi Style */}
+              {notificationsOpen && (
+                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">Notifications</span>
+                    <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                      Mark all as read
+                    </button>
+                  </div>
+                  
+                  {/* Notifications List */}
+                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
+                    {/* Market Settled */}
+                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-purple-100 rounded-full shrink-0">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-900">Market settled</span>
+                            <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            Fed cuts rates in January 2026?
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">Result is <span className="text-gray-600 font-medium">No</span></p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Trade Confirmed */}
+                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-green-100 rounded-full shrink-0">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-900">Trade confirmed</span>
+                            <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            Trump wins 2024 Presidential Election
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">1 Yes contract at 42 cents</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Order Cancelled */}
+                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-red-100 rounded-full shrink-0">
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-900">Order cancelled</span>
+                            <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            S&P 500 above 6,000 by March?
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">Order for 10 No contracts cancelled</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Deposit Completed */}
+                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-100 rounded-full shrink-0">
+                          <Banknote className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-900">Deposit completed</span>
+                            <span className="text-xs text-gray-400 shrink-0">Jan 17</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Your deposit of $490.00 to your Kalshi account has been processed.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Position Update */}
+                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-amber-100 rounded-full shrink-0">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-900">Position expiring soon</span>
+                            <span className="text-xs text-gray-400 shrink-0">Jan 17</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            Bitcoin hits $100K in 2024
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">Expires in 7 days</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+                    <button 
+                      onClick={() => {
+                        setNotificationsOpen(false)
+                        onNavigate?.('history')
+                      }}
+                      className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-1"
+                    >
+                      View all activity
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Subscription Status / Upgrade Button */}
             {isPro ? (
