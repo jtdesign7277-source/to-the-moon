@@ -13,6 +13,7 @@ import { useApp } from '../hooks/useApp'
 import { useLivePortfolio } from '../hooks/useLiveMarkets'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 import LiveScanner from '../components/LiveScanner'
+import TradingCalendar from '../components/TradingCalendar'
 import TradeSlipViewer from '../components/TradeSlipViewer'
 import { strategyApi } from '../utils/api'
 import { Play, Pause, AlertCircle } from 'lucide-react'
@@ -1127,7 +1128,13 @@ const Dashboard = ({ onNavigate }) => {
           )}
         </div>
       </div>
+{/* Trading Calendar */}
+      <TradingCalendar 
+        trades={tradeHistory} 
+        onDayClick={(day) => console.log('Clicked:', day)}
+      />
 
+      
       {/* Recent Bets */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
