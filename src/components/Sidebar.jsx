@@ -171,52 +171,6 @@ const Sidebar = ({
               </>
             )}
           </nav>
-
-          {/* User Section */}
-          {user && (
-            <div className="border-t border-gray-200 p-2">
-              {isExpanded ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 px-2 py-1.5">
-                    <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">{user.username}</p>
-                      <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
-                    </div>
-                    {isPro && (
-                      <span className="px-1.5 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[9px] font-bold rounded">
-                        PRO
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    className="w-full flex items-center justify-center gap-2 px-2 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Log Out
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <div 
-                    className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mx-auto cursor-pointer hover:bg-indigo-200"
-                    title={user.username}
-                    onClick={() => setIsExpanded(true)}
-                  >
-                    <User className="w-4 h-4 text-indigo-600" />
-                  </div>
-                  {isPro && (
-                    <div className="flex justify-center">
-                      <Crown className="w-4 h-4 text-indigo-600" />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 

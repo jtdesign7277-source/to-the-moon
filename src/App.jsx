@@ -268,6 +268,34 @@ const AppContent = () => {
 
       {/* Main Content Area - No left margin on mobile (sidebar is hidden), margin on desktop */}
       <div className="flex-1 flex flex-col min-h-screen ml-0 lg:ml-14">
+        {/* Top Right Header Bar */}
+        <div className="fixed top-3 right-4 z-50 flex items-center gap-2">
+          {/* Crown / PRO Badge */}
+          {isPro ? (
+            <span className="px-2.5 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+              PRO
+            </span>
+          ) : (
+            <button
+              onClick={openUpgradeModal}
+              className="px-2.5 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+              Upgrade
+            </button>
+          )}
+          {/* User Icon */}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+              title={`${user.username} - Click to logout`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
+          )}
+        </div>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full pt-16 lg:pt-6">
           <PageRenderer currentPage={currentPage} legalTab={legalTab} onNavigate={handleNavigation} />
