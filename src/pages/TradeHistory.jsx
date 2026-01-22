@@ -203,6 +203,7 @@ const TradeHistory = () => {
           color === 'red' ? 'bg-red-50' :
           color === 'indigo' ? 'bg-indigo-50' :
           color === 'amber' ? 'bg-amber-50' :
+          color === 'purple' ? 'bg-purple-50' :
           'bg-gray-50'
         }`}>
           <Icon className={`w-4 h-4 ${
@@ -210,15 +211,18 @@ const TradeHistory = () => {
             color === 'red' ? 'text-red-600' :
             color === 'indigo' ? 'text-indigo-600' :
             color === 'amber' ? 'text-amber-600' :
+            color === 'purple' ? 'text-purple-600' :
             'text-gray-600'
           }`} />
         </div>
       </div>
-      <p className={`text-2xl font-bold mt-2 ${
-        color === 'green' ? 'text-green-600' :
-        color === 'red' ? 'text-red-600' :
-        'text-gray-900'
-      }`}>{value}</p>
+      <div className={`text-2xl font-bold mt-2 ${
+        typeof value === 'string' ? (
+          color === 'green' ? 'text-green-600' :
+          color === 'red' ? 'text-red-600' :
+          'text-gray-900'
+        ) : 'text-gray-900'
+      }`}>{value}</div>
       {subValue && (
         <p className="text-xs text-gray-400 mt-1">{subValue}</p>
       )}
@@ -276,7 +280,11 @@ const TradeHistory = () => {
         />
         <StatCard
           label="Avg Win/Loss"
-          value={stats.avgWin > 0 || stats.avgLoss > 0 ? `+$${stats.avgWin.toFixed(2)} / -$${stats.avgLoss.toFixed(2)}` : '$0.00'}
+          value={
+            stats.avgWin > 0 || stats.avgLoss > 0 
+              ? <><span className="text-green-600">+${stats.avgWin.toFixed(2)}</span> / <span className="text-red-600">-${stats.avgLoss.toFixed(2)}</span></>
+              : '$0.00'
+          }
           icon={ArrowUpRight}
           color="green"
           subValue="Average per trade"
