@@ -9,6 +9,8 @@ import { paperTradingApi, strategyApi, accountsApi, liveTradeApi } from '../util
 import { useAuth } from '../hooks/useAuth'
 import { useApp } from '../hooks/useApp'
 
+// Strategy Builder - Build and deploy automated trading strategies
+
 // Transform strategy templates to the format expected by the UI
 const templates = STRATEGY_TEMPLATES.map(s => ({
   id: s.id,
