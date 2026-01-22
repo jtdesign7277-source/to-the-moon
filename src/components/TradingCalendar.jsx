@@ -19,7 +19,7 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
     
     for (let day = 1; day <= daysInMonth; day++) {
       const dayTrades = trades.filter(trade => {
-        const tradeDate = new Date(trade.closedAt || trade.timestamp || trade.date)
+        const tradeDate = new Date(trade.settledAt || trade.closedAt || trade.timestamp || trade.date)
         return tradeDate.getFullYear() === year &&
                tradeDate.getMonth() === month &&
                tradeDate.getDate() === day

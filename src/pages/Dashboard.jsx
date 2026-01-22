@@ -826,29 +826,42 @@ const Dashboard = ({ onNavigate }) => {
 
       {/* Active Strategies & Strategy Bets - Side by Side */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Active Strategies Section */}
-        {activeStrategies.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 rounded-lg">
-                  <Zap className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900">Active Strategies</h2>
-                  <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
-                </div>
+        {/* Active Strategies Section - Always show */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 rounded-lg">
+                <Zap className="w-5 h-5 text-indigo-600" />
               </div>
-              <button
-                onClick={() => onNavigate && onNavigate('strategies')}
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
-              >
-                Manage <ChevronRight className="w-4 h-4" />
-              </button>
+              <div>
+                <h2 className="font-semibold text-gray-900">Active Strategies</h2>
+                <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
+              </div>
             </div>
-            
-            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-              {activeStrategies.map(strategy => {
+            <button
+              onClick={() => onNavigate && onNavigate('strategies')}
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+            >
+              Manage <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+            {activeStrategies.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Zap className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-sm mb-2">No active strategies</p>
+                <button
+                  onClick={() => onNavigate && onNavigate('strategies')}
+                  className="text-indigo-600 text-sm font-medium hover:text-indigo-700"
+                >
+                  Create a strategy →
+                </button>
+              </div>
+            ) : (
+              activeStrategies.map(strategy => {
                 const activity = strategyActivity[strategy.id] || {}
                 const isLive = strategy.mode === 'live'
                 
@@ -907,96 +920,104 @@ const Dashboard = ({ onNavigate }) => {
                     </div>
                   </div>
                 )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Strategy Bets - Live trades executed by automated strategies */}
-        {strategyBets && strategyBets.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <Rocket className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
-                  <p className="text-xs text-gray-500">{strategyBets.length} live position{strategyBets.length !== 1 ? 's' : ''} from automated strategies</p>
-                </div>
-              </div>
-              <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
-                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
-                AUTO
-              </span>
-            </div>
-            
-            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-            {strategyBets.map(bet => {
-              const isProfit = (bet.profit || 0) >= 0
-              const timeSincePlaced = bet.placedAt ? Math.floor((Date.now() - new Date(bet.placedAt).getTime()) / 60000) : 0
-              const timeLabel = timeSincePlaced < 60 
-                ? `${timeSincePlaced}m ago` 
-                : timeSincePlaced < 1440 
-                  ? `${Math.floor(timeSincePlaced / 60)}h ago`
-                  : `${Math.floor(timeSincePlaced / 1440)}d ago`
-              
-              return (
-                <div 
-                  key={bet.id}
-                  className="px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Left: Strategy & Market Info */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex flex-col items-center">
-                        <span className="text-lg">{bet.strategyIcon || '⚡'}</span>
-                        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                          bet.position === 'YES' 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {bet.position}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{bet.ticker}</p>
-                        <p className="text-xs text-gray-500 truncate">{bet.event}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-purple-600 font-medium">{bet.strategy}</span>
-                          <span className="text-[10px] text-gray-400">•</span>
-                          <span className="text-[10px] text-gray-400">{bet.platform}</span>
-                          <span className="text-[10px] text-gray-400">•</span>
-                          <span className="text-[10px] text-gray-400">{timeLabel}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Right: Trade Details & P&L */}
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="text-right hidden sm:block">
-                        <p className="text-xs text-gray-500">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
-                        <p className="text-xs text-gray-400">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
-                      </div>
-                      <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
-                        isProfit ? 'bg-green-50' : 'bg-red-50'
-                      }`}>
-                        <p className={`text-sm font-semibold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
-                          {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
-                        </p>
-                        <p className={`text-[10px] ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
-                          {isProfit ? '+' : ''}{(bet.profitPercent || 0).toFixed(1)}%
-                        </p>
-                      </div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Live" />
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+              })
+            )}
           </div>
         </div>
-        )}
+
+        {/* Strategy Bets - Live trades executed by automated strategies */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <Rocket className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
+                <p className="text-xs text-gray-500">{strategyBets?.length || 0} live position{(strategyBets?.length || 0) !== 1 ? 's' : ''} from automated strategies</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+              AUTO
+            </span>
+          </div>
+            
+          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+            {(!strategyBets || strategyBets.length === 0) ? (
+              <div className="p-8 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Rocket className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-sm mb-2">No automated bets yet</p>
+                <p className="text-gray-400 text-xs">Bets placed by strategies appear here</p>
+              </div>
+            ) : (
+              strategyBets.map(bet => {
+                const isProfit = (bet.profit || 0) >= 0
+                const timeSincePlaced = bet.placedAt ? Math.floor((Date.now() - new Date(bet.placedAt).getTime()) / 60000) : 0
+                const timeLabel = timeSincePlaced < 60 
+                  ? `${timeSincePlaced}m ago` 
+                  : timeSincePlaced < 1440 
+                    ? `${Math.floor(timeSincePlaced / 60)}h ago`
+                    : `${Math.floor(timeSincePlaced / 1440)}d ago`
+                
+                return (
+                  <div 
+                    key={bet.id}
+                    className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Left: Strategy & Market Info */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex flex-col items-center">
+                          <span className="text-lg">{bet.strategyIcon || '⚡'}</span>
+                          <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                            bet.position === 'YES' 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {bet.position}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{bet.ticker}</p>
+                          <p className="text-xs text-gray-500 truncate">{bet.event}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-purple-600 font-medium">{bet.strategy}</span>
+                            <span className="text-[10px] text-gray-400">•</span>
+                            <span className="text-[10px] text-gray-400">{bet.platform}</span>
+                            <span className="text-[10px] text-gray-400">•</span>
+                            <span className="text-[10px] text-gray-400">{timeLabel}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Right: Trade Details & P&L */}
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-xs text-gray-500">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
+                          <p className="text-xs text-gray-400">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
+                        </div>
+                        <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
+                          isProfit ? 'bg-green-50' : 'bg-red-50'
+                        }`}>
+                          <p className={`text-sm font-semibold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                            {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
+                          </p>
+                          <p className={`text-[10px] ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+                            {isProfit ? '+' : ''}{(bet.profitPercent || 0).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Live" />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Live Market Scanner */}
