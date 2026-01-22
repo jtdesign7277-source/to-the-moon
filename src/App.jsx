@@ -18,6 +18,7 @@ import { AuthProvider } from './hooks/useAuth'
 
 // Components
 import Header from './components/Header'
+import Sidebar from './components/Sidebar'
 import MobileNav from './components/MobileNav'
 import UpgradeModal from './components/UpgradeModal'
 import DevTools from './components/DevTools'
@@ -39,7 +40,7 @@ import StrategyDiscovery from './pages/StrategyDiscovery'
 import TradeHistory from './pages/TradeHistory'
 import Legal from './pages/Legal'
 
-// Navigation configuration
+// Navigation configuration - Main nav items
 const NAV_ITEMS = [
   {
     id: 'dashboard',
@@ -69,33 +70,34 @@ const NAV_ITEMS = [
     icon: Wrench,
     requiresPro: false,
   },
+]
+
+// Explore section items
+const EXPLORE_ITEMS = [
   {
     id: 'leaderboard',
     label: 'Leaderboard',
-    shortLabel: 'Ranks',
     icon: Trophy,
-    requiresPro: false,
   },
   {
     id: 'marketplace',
     label: 'Marketplace',
-    shortLabel: 'Market',
     icon: ShoppingCart,
-    requiresPro: false,
   },
   {
     id: 'education',
     label: 'Education',
-    shortLabel: 'Learn',
     icon: BookOpen,
-    requiresPro: false,
   },
   {
     id: 'discover',
     label: 'Discover',
-    shortLabel: 'Discover',
     icon: Compass,
-    requiresPro: false,
+  },
+  {
+    id: 'history',
+    label: 'Trade History',
+    icon: History,
   },
 ]
 
@@ -243,7 +245,7 @@ const AppContent = () => {
 
   // Handle navigation with paywall check
   const handleNavigation = (pageId) => {
-    const navItem = NAV_ITEMS.find(item => item.id === pageId)
+    const navItem = [...NAV_ITEMS, ...EXPLORE_ITEMS].find(item => item.id === pageId)
     if (navItem?.requiresPro && !isPro) {
       openUpgradeModal()
       return
@@ -253,58 +255,53 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-0 flex flex-col">
-      {/* Header */}
-      <Header
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar Navigation */}
+      <Sidebar
         navItems={NAV_ITEMS}
+        exploreItems={EXPLORE_ITEMS}
         currentPage={currentPage}
         onNavigate={handleNavigation}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
         user={user}
         onLogout={handleLogout}
       />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6 flex-1">
-        <PageRenderer currentPage={currentPage} legalTab={legalTab} onNavigate={handleNavigation} />
-      </main>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen ml-12 lg:ml-14">
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+          <PageRenderer currentPage={currentPage} legalTab={legalTab} onNavigate={handleNavigation} />
+        </main>
 
-      {/* Footer with Legal Links */}
-      <footer className="hidden lg:block bg-white border-t border-gray-200 py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} ToTheMoon. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4 text-sm">
-            <button
-              onClick={() => { setLegalTab('terms'); setCurrentPage('legal'); }}
-              className="text-gray-500 hover:text-indigo-600 transition-colors"
-            >
-              Terms of Service
-            </button>
-            <button
-              onClick={() => { setLegalTab('privacy'); setCurrentPage('legal'); }}
-              className="text-gray-500 hover:text-indigo-600 transition-colors"
-            >
-              Privacy Policy
-            </button>
-            <button
-              onClick={() => { setLegalTab('risk'); setCurrentPage('legal'); }}
-              className="text-gray-500 hover:text-indigo-600 transition-colors"
-            >
-              Risk Disclaimer
-            </button>
+        {/* Footer with Legal Links */}
+        <footer className="hidden lg:block bg-white border-t border-gray-200 py-4 mt-auto">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              &copy; {new Date().getFullYear()} ToTheMoon. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4 text-sm">
+              <button
+                onClick={() => { setLegalTab('terms'); setCurrentPage('legal'); }}
+                className="text-gray-500 hover:text-indigo-600 transition-colors"
+              >
+                Terms of Service
+              </button>
+              <button
+                onClick={() => { setLegalTab('privacy'); setCurrentPage('legal'); }}
+                className="text-gray-500 hover:text-indigo-600 transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => { setLegalTab('risk'); setCurrentPage('legal'); }}
+                className="text-gray-500 hover:text-indigo-600 transition-colors"
+              >
+                Risk Disclaimer
+              </button>
+            </div>
           </div>
-        </div>
-      </footer>
-
-      {/* Mobile Bottom Navigation */}
-      <MobileNav
-        navItems={NAV_ITEMS}
-        currentPage={currentPage}
-        onNavigate={handleNavigation}
-      />
+        </footer>
+      </div>
 
       {/* Upgrade Modal */}
       <UpgradeModal />
