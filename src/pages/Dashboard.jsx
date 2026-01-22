@@ -825,112 +825,114 @@ const Dashboard = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Active Strategies Section */}
-      {activeStrategies.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-50 rounded-lg">
-                <Zap className="w-5 h-5 text-indigo-600" />
+      {/* Active Strategies & Strategy Bets - Side by Side */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Active Strategies Section */}
+        {activeStrategies.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 rounded-lg">
+                  <Zap className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-gray-900">Active Strategies</h2>
+                  <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-semibold text-gray-900">Active Strategies</h2>
-                <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
-              </div>
+              <button
+                onClick={() => onNavigate && onNavigate('strategies')}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+              >
+                Manage <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => onNavigate && onNavigate('strategies')}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
-            >
-              Manage <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <div className="divide-y divide-gray-100">
-            {activeStrategies.map(strategy => {
-              const activity = strategyActivity[strategy.id] || {}
-              const isLive = strategy.mode === 'live'
-              
-              return (
-                <div 
-                  key={strategy.id}
-                  className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => onNavigate && onNavigate('strategies')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{strategy.icon || '⚡'}</span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-gray-900">{strategy.name}</h3>
-                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                            isLive 
-                              ? 'bg-red-100 text-red-700' 
-                              : 'bg-yellow-100 text-yellow-700'
+            
+            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+              {activeStrategies.map(strategy => {
+                const activity = strategyActivity[strategy.id] || {}
+                const isLive = strategy.mode === 'live'
+                
+                return (
+                  <div 
+                    key={strategy.id}
+                    className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => onNavigate && onNavigate('strategies')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{strategy.icon || '⚡'}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-gray-900">{strategy.name}</h3>
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                              isLive 
+                                ? 'bg-red-100 text-red-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {isLive ? '🔴 LIVE' : '📝 Paper'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            ${strategy.allocatedCapital?.toLocaleString() || '0'} allocated
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        {/* Activity indicator */}
+                        <div className="text-right hidden sm:block">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                            <span>{activity.message?.icon} {activity.message?.text || 'Running...'}</span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {activity.marketsScanned || 0} markets scanned
+                          </p>
+                        </div>
+                        
+                        {/* P&L */}
+                        <div className="text-right">
+                          <p className={`font-semibold ${
+                            (strategy.totalPnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {isLive ? '🔴 LIVE' : '📝 Paper'}
-                          </span>
+                            {(strategy.totalPnl || 0) >= 0 ? '+' : ''}${(strategy.totalPnl || 0).toFixed(2)}
+                          </p>
+                          <p className="text-xs text-gray-500">{strategy.totalTrades || 0} trades</p>
                         </div>
-                        <p className="text-sm text-gray-500">
-                          ${strategy.allocatedCapital?.toLocaleString() || '0'} allocated
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                      {/* Activity indicator */}
-                      <div className="text-right hidden sm:block">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span>{activity.message?.icon} {activity.message?.text || 'Running...'}</span>
+                        
+                        <div className="p-2 bg-green-50 rounded-lg">
+                          <Play className="w-4 h-4 text-green-600" />
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {activity.marketsScanned || 0} markets scanned
-                        </p>
-                      </div>
-                      
-                      {/* P&L */}
-                      <div className="text-right">
-                        <p className={`font-semibold ${
-                          (strategy.totalPnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {(strategy.totalPnl || 0) >= 0 ? '+' : ''}${(strategy.totalPnl || 0).toFixed(2)}
-                        </p>
-                        <p className="text-xs text-gray-500">{strategy.totalTrades || 0} trades</p>
-                      </div>
-                      
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <Play className="w-4 h-4 text-green-600" />
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Strategy Bets - Live trades executed by automated strategies */}
-      {strategyBets && strategyBets.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <Rocket className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
-                <p className="text-xs text-gray-500">{strategyBets.length} live position{strategyBets.length !== 1 ? 's' : ''} from automated strategies</p>
-              </div>
+                )
+              })}
             </div>
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
-              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
-              AUTO
-            </span>
           </div>
-          
-          <div className="divide-y divide-gray-100">
+        )}
+
+        {/* Strategy Bets - Live trades executed by automated strategies */}
+        {strategyBets && strategyBets.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-50 rounded-lg">
+                  <Rocket className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
+                  <p className="text-xs text-gray-500">{strategyBets.length} live position{strategyBets.length !== 1 ? 's' : ''} from automated strategies</p>
+                </div>
+              </div>
+              <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                AUTO
+              </span>
+            </div>
+            
+            <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
             {strategyBets.map(bet => {
               const isProfit = (bet.profit || 0) >= 0
               const timeSincePlaced = bet.placedAt ? Math.floor((Date.now() - new Date(bet.placedAt).getTime()) / 60000) : 0
@@ -995,7 +997,8 @@ const Dashboard = ({ onNavigate }) => {
             })}
           </div>
         </div>
-      )}
+        )}
+      </div>
 
       {/* Live Market Scanner */}
       <LiveScanner 
