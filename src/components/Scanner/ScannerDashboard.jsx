@@ -732,6 +732,8 @@ const ScannerDashboard = ({ onNavigate }) => {
     placeBet, 
     closeBet, 
     portfolioStats,
+    tradingMode,
+    isPro,
   } = useApp();
 
   // Load saved preferences
@@ -1301,7 +1303,27 @@ const ScannerDashboard = ({ onNavigate }) => {
           </div>
 
           {/* ARBITRAGE DATA GRID - Below live feed */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto relative">
+            {/* Empty State Overlay - Centered */}
+            {scannerState === 'idle' && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-white z-10">
+                <div className="text-5xl mb-4">🔍</div>
+                <p className="text-lg font-semibold text-[#111827] mb-2">Ready to Scan</p>
+                <p className="text-[13px] text-[#6B7280] max-w-sm">
+                  Select platforms and click Start to find arbitrage opportunities
+                </p>
+              </div>
+            )}
+            
+            {/* Scanning State Overlay */}
+            {scannerState === 'scanning' && filteredOpportunities.length === 0 && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-white z-10">
+                <Loader2 className="w-8 h-8 text-[#10B981] animate-spin mb-4" />
+                <p className="text-lg font-semibold text-[#111827] mb-2">Scanning Markets...</p>
+                <p className="text-[13px] text-[#6B7280]">No opportunities found yet</p>
+              </div>
+            )}
+            
             <table className="w-full min-w-[900px] text-[13px]">
               {/* Sticky Header */}
               <thead className="bg-[#F9FAFB] sticky top-0 z-10 border-b border-[#E5E7EB]">
@@ -1318,29 +1340,7 @@ const ScannerDashboard = ({ onNavigate }) => {
                 </tr>
               </thead>
               <tbody>
-                {scannerState === 'idle' ? (
-                  <tr>
-                    <td colSpan={9}>
-                      <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="text-4xl mb-4">🔍</div>
-                        <p className="text-lg font-semibold text-[#111827] mb-2">Ready to Scan</p>
-                        <p className="text-[13px] text-[#6B7280] max-w-sm">
-                          Select platforms and click Start to find arbitrage opportunities
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredOpportunities.length === 0 ? (
-                  <tr>
-                    <td colSpan={9}>
-                      <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <Loader2 className="w-8 h-8 text-[#10B981] animate-spin mb-4" />
-                        <p className="text-lg font-semibold text-[#111827] mb-2">Scanning Markets...</p>
-                        <p className="text-[13px] text-[#6B7280]">No opportunities found yet</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
+                {filteredOpportunities.length > 0 ? (
                   filteredOpportunities.map((opp, idx) => {
                     const isOpportunity = opp.netEdge >= settings.minEdge;
                     return (
@@ -1435,7 +1435,7 @@ const ScannerDashboard = ({ onNavigate }) => {
                       </tr>
                     );
                   })
-                )}
+                ) : null}
               </tbody>
             </table>
           </div>
@@ -1606,8 +1606,8 @@ const ScannerDashboard = ({ onNavigate }) => {
             });
             setSelectedOpportunity(null);
           }}
-          tradingMode="paper"
-          isPro={false}
+          tradingMode={tradingMode}
+          isPro={isPro}
         />
       )}
     </div>

@@ -44,7 +44,7 @@ const NAV_ITEMS = [
   {
     id: 'dashboard',
     label: 'Dashboard',
-    shortLabel: 'Home',
+    shortLabel: 'Dashboard',
     icon: LayoutDashboard,
     requiresPro: false,
   },
