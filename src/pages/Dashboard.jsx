@@ -366,8 +366,26 @@ const Dashboard = ({ onNavigate }) => {
 
   // Check if user has any data - include global state
   const hasData = userData.totalTrades > 0 || recentTrades.length > 0 || openBets.length > 0 || tradeHistory.length > 0
+  
+  // Check if user has COMPLETED trades (for showing real chart data)
+  const hasCompletedTrades = tradeHistory.length > 0
 
-  // Empty state for charts
+  // Default sample performance data - shows a realistic growth curve like Kalshi
+  // This displays before users complete their first bet
+  const defaultPerformanceData = [
+    { date: 'Oct 1', pnl: 0 },
+    { date: 'Oct 15', pnl: 120 },
+    { date: 'Nov 1', pnl: 85 },
+    { date: 'Nov 15', pnl: 210 },
+    { date: 'Dec 1', pnl: 180 },
+    { date: 'Dec 15', pnl: 340 },
+    { date: 'Jan 1', pnl: 290 },
+    { date: 'Jan 10', pnl: 425 },
+    { date: 'Jan 15', pnl: 380 },
+    { date: 'Jan 21', pnl: 520 },
+  ]
+
+  // Empty state for charts (flat line)
   const emptyPerformanceData = [
     { date: 'Jan', pnl: 0 },
     { date: 'Feb', pnl: 0 },
@@ -384,7 +402,30 @@ const Dashboard = ({ onNavigate }) => {
   // Vibrant colors for portfolio allocation
   const portfolioColors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
   
-  const chartData = performanceData.length > 0 ? performanceData : emptyPerformanceData
+  // Chart data priority: 1) Real performance data from API, 2) Generated from trade history, 3) Default sample curve
+  const chartData = performanceData.length > 0 
+    ? performanceData 
+    : hasCompletedTrades 
+      ? generateChartFromTrades(tradeHistory)
+      : defaultPerformanceData
+  
+  // Generate performance chart from completed trades
+  function generateChartFromTrades(trades) {
+    if (!trades || trades.length === 0) return defaultPerformanceData
+    
+    // Sort trades by date
+    const sortedTrades = [...trades].sort((a, b) => new Date(a.closedAt || a.timestamp) - new Date(b.closedAt || b.timestamp))
+    
+    let runningPnl = 0
+    return sortedTrades.map(trade => {
+      runningPnl += (trade.pnl || 0)
+      const tradeDate = new Date(trade.closedAt || trade.timestamp)
+      return {
+        date: tradeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        pnl: runningPnl
+      }
+    })
+  }
   
   // Use global portfolio breakdown from context
   const platformBreakdown = getPortfolioByPlatform()
@@ -605,7 +646,14 @@ const Dashboard = ({ onNavigate }) => {
         {/* Performance Chart */}
         <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Performance</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-gray-900">Performance</h2>
+              {!hasCompletedTrades && (
+                <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
+                  Sample Data
+                </span>
+              )}
+            </div>
             <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
               {[
                 { key: '1D', label: '1D' },
@@ -628,36 +676,41 @@ const Dashboard = ({ onNavigate }) => {
               ))}
             </div>
           </div>
-          {!hasData ? (
-            <div className="h-64 flex flex-col items-center justify-center text-center">
-              <BarChart3 className="w-12 h-12 text-gray-300 mb-4" />
-              <p className="text-gray-500 font-medium">No trading data yet</p>
-              <p className="text-gray-400 text-sm mt-1">
-                Your performance chart will appear here once you start trading
-              </p>
-            </div>
-          ) : (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(v) => `$${v/1000}k`} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value) => [`$${value.toLocaleString()}`, 'P&L']}
-                  />
-                  <Area type="monotone" dataKey="pnl" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorPnl)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+          {/* Always show chart - sample data until user has completed trades */}
+          <div className="h-64 relative">
+            {!hasCompletedTrades && (
+              <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none z-10">
+                <p className="text-xs text-gray-400 bg-white/80 px-3 py-1 rounded-full">
+                  Complete your first bet to see your real performance
+                </p>
+              </div>
+            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={hasCompletedTrades ? "#10B981" : "#6366f1"} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={hasCompletedTrades ? "#10B981" : "#6366f1"} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value) => [`$${value.toLocaleString()}`, 'P&L']}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="pnl" 
+                  stroke={hasCompletedTrades ? "#10B981" : "#6366f1"} 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#colorPnl)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Portfolio Allocation */}

@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApp } from '../../hooks/useApp';
+import TradeTicket from '../TradeTicket';
 import {
   Play,
   Pause,
@@ -778,6 +779,7 @@ const ScannerDashboard = ({ onNavigate }) => {
   
   const [executeModal, setExecuteModal] = useState(null);
   const [watchlist, setWatchlist] = useState([]);
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   
   // Open bets UI state (using global openBets from context)
   const [selectedBetSlip, setSelectedBetSlip] = useState(null);
@@ -1334,6 +1336,7 @@ const ScannerDashboard = ({ onNavigate }) => {
                     return (
                       <tr
                         key={opp.id}
+                        onClick={() => setSelectedOpportunity(opp)}
                         className={`border-b border-[#E5E7EB] h-12 transition-colors cursor-pointer ${
                           isOpportunity 
                             ? 'bg-[#10B981]/5 hover:bg-[#10B981]/10' 
@@ -1562,6 +1565,39 @@ const ScannerDashboard = ({ onNavigate }) => {
           bet={selectedBetSlip}
           onClose={() => setSelectedBetSlip(null)}
           onCloseBet={closeBet}
+        />
+      )}
+
+      {/* Trade Ticket Modal - Opens when clicking an opportunity row */}
+      {selectedOpportunity && (
+        <TradeTicket
+          opportunity={{
+            market: selectedOpportunity.event,
+            platform: 'Kalshi',
+            price: Math.round(selectedOpportunity.kalshiPrice * 100),
+            strategy: 'Scanner',
+            edge: selectedOpportunity.netEdge,
+            volume: selectedOpportunity.volume,
+            ticker: selectedOpportunity.ticker,
+          }}
+          onClose={() => setSelectedOpportunity(null)}
+          onSubmit={(trade) => {
+            // Place bet using global state
+            placeBet({
+              ticker: selectedOpportunity.ticker,
+              event: selectedOpportunity.event,
+              platform: 'Kalshi',
+              position: trade.position?.toUpperCase() || 'YES',
+              contracts: Math.round(trade.amount / selectedOpportunity.kalshiPrice),
+              entryPrice: selectedOpportunity.kalshiPrice,
+              potentialPayout: trade.amount * 2,
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              strategy: 'Scanner',
+            });
+            setSelectedOpportunity(null);
+          }}
+          tradingMode="paper"
+          isPro={false}
         />
       )}
     </div>
