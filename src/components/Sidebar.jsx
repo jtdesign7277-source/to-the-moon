@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { 
-  ChevronLeft, 
-  ChevronRight, 
+  Menu, 
+  X, 
   Rocket, 
   Crown, 
   LogOut, 
@@ -36,29 +36,29 @@ const Sidebar = ({
         <div className="h-full bg-white border-r border-gray-200 shadow-lg flex flex-col">
           
           {/* Logo & Toggle */}
-          <div className="p-2 border-b border-gray-100 flex items-center justify-between">
-            {isExpanded ? (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <Rocket className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-sm text-gray-900">TO THE MOON</span>
-              </div>
-            ) : (
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg mx-auto">
-                <Rocket className="w-5 h-5 text-white" />
-              </div>
-            )}
+          <div className="p-2 border-b border-gray-100 flex flex-col items-center gap-2">
+            {/* Rocket Logo */}
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Rocket className="w-5 h-5 text-white" />
+            </div>
+            
+            {/* Hamburger Toggle Button - Below Rocket */}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className={`p-1.5 hover:bg-gray-100 rounded-lg transition-colors ${!isExpanded && 'absolute -right-3 top-14 bg-white border border-gray-200 shadow-md'}`}
+              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              title={isExpanded ? 'Collapse menu' : 'Expand menu'}
             >
               {isExpanded ? (
-                <ChevronLeft className="w-4 h-4 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <Menu className="w-5 h-5 text-gray-500" />
               )}
             </button>
+            
+            {/* App Name - Only when expanded */}
+            {isExpanded && (
+              <span className="font-bold text-xs text-gray-900 whitespace-nowrap">TO THE MOON</span>
+            )}
           </div>
 
           {/* Trading Mode Toggle */}
