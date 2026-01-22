@@ -8,10 +8,12 @@ import {
   Shield,
   Layers,
   Timer,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react'
 
 // Filter Section Component
-const FilterSection = ({ title, icon: _Icon, children, defaultOpen = false, badge }) => {
+const FilterSection = ({ title, icon: Icon, children, defaultOpen = false, badge }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
