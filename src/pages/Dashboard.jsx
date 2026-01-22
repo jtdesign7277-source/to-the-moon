@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SkeletonDashboard } from '../components/animations/SkeletonLoader'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadialBarChart, RadialBar
@@ -591,12 +592,9 @@ const Dashboard = ({ onNavigate }) => {
       : emptyPortfolioData
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-      </div>
-    )
-  }
+  return <SkeletonDashboard />
+}
+    
 
   return (
     <div className="space-y-6">
