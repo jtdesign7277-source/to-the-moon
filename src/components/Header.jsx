@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity, CheckCircle, XCircle, Banknote, Clock } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity, CheckCircle, XCircle, Banknote, Clock, History } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import api from '../utils/api'
 
