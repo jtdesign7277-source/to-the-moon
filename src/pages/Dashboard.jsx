@@ -190,15 +190,37 @@ const Dashboard = ({ onNavigate }) => {
       { ticker: 'OIL-80', event: 'Oil stays above $80/barrel', platform: 'Manifold' },
     ]
     
-    // Only simulate if we have fewer than 3 strategy bets (to not overwhelm)
+    // Max 3 simulated bets at a time
     const maxSimulatedBets = 3
     
-    // Simulate a new bet every 20-40 seconds when strategies are running
+    // Place initial bet immediately when strategy starts (if none exist)
+    if (strategyBets.length === 0) {
+      const strategy = activeStrategies[0]
+      const market = sampleMarkets[Math.floor(Math.random() * sampleMarkets.length)]
+      const position = Math.random() > 0.5 ? 'YES' : 'NO'
+      const entryPrice = 0.35 + Math.random() * 0.30
+      const contracts = Math.floor(30 + Math.random() * 70)
+      
+      addStrategyBet({
+        ticker: market.ticker,
+        event: market.event,
+        platform: market.platform,
+        position,
+        contracts,
+        entryPrice: Math.round(entryPrice * 100) / 100,
+        strategy: strategy.name,
+        strategyId: strategy.id,
+        strategyIcon: strategy.icon || '⚡',
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      })
+    }
+    
+    // Continue placing bets periodically
     const interval = setInterval(() => {
       if (strategyBets.length >= maxSimulatedBets) return
       
-      // 30% chance to place a bet each interval
-      if (Math.random() > 0.30) return
+      // 50% chance to place a bet each interval (increased from 30%)
+      if (Math.random() > 0.50) return
       
       const strategy = activeStrategies[Math.floor(Math.random() * activeStrategies.length)]
       const market = sampleMarkets[Math.floor(Math.random() * sampleMarkets.length)]
@@ -207,7 +229,7 @@ const Dashboard = ({ onNavigate }) => {
       if (strategyBets.some(b => b.ticker === market.ticker)) return
       
       const position = Math.random() > 0.5 ? 'YES' : 'NO'
-      const entryPrice = 0.30 + Math.random() * 0.40 // 0.30 - 0.70
+      const entryPrice = 0.30 + Math.random() * 0.40
       const contracts = Math.floor(20 + Math.random() * 80)
       
       addStrategyBet({
@@ -220,9 +242,9 @@ const Dashboard = ({ onNavigate }) => {
         strategy: strategy.name,
         strategyId: strategy.id,
         strategyIcon: strategy.icon || '⚡',
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       })
-    }, 25000) // Every 25 seconds
+    }, 15000) // Every 15 seconds (faster)
     
     return () => clearInterval(interval)
   }, [activeStrategies, strategyBets, addStrategyBet])
