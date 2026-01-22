@@ -401,6 +401,14 @@ export function AppProvider({ children }) {
     setTradeHistory(prev => prev.filter(t => t.id !== tradeId))
   }, [])
 
+  // Update trade details (for journal: notes, tags, ratings)
+  const updateTradeDetails = useCallback((tradeId, updates) => {
+    setTradeHistory(prev => prev.map(trade => {
+      if (trade.id !== tradeId) return trade
+      return { ...trade, ...updates }
+    }))
+  }, [])
+
   // ============================================
   // STRATEGY BET ACTIONS
   // ============================================
@@ -617,6 +625,7 @@ export function AppProvider({ children }) {
     settleBet,
     deleteBet,
     deleteTrade,
+    updateTradeDetails,
 
     // === Strategy Bet Actions ===
     addStrategyBet,
@@ -651,6 +660,7 @@ export function AppProvider({ children }) {
     settleBet,
     deleteBet,
     deleteTrade,
+    updateTradeDetails,
     addStrategyBet,
     updateStrategyBetPrice,
     settleStrategyBet,

@@ -2,10 +2,13 @@ import { useState, useEffect, useMemo } from 'react'
 import {
   TrendingUp, TrendingDown, Check, X, Clock, Calendar, DollarSign,
   Target, Activity, Filter, Search, ChevronDown, Download, BarChart3,
-  ArrowUpRight, ArrowDownRight, Zap, RefreshCw
+  ArrowUpRight, ArrowDownRight, Zap, RefreshCw, BookOpen, PieChart
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { trackPageView } from '../utils/analytics'
+import TradingCalendar from '../components/TradingCalendar'
+import TradingAnalytics from '../components/TradingAnalytics'
+import TradeJournal from '../components/TradeJournal'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
@@ -18,6 +21,7 @@ const TradeHistory = () => {
     tradeHistory: globalTradeHistory,
     portfolioStats,
     deleteTrade,
+    updateTradeDetails,
   } = useApp()
   
   const [apiTrades, setApiTrades] = useState([])
@@ -25,6 +29,7 @@ const TradeHistory = () => {
   const [filter, setFilter] = useState('all') // all, won, lost, open
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest') // newest, oldest, pnl-high, pnl-low
+  const [activeTab, setActiveTab] = useState('trades') // trades, calendar, analytics, journal
 
   // Merge global trade history with API trades
   const trades = useMemo(() => {
@@ -70,6 +75,28 @@ const TradeHistory = () => {
     
     return [...allTrades, ...uniqueApiTrades]
   }, [openBets, globalTradeHistory, apiTrades])
+
+  // Format trades for calendar/analytics components
+  const calendarTrades = useMemo(() => {
+    return globalTradeHistory.map(trade => ({
+      id: trade.id,
+      market: trade.ticker || trade.event,
+      title: trade.event,
+      platform: trade.platform,
+      position: trade.position,
+      price: trade.entryPrice,
+      settledPrice: trade.exitPrice,
+      pnl: trade.pnl,
+      profit: trade.pnl,
+      settledAt: trade.settledAt,
+      placedAt: trade.placedAt,
+      strategy: trade.strategy,
+      contracts: trade.contracts,
+      rating: trade.rating || 0,
+      tags: trade.tags || [],
+      notes: trade.notes || '',
+    }))
+  }, [globalTradeHistory])
 
   // Calculate stats from merged data
   const stats = useMemo(() => {
@@ -270,8 +297,60 @@ const TradeHistory = () => {
         />
       </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-100 flex gap-1">
+        {[
+          { id: 'trades', label: 'Trade List', icon: BarChart3 },
+          { id: 'calendar', label: 'Calendar', icon: Calendar },
+          { id: 'analytics', label: 'Analytics', icon: PieChart },
+          { id: 'journal', label: 'Journal', icon: BookOpen },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            <span className="hidden sm:inline">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Calendar View */}
+      {activeTab === 'calendar' && (
+        <TradingCalendar 
+          trades={calendarTrades} 
+          onDayClick={(date, dayTrades) => {
+            console.log('Day clicked:', date, dayTrades)
+          }}
+        />
+      )}
+
+      {/* Analytics View */}
+      {activeTab === 'analytics' && (
+        <TradingAnalytics trades={calendarTrades} />
+      )}
+
+      {/* Journal View */}
+      {activeTab === 'journal' && (
+        <TradeJournal 
+          trades={calendarTrades}
+          onUpdateTrade={(tradeId, updates) => {
+            if (updateTradeDetails) {
+              updateTradeDetails(tradeId, updates)
+            }
+          }}
+        />
+      )}
+
+      {/* Filters and Search - Only show for trades tab */}
+      {activeTab === 'trades' && (
+        <>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -440,7 +519,7 @@ const TradeHistory = () => {
       </div>
 
       {/* Performance Insights */}
-      {trades.length > 0 && (
+      {trades.length > 0 && activeTab === 'trades' && (
         <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -460,6 +539,8 @@ const TradeHistory = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )
