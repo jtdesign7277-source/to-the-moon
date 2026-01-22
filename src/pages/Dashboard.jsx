@@ -785,24 +785,24 @@ const Dashboard = ({ onNavigate }) => {
 
       {/* Recent Bets */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Bets</h2>
+        <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-900">Recent Bets</h2>
           {openBets.length > 0 && (
             <button
               onClick={handleViewAllTrades}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors"
+              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 transition-colors"
             >
-              View All <ChevronRight className="w-4 h-4" />
+              View All <ChevronRight className="w-3 h-3" />
             </button>
           )}
         </div>
 
         {openBets.length === 0 ? (
-          <div className="p-12 text-center">
-            <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 font-medium">No bets yet</p>
-            <p className="text-gray-400 text-sm mt-1">
-              Your recent bets will appear here once you place your first trade
+          <div className="p-6 text-center">
+            <Activity className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm font-medium">No bets yet</p>
+            <p className="text-gray-400 text-xs mt-0.5">
+              Place your first trade to see it here
             </p>
           </div>
         ) : (
@@ -811,58 +811,34 @@ const Dashboard = ({ onNavigate }) => {
               <div
                 key={bet.id}
                 onClick={() => setSelectedTrade(bet)}
-                className="px-4 py-3 hover:bg-indigo-50 cursor-pointer transition-colors group"
+                className="px-3 py-2 hover:bg-indigo-50 cursor-pointer transition-colors"
               >
-                {/* Row 1: Ticker + Platform + Position */}
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono font-bold text-gray-900 text-sm">{bet.ticker}</span>
-                  <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded ${
+                {/* Compact single row */}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-gray-900 text-xs">{bet.ticker}</span>
+                  <span className={`px-1 py-0.5 text-[9px] font-semibold rounded ${
                     bet.platform === 'Kalshi' ? 'bg-blue-100 text-blue-700' :
                     bet.platform === 'Polymarket' ? 'bg-purple-100 text-purple-700' :
                     'bg-orange-100 text-orange-700'
                   }`}>
                     {bet.platform}
                   </span>
-                  <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                  <span className={`px-1 py-0.5 text-[9px] font-bold rounded ${
                     bet.position === 'YES' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   }`}>
                     {bet.position}
                   </span>
-                  {/* P&L indicator bar */}
-                  <div className={`ml-auto w-1.5 h-6 rounded-full ${
-                    bet.profit >= 0 ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
-                </div>
-                
-                {/* Row 2: Event (truncated) */}
-                <p className="text-gray-600 text-sm truncate mb-1.5">{bet.event}</p>
-                
-                {/* Row 3: Contracts + Entry + P&L */}
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    <span className="font-medium text-gray-900">{bet.contracts}</span> contracts @ ${bet.entryPrice.toFixed(2)}
-                  </div>
-                  <div className="text-right">
-                    <span className={`font-mono font-bold text-sm ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
-                    </span>
-                    <span className={`ml-1 text-xs ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ({bet.profit >= 0 ? '+' : ''}{bet.profitPercent.toFixed(1)}%)
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Hover: View Slip */}
-                <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="w-full block text-center px-2 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded border border-gray-200">
-                    View Bet Slip
+                  <span className="text-gray-400 text-[10px] truncate flex-1 max-w-[120px]">{bet.event}</span>
+                  <span className="text-[10px] text-gray-500">
+                    {bet.contracts}@${bet.entryPrice.toFixed(2)}
                   </span>
+                  <span className={`font-mono font-bold text-xs ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
+                  </span>
+                  <div className={`w-1 h-4 rounded-full ${bet.profit >= 0 ? 'bg-green-500' : 'bg-red-500'}`} />
                 </div>
               </div>
             ))}
-            <p className="text-xs text-gray-400 text-center py-2 border-t border-gray-100">
-              Click any bet to view details
-            </p>
           </div>
         )}
       </div>
