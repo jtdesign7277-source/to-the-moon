@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell, RadialBarChart, RadialBar
 } from 'recharts'
 import {
   TrendingUp, TrendingDown, Activity, Wrench, LayoutDashboard,
   ChevronRight, Check, X, Rocket, Crown, Wallet, BarChart3,
-  DollarSign, Target, Zap, Calendar, ArrowUpRight, ArrowDownRight, Clock
+  DollarSign, Target, Zap, Calendar, ArrowUpRight, ArrowDownRight, Clock, Info, Filter
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useLivePortfolio } from '../hooks/useLiveMarkets'
@@ -648,42 +648,181 @@ const Dashboard = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon
-          const showChange = stat.change !== '—'
-          return (
-            <div
-              key={i}
-              onClick={() => handleStatClick(stat)}
-              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <div className={`p-2 rounded-lg ${stat.positive ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <Icon className={`w-4 h-4 ${stat.positive ? 'text-green-600' : 'text-red-600'}`} />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-              {showChange ? (
-                <div className="flex items-center gap-1 mt-1">
-                  {stat.positive ? (
-                    <TrendingUp className="w-3 h-3 text-green-600" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3 text-red-600" />
-                  )}
-                  <span className={`text-sm ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-xs text-gray-400">vs last month</span>
-                </div>
-              ) : (
-                <p className="text-xs text-gray-400 mt-1">No data yet</p>
-              )}
+      {/* TradeZella-style Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Trade Expectancy / Total P&L Card */}
+        <div 
+          onClick={() => handleStatClick(stats[0])}
+          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-gray-600">Net P&L</span>
+              <Info className="w-3.5 h-3.5 text-gray-400" />
             </div>
-          )
-        })}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className={`text-3xl font-bold ${displayStats.totalPnl >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+              {formatCurrency(displayStats.totalPnl)}
+            </span>
+            <div className={`p-2.5 rounded-xl ${displayStats.totalPnl >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+              <DollarSign className={`w-5 h-5 ${displayStats.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+            </div>
+          </div>
+        </div>
+
+        {/* Profit Factor Card with Gauge */}
+        <div 
+          onClick={() => handleStatClick(stats[0])}
+          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="text-sm font-medium text-gray-600">Profit Factor</span>
+            <Info className="w-3.5 h-3.5 text-gray-400" />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-3xl font-bold text-gray-900">
+              {displayStats.winLossRatio > 0 && displayStats.winLossRatio !== Infinity 
+                ? displayStats.winLossRatio.toFixed(2) 
+                : displayStats.avgWin > 0 && displayStats.avgLoss > 0 
+                  ? (displayStats.avgWin / displayStats.avgLoss).toFixed(2)
+                  : '—'}
+            </span>
+            {/* Semi-circle gauge */}
+            <div className="relative w-16 h-8 overflow-hidden">
+              <svg viewBox="0 0 100 50" className="w-full h-full">
+                {/* Background arc */}
+                <path
+                  d="M 10 50 A 40 40 0 0 1 90 50"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                />
+                {/* Colored arc based on profit factor */}
+                <path
+                  d="M 10 50 A 40 40 0 0 1 90 50"
+                  fill="none"
+                  stroke={displayStats.winLossRatio >= 1 ? '#22c55e' : '#ef4444'}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${Math.min(displayStats.winLossRatio || 0, 3) / 3 * 126} 126`}
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Win % Card with Donut */}
+        <div 
+          onClick={() => handleStatClick(stats[1])}
+          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="text-sm font-medium text-gray-600">Win %</span>
+            <Info className="w-3.5 h-3.5 text-gray-400" />
+            {displayStats.winningTrades > 0 && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                  {displayStats.winningTrades}
+                </span>
+                <span className="text-xs font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                  {displayStats.losingTrades}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-3xl font-bold text-gray-900">
+              {displayStats.totalTrades > 0 ? `${displayStats.winRate}%` : '—'}
+            </span>
+            {/* Donut chart */}
+            <div className="w-12 h-12">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { value: displayStats.winRate || 0 },
+                      { value: 100 - (displayStats.winRate || 0) }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={14}
+                    outerRadius={20}
+                    startAngle={90}
+                    endAngle={-270}
+                    dataKey="value"
+                  >
+                    <Cell fill="#22c55e" />
+                    <Cell fill="#3b82f6" />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Avg Win/Loss Card with Bar */}
+        <div 
+          onClick={() => handleStatClick(stats[0])}
+          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="text-sm font-medium text-gray-600">Avg win/loss trade</span>
+            <Info className="w-3.5 h-3.5 text-gray-400" />
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-3xl font-bold text-gray-900">
+              {displayStats.winLossRatio > 0 && displayStats.winLossRatio !== Infinity 
+                ? displayStats.winLossRatio.toFixed(1) 
+                : '—'}
+            </span>
+            {/* Horizontal bar visualization */}
+            <div className="flex-1 max-w-[120px]">
+              <div className="flex items-center gap-2 mb-1">
+                <div 
+                  className="h-2 bg-green-500 rounded-full" 
+                  style={{ width: `${Math.min(displayStats.avgWin / (displayStats.avgWin + displayStats.avgLoss || 1) * 100, 100) || 50}%` }}
+                />
+                <div 
+                  className="h-2 bg-red-500 rounded-full flex-1" 
+                />
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-green-600 font-medium">${displayStats.avgWin?.toFixed(2) || '0.00'}</span>
+                <span className="text-red-600 font-medium">${displayStats.avgLoss?.toFixed(2) || '0.00'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats Row - Additional metrics */}
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Open Positions</p>
+          <p className="text-xl font-bold text-gray-900">{displayStats.openPositions}</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Total Trades</p>
+          <p className="text-xl font-bold text-gray-900">{displayStats.totalTrades}</p>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Realized P&L</p>
+          <p className={`text-xl font-bold ${displayStats.realizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(displayStats.realizedPnl)}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Unrealized P&L</p>
+          <p className={`text-xl font-bold ${displayStats.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(displayStats.unrealizedPnl)}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <p className="text-xs text-gray-500 mb-1">Active Strategies</p>
+          <p className="text-xl font-bold text-indigo-600">{displayStats.activeStrategies}</p>
+        </div>
       </div>
 
       {/* Active Strategies Section */}
