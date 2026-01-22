@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts'
-import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp, Wallet } from 'lucide-react'
+import { Plus, Activity, Rocket, Wrench, Check, Play, Pause, Settings, TrendingUp, AlertCircle, X, ChevronRight, Zap, Shield, Target, RefreshCw, DollarSign, Percent, TrendingDown, Trash2, ArrowRight, Clock, GitBranch, ChevronDown, ChevronUp, Wallet, Filter } from 'lucide-react'
 import { STRATEGY_TEMPLATES, STRATEGY_TYPES as IMPORTED_STRATEGY_TYPES, AVAILABLE_MARKETS as IMPORTED_MARKETS, ENTRY_CONDITIONS as IMPORTED_ENTRY, EXIT_CONDITIONS as IMPORTED_EXIT } from '../data/prebuiltStrategies'
 import BacktestResultsPanel from '../components/BacktestResultsPanel'
+import AdvancedFilters, { DEFAULT_FILTERS } from '../components/AdvancedFilters'
 import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
 import { paperTradingApi, strategyApi, accountsApi, liveTradeApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
@@ -250,6 +251,10 @@ const StrategyBuilder = () => {
   })
   const [customStrategies, setCustomStrategies] = useState([])
   const [showExpandedBacktest, setShowExpandedBacktest] = useState(false)
+
+  // Advanced backtest filters state
+  const [advancedFilters, setAdvancedFilters] = useState(DEFAULT_FILTERS)
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false)
 
   const template = selectedTemplate !== null ? templates[selectedTemplate] : null
   const activeStrategy = template || (selectedTemplate === 'custom' ? customStrategy : null)
@@ -1688,6 +1693,70 @@ const StrategyBuilder = () => {
           )}
         </div>
 
+        {/* Right sidebar with filters and backtest results */}
+        <div className="space-y-4">
+          {/* Advanced Filters Toggle */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <Filter className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">Advanced Filters</h3>
+                  <p className="text-xs text-gray-500">Fine-tune your backtest parameters</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Active filters badge */}
+                {(() => {
+                  const countActiveFilters = () => {
+                    let count = 0
+                    if (advancedFilters.timeframe !== '6m') count++
+                    if (advancedFilters.volume.high || advancedFilters.volume.medium || advancedFilters.volume.low) count++
+                    if (advancedFilters.volume.spikeDetection) count++
+                    if (advancedFilters.lineMovement.enabled) count++
+                    if (advancedFilters.volatility.enabled) count++
+                    if (advancedFilters.categories.length > 0) count++
+                    if (advancedFilters.timing.minTimeToResolution > 0 || advancedFilters.timing.maxTimeToResolution < 365) count++
+                    if (advancedFilters.risk.maxPositionSize < 1000 || advancedFilters.risk.dailyLossLimit < 500) count++
+                    return count
+                  }
+                  const activeCount = countActiveFilters()
+                  return activeCount > 0 ? (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+                      {activeCount} active
+                    </span>
+                  ) : null
+                })()}
+                {showFiltersPanel ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+            </button>
+            
+            {/* Collapsible Filters Panel */}
+            {showFiltersPanel && (
+              <div className="border-t border-gray-100">
+                <AdvancedFilters
+                  filters={advancedFilters}
+                  onFiltersChange={setAdvancedFilters}
+                  onApply={() => {
+                    setShowFiltersPanel(false)
+                    if (activeStrategy) {
+                      rerunBacktest()
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
         {/* Backtest Preview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
           <div className="flex items-center justify-between mb-4">
@@ -1764,6 +1833,7 @@ const StrategyBuilder = () => {
               View Full Backtest Report
             </button>
           )}
+        </div>
         </div>
       </div>
 

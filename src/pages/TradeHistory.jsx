@@ -275,18 +275,18 @@ const TradeHistory = () => {
           subValue={`${stats.wonTrades}W / ${stats.lostTrades}L`}
         />
         <StatCard
-          label="Best Trade"
-          value={stats.bestTrade >= 0 ? `+$${stats.bestTrade.toFixed(2)}` : '$0.00'}
+          label="Avg Win/Loss"
+          value={stats.avgWin > 0 || stats.avgLoss > 0 ? `+$${stats.avgWin.toFixed(2)} / -$${stats.avgLoss.toFixed(2)}` : '$0.00'}
           icon={ArrowUpRight}
           color="green"
-          subValue="Highest profit"
+          subValue="Average per trade"
         />
         <StatCard
-          label="Worst Trade"
-          value={stats.worstTrade < 0 ? `-$${Math.abs(stats.worstTrade).toFixed(2)}` : '$0.00'}
-          icon={ArrowDownRight}
-          color="red"
-          subValue="Biggest loss"
+          label="Win/Loss Ratio"
+          value={stats.avgLoss > 0 ? (stats.avgWin / stats.avgLoss).toFixed(2) : stats.avgWin > 0 ? '∞' : '—'}
+          icon={Target}
+          color="purple"
+          subValue="Risk/reward"
         />
         <StatCard
           label="Open Positions"

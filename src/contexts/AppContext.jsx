@@ -225,6 +225,9 @@ export function AppProvider({ children }) {
     totalInvested: 0,
     bestTrade: 0,
     worstTrade: 0,
+    avgWin: 0,
+    avgLoss: 0,
+    winLossRatio: 0,
   })
 
   // ============================================
@@ -265,6 +268,13 @@ export function AppProvider({ children }) {
     const bestTrade = pnls.length > 0 ? Math.max(...pnls) : 0
     const worstTrade = pnls.length > 0 ? Math.min(...pnls) : 0
 
+    // Calculate average win and average loss
+    const winPnls = wonTrades.map(t => t.pnl || 0)
+    const lossPnls = lostTrades.map(t => Math.abs(t.pnl || 0))
+    const avgWin = winPnls.length > 0 ? winPnls.reduce((a, b) => a + b, 0) / winPnls.length : 0
+    const avgLoss = lossPnls.length > 0 ? lossPnls.reduce((a, b) => a + b, 0) / lossPnls.length : 0
+    const winLossRatio = avgLoss > 0 ? avgWin / avgLoss : avgWin > 0 ? Infinity : 0
+
     setPortfolioStats({
       totalPnl: realizedPnl + unrealizedPnl,
       realizedPnl,
@@ -277,6 +287,9 @@ export function AppProvider({ children }) {
       totalInvested,
       bestTrade,
       worstTrade,
+      avgWin,
+      avgLoss,
+      winLossRatio,
     })
   }, [openBets, tradeHistory])
 

@@ -374,6 +374,9 @@ const Dashboard = ({ onNavigate }) => {
     unrealizedPnl: portfolioStats.unrealizedPnl,
     bestTrade: portfolioStats.bestTrade,
     worstTrade: portfolioStats.worstTrade,
+    avgWin: portfolioStats.avgWin || 0,
+    avgLoss: portfolioStats.avgLoss || 0,
+    winLossRatio: portfolioStats.winLossRatio || 0,
     activeStrategies: userData.activeStrategies,
     totalBalance: userData.totalBalance,
     monthlyChange: userData.monthlyChange,
@@ -395,8 +398,8 @@ const Dashboard = ({ onNavigate }) => {
           { label: 'Total P&L', value: formatCurrency(displayStats.totalPnl), icon: DollarSign },
           { label: 'Realized P&L', value: formatCurrency(displayStats.realizedPnl), icon: Check },
           { label: 'Unrealized P&L', value: formatCurrency(displayStats.unrealizedPnl), icon: Clock },
-          { label: 'Best Trade', value: displayStats.bestTrade > 0 ? formatCurrency(displayStats.bestTrade) : '—', icon: ArrowUpRight },
-          { label: 'Worst Trade', value: displayStats.worstTrade < 0 ? formatCurrency(displayStats.worstTrade) : '—', icon: ArrowDownRight },
+          { label: 'Avg Win/Loss', value: displayStats.avgWin > 0 || displayStats.avgLoss > 0 ? `${formatCurrency(displayStats.avgWin)} / ${formatCurrency(-displayStats.avgLoss)}` : '—', icon: ArrowUpRight },
+          { label: 'Win/Loss Ratio', value: displayStats.winLossRatio > 0 ? (displayStats.winLossRatio === Infinity ? '∞' : displayStats.winLossRatio.toFixed(2)) : '—', icon: Target },
         ],
         tip: 'Pro tip: Diversify across multiple strategies to reduce volatility.'
       }
