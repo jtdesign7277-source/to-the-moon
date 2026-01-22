@@ -49,15 +49,9 @@ const NAV_ITEMS = [
     requiresPro: false,
   },
   {
-    id: 'history',
-    label: 'Trade History',
-    shortLabel: 'History',
-    icon: History,
-    requiresPro: false,
-  },{
     id: 'scanner',
     label: 'Scanner',
-    shortLabel: 'Scan',
+    shortLabel: 'Scanner',
     icon: Activity,
     requiresPro: false,
   },
@@ -103,13 +97,6 @@ const NAV_ITEMS = [
     icon: Compass,
     requiresPro: false,
   },
-  {
-  id: 'scanner',
-  label: 'Scanner',
-  shortLabel: 'Scanner',
-  icon: Activity,
-  requiresPro: false,
-},
 ]
 
 // Page renderer component
