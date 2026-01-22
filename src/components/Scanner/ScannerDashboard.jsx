@@ -1149,14 +1149,6 @@ const ScannerDashboard = ({ onNavigate }) => {
                   <><Play className="w-3.5 h-3.5" /> Start</>
                 )}
               </button>
-              {scannerState === 'scanning' && (
-                <button
-                  onClick={pauseScanning}
-                  className="px-3 py-2.5 bg-[#F59E0B] hover:bg-[#D97706] text-white rounded-lg font-semibold transition-colors text-[12px] shadow-sm"
-                >
-                  <Pause className="w-3.5 h-3.5" />
-                </button>
-              )}
               <button
                 onClick={() => onNavigate?.('settings')}
                 className="px-3 py-2.5 bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#374151] rounded-lg transition-colors border border-[#E5E7EB]"
@@ -1188,6 +1180,24 @@ const ScannerDashboard = ({ onNavigate }) => {
                   <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#D1FAE5] text-[#059669] rounded animate-pulse">
                     LIVE
                   </span>
+                )}
+                {scannerState === 'scanning' && (
+                  <button
+                    onClick={pauseScanning}
+                    className="ml-2 px-2 py-1 bg-[#F59E0B] hover:bg-[#D97706] text-white rounded-md font-medium transition-colors text-[10px] flex items-center gap-1 shadow-sm"
+                  >
+                    <Pause className="w-3 h-3" />
+                    Pause
+                  </button>
+                )}
+                {scannerState === 'paused' && (
+                  <button
+                    onClick={startScanning}
+                    className="ml-2 px-2 py-1 bg-[#10B981] hover:bg-[#059669] text-white rounded-md font-medium transition-colors text-[10px] flex items-center gap-1 shadow-sm"
+                  >
+                    <Play className="w-3 h-3" />
+                    Resume
+                  </button>
                 )}
               </div>
               <div className="text-[11px] text-[#6B7280]">
