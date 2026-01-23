@@ -597,7 +597,8 @@ const Trading = () => {
     const checkAlpaca = async () => {
       try {
         const response = await accountsApi.getAll()
-        const alpacaAccount = response.data?.find(a => a.platform === 'alpaca')
+        const accounts = response.data?.accounts || response.data || []
+        const alpacaAccount = accounts.find?.(a => a.platform === 'alpaca')
         setAlpacaConnected(!!alpacaAccount)
 
         if (alpacaAccount) {
@@ -610,7 +611,7 @@ const Trading = () => {
           // Fetch positions
           const positionsResponse = await alpacaApi.getPositions()
           if (positionsResponse.data) {
-            setPositions(positionsResponse.data)
+            setPositions(positionsResponse.data.positions || positionsResponse.data || [])
           }
 
           // Fetch market clock
