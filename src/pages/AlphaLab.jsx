@@ -16,7 +16,6 @@ import {
   Zap,
   Check,
   X,
-  ChevronRight,
   AlertCircle,
   Loader2,
   RefreshCw,
@@ -59,12 +58,11 @@ const TIMEFRAMES = [
 ]
 
 const LOOKBACKS = [
+  { id: '1d', label: '1 Day' },
   { id: '1w', label: '1 Week' },
   { id: '1m', label: '1 Month' },
-  { id: '3m', label: '3 Months' },
   { id: '6m', label: '6 Months' },
   { id: '1y', label: '1 Year' },
-  { id: '2y', label: '2 Years' },
 ]
 
 const EXAMPLE_STRATEGIES = [
@@ -143,6 +141,7 @@ const AlphaLab = () => {
   const [isParsing, setIsParsing] = useState(false)
   const [parsedStrategy, setParsedStrategy] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [editedInterpretation, setEditedInterpretation] = useState('')
   const [selectedTimeframe, setSelectedTimeframe] = useState('1d')
   const [selectedLookback, setSelectedLookback] = useState('6m')
   const [initialCapital, setInitialCapital] = useState(10000)
@@ -322,39 +321,13 @@ const AlphaLab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Alpha Lab</h1>
-              <p className="text-gray-500 text-sm">AI-powered strategy builder & backtester</p>
-            </div>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
+          <Brain className="w-6 h-6 text-white" />
         </div>
-        <div className="flex items-center gap-2">
-          {[
-            { step: 1, label: 'Create', icon: Edit3 },
-            { step: 2, label: 'Review', icon: Sparkles },
-            { step: 3, label: 'Backtest', icon: BarChart3 },
-            { step: 4, label: 'Deploy', icon: Rocket },
-          ].map(({ step, label, icon: Icon }) => (
-            <div key={step} className="flex items-center">
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                currentStep >= step
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'bg-gray-100 text-gray-400'
-              }`}>
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{label}</span>
-              </div>
-              {step < 4 && (
-                <ChevronRight className={`w-4 h-4 mx-1 ${currentStep > step ? 'text-indigo-400' : 'text-gray-300'}`} />
-              )}
-            </div>
-          ))}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Alpha Lab</h1>
+          <p className="text-gray-500 text-sm">AI-powered strategy builder & backtester</p>
         </div>
       </div>
 
@@ -492,17 +465,35 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   </div>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                    className={`text-sm flex items-center gap-1 ${isEditing ? 'text-indigo-600 hover:text-indigo-700' : 'text-gray-500 hover:text-gray-700'}`}
                   >
-                    <Edit3 className="w-4 h-4" />
-                    Edit
+                    {isEditing ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Save
+                      </>
+                    ) : (
+                      <>
+                        <Edit3 className="w-4 h-4" />
+                        Edit
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
 
               <div className="p-4 space-y-4">
                 <div className="p-3 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-700">{parsedStrategy.interpretation}</p>
+                  {isEditing ? (
+                    <textarea
+                      value={editedInterpretation || parsedStrategy.interpretation}
+                      onChange={(e) => setEditedInterpretation(e.target.value)}
+                      className="w-full text-sm text-gray-700 bg-white border border-indigo-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                      rows={3}
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-700">{editedInterpretation || parsedStrategy.interpretation}</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="p-3 bg-indigo-50 rounded-xl">
