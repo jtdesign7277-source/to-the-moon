@@ -63,6 +63,18 @@ export function TradingProvider({ children }) {
   const [orders, setOrders] = useState([])
 
   // ============================================
+  // STRATEGY TRADES (Trades linked to strategies)
+  // ============================================
+  const [strategyTrades, setStrategyTrades] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ttm_strategy_trades')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  // ============================================
   // WATCHLIST STATE
   // ============================================
   const [watchlist, setWatchlist] = useState(() => {
@@ -95,6 +107,10 @@ export function TradingProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('ttm_watchlist', JSON.stringify(watchlist))
   }, [watchlist])
+
+  useEffect(() => {
+    localStorage.setItem('ttm_strategy_trades', JSON.stringify(strategyTrades))
+  }, [strategyTrades])
 
   // ============================================
   // FETCH ALL TRADING DATA
@@ -386,6 +402,172 @@ export function TradingProvider({ children }) {
   }, [fetchTradingData])
 
   // ============================================
+  // STRATEGY TRADE ACTIONS
+  // ============================================
+  const logStrategyTrade = useCallback((deploymentId, tradeData) => {
+    const trade = {
+      id: `trade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      deploymentId,
+      symbol: tradeData.symbol,
+      side: tradeData.side,
+      quantity: tradeData.quantity,
+      entryPrice: tradeData.entryPrice,
+      entryTime: new Date().toISOString(),
+      status: 'open',
+      exitPrice: null,
+      exitTime: null,
+      pnl: null,
+      pnlPercent: null,
+    }
+    setStrategyTrades(prev => [trade, ...prev])
+    return trade
+  }, [])
+
+  const closeStrategyTrade = useCallback((tradeId, exitPrice) => {
+    setStrategyTrades(prev => prev.map(trade => {
+      if (trade.id === tradeId) {
+        const pnl = trade.side === 'buy'
+          ? (exitPrice - trade.entryPrice) * trade.quantity
+          : (trade.entryPrice - exitPrice) * trade.quantity
+        const pnlPercent = trade.side === 'buy'
+          ? ((exitPrice - trade.entryPrice) / trade.entryPrice) * 100
+          : ((trade.entryPrice - exitPrice) / trade.entryPrice) * 100
+        return {
+          ...trade,
+          status: 'closed',
+          exitPrice,
+          exitTime: new Date().toISOString(),
+          pnl,
+          pnlPercent,
+        }
+      }
+      return trade
+    }))
+  }, [])
+
+  // Kill switch - close all positions for a specific strategy
+  const killStrategy = useCallback(async (deploymentId) => {
+    const token = localStorage.getItem('ttm_access_token')
+
+    // Get all open trades for this strategy
+    const openTrades = strategyTrades.filter(
+      t => t.deploymentId === deploymentId && t.status === 'open'
+    )
+
+    // Close each position
+    const closePromises = openTrades.map(async (trade) => {
+      try {
+        const res = await fetch(`${API_URL}/api/alpaca/positions/${trade.symbol}`, {
+          method: 'DELETE',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        })
+        if (res.ok) {
+          // Get current price for P&L calculation
+          const position = positions.find(p => p.symbol === trade.symbol)
+          const exitPrice = position?.currentPrice || trade.entryPrice
+          closeStrategyTrade(trade.id, exitPrice)
+        }
+      } catch (err) {
+        console.error(`Error closing position ${trade.symbol}:`, err)
+      }
+    })
+
+    await Promise.all(closePromises)
+
+    // Stop the strategy
+    stopStrategy(deploymentId)
+
+    // Refresh data
+    fetchTradingData()
+
+    return { success: true }
+  }, [strategyTrades, positions, closeStrategyTrade, stopStrategy, fetchTradingData])
+
+  // Kill ALL strategies and positions
+  const killAllStrategies = useCallback(async () => {
+    const token = localStorage.getItem('ttm_access_token')
+
+    try {
+      // Close all positions via Alpaca
+      const res = await fetch(`${API_URL}/api/alpaca/positions`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
+
+      if (res.ok) {
+        // Mark all open trades as closed
+        setStrategyTrades(prev => prev.map(trade => {
+          if (trade.status === 'open') {
+            const position = positions.find(p => p.symbol === trade.symbol)
+            const exitPrice = position?.currentPrice || trade.entryPrice
+            const pnl = trade.side === 'buy'
+              ? (exitPrice - trade.entryPrice) * trade.quantity
+              : (trade.entryPrice - exitPrice) * trade.quantity
+            return {
+              ...trade,
+              status: 'closed',
+              exitPrice,
+              exitTime: new Date().toISOString(),
+              pnl,
+              pnlPercent: ((exitPrice - trade.entryPrice) / trade.entryPrice) * 100,
+            }
+          }
+          return trade
+        }))
+
+        // Stop all deployed strategies
+        setDeployedStrategies([])
+
+        // Refresh data
+        fetchTradingData()
+
+        return { success: true }
+      }
+    } catch (err) {
+      console.error('Error killing all strategies:', err)
+      return { success: false, error: err.message }
+    }
+  }, [positions, fetchTradingData])
+
+  // Get trades for a specific strategy
+  const getStrategyTrades = useCallback((deploymentId) => {
+    return strategyTrades.filter(t => t.deploymentId === deploymentId)
+  }, [strategyTrades])
+
+  // Get open trades for a strategy
+  const getOpenTrades = useCallback((deploymentId) => {
+    return strategyTrades.filter(t => t.deploymentId === deploymentId && t.status === 'open')
+  }, [strategyTrades])
+
+  // Get closed trades for a strategy
+  const getClosedTrades = useCallback((deploymentId) => {
+    return strategyTrades.filter(t => t.deploymentId === deploymentId && t.status === 'closed')
+  }, [strategyTrades])
+
+  // Calculate total P&L for a strategy
+  const getStrategyPnL = useCallback((deploymentId) => {
+    const trades = strategyTrades.filter(t => t.deploymentId === deploymentId)
+    const closedPnL = trades
+      .filter(t => t.status === 'closed')
+      .reduce((sum, t) => sum + (t.pnl || 0), 0)
+
+    // Add unrealized P&L from open trades
+    const openPnL = trades
+      .filter(t => t.status === 'open')
+      .reduce((sum, t) => {
+        const position = positions.find(p => p.symbol === t.symbol)
+        if (position) {
+          return sum + (t.side === 'buy'
+            ? (position.currentPrice - t.entryPrice) * t.quantity
+            : (t.entryPrice - position.currentPrice) * t.quantity)
+        }
+        return sum
+      }, 0)
+
+    return { closedPnL, openPnL, totalPnL: closedPnL + openPnL }
+  }, [strategyTrades, positions])
+
+  // ============================================
   // WATCHLIST ACTIONS
   // ============================================
   const addToWatchlist = useCallback((symbol) => {
@@ -441,6 +623,17 @@ export function TradingProvider({ children }) {
     resumeStrategy,
     stopStrategy,
 
+    // Strategy Trades
+    strategyTrades,
+    logStrategyTrade,
+    closeStrategyTrade,
+    getStrategyTrades,
+    getOpenTrades,
+    getClosedTrades,
+    getStrategyPnL,
+    killStrategy,
+    killAllStrategies,
+
     // Orders
     orders,
     pendingOrdersCount,
@@ -476,6 +669,15 @@ export function TradingProvider({ children }) {
     pauseStrategy,
     resumeStrategy,
     stopStrategy,
+    strategyTrades,
+    logStrategyTrade,
+    closeStrategyTrade,
+    getStrategyTrades,
+    getOpenTrades,
+    getClosedTrades,
+    getStrategyPnL,
+    killStrategy,
+    killAllStrategies,
     orders,
     pendingOrdersCount,
     placeOrder,

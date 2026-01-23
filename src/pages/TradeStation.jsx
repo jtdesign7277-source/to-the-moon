@@ -6,7 +6,8 @@ import {
   Flame, Star, Crown, Award, Clock,
   Play, ChevronRight, ChevronDown, ArrowUpRight,
   Share2, Copy, Check, X, Pause, Trash2,
-  Sparkles, Send, Users, Timer, FolderOpen, Folder
+  Sparkles, Send, Users, Timer, FolderOpen, Folder,
+  AlertTriangle, Activity, DollarSign, TrendingDown
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useTrading } from '../contexts/TradingContext'
@@ -92,69 +93,36 @@ const StatPill = ({ icon: Icon, label, value, color = 'indigo' }) => {
   )
 }
 
-// Progress ring component
-const ProgressRing = ({ progress, size = 48, strokeWidth = 4, children }) => {
-  const radius = (size - strokeWidth) / 2
-  const circumference = radius * 2 * Math.PI
-  const offset = circumference - (progress / 100) * circumference
-
-  return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg className="transform -rotate-90" width={size} height={size}>
-        <circle
-          className="text-gray-100"
-          strokeWidth={strokeWidth}
-          stroke="currentColor"
-          fill="transparent"
-          r={radius}
-          cx={size / 2}
-          cy={size / 2}
-        />
-        <circle
-          className="text-indigo-500 transition-all duration-500"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          stroke="currentColor"
-          fill="transparent"
-          r={radius}
-          cx={size / 2}
-          cy={size / 2}
-          style={{ strokeDasharray: circumference, strokeDashoffset: offset }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        {children}
-      </div>
-    </div>
-  )
-}
-
 // Main Trade Station Component
 const TradeStation = () => {
-  const { isPro, tradingMode } = useApp()
+  const { tradingMode } = useApp()
   const {
     strategies: savedStrategies,
     deployedStrategies,
-    portfolio,
     positions,
-    placeOrder,
-    refreshData,
     deleteStrategy,
     pauseStrategy,
     resumeStrategy,
     stopStrategy,
     deployStrategy,
+    strategyTrades,
+    getOpenTrades,
+    getClosedTrades,
+    getStrategyPnL,
+    killStrategy,
+    killAllStrategies,
   } = useTrading()
 
-  const [activeTab, setActiveTab] = useState('build')
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationProfit, setCelebrationProfit] = useState(0)
   const [showShareSheet, setShowShareSheet] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  // Collapsible folder states
+  // Collapsible states
   const [isStrategiesFolderOpen, setIsStrategiesFolderOpen] = useState(true)
-  const [isDeployedFolderOpen, setIsDeployedFolderOpen] = useState(true)
+  const [isActiveFolderOpen, setIsActiveFolderOpen] = useState(true)
+  const [isPositionsFolderOpen, setIsPositionsFolderOpen] = useState(true)
+  const [positionsTab, setPositionsTab] = useState('open') // 'open' | 'closed'
 
   // User stats
   const stats = {
@@ -174,18 +142,31 @@ const TradeStation = () => {
     { id: 2, name: 'Momentum Masters', prize: 10000, participants: 567, endsIn: '6d 8h', joined: true },
   ]
 
-  
   const handleCopy = () => {
     navigator.clipboard.writeText('https://tothemoon.app/s/demo')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const tabs = [
-    { id: 'build', label: 'Build' },
-    { id: 'challenges', label: 'Challenges' },
-    { id: 'compete', label: 'Compete' },
-  ]
+  // Calculate total P&L across all strategies
+  const totalPnL = deployedStrategies.reduce((sum, dep) => {
+    const pnl = getStrategyPnL(dep.id)
+    return sum + pnl.totalPnL
+  }, 0)
+
+  // Get all open trades grouped by strategy
+  const openTradesByStrategy = deployedStrategies.map(dep => ({
+    deployment: dep,
+    trades: getOpenTrades(dep.id),
+    pnl: getStrategyPnL(dep.id)
+  })).filter(g => g.trades.length > 0 || g.pnl.totalPnL !== 0)
+
+  // Get all closed trades grouped by strategy
+  const closedTradesByStrategy = deployedStrategies.map(dep => ({
+    deployment: dep,
+    trades: getClosedTrades(dep.id),
+    pnl: getStrategyPnL(dep.id)
+  })).filter(g => g.trades.length > 0)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -256,443 +237,539 @@ const TradeStation = () => {
               <h1 className="text-2xl font-bold text-gray-900">Trade Station</h1>
               <p className="text-gray-500 text-sm">Build, test, and deploy strategies</p>
             </div>
-            <div className="mr-4">
+            <div className="flex items-center gap-3">
               <StatPill icon={Star} value={stats.coins} color="indigo" />
+              {deployedStrategies.length > 0 && (
+                <button
+                  onClick={killAllStrategies}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium rounded-full transition-colors"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  Kill All
+                </button>
+              )}
             </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="px-4 pb-3">
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
           </div>
         </div>
       </div>
 
-      {/* Content */}
+      {/* 3-Column Layout */}
       <div className="p-4">
-        <AnimatePresence mode="wait">
-          {/* Build Tab */}
-          {activeTab === 'build' && (
-            <motion.div
-              key="build"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          {/* Column 1: My Strategies */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
-              {/* Deployed Strategies Folder */}
-              {deployedStrategies.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <button
-                    onClick={() => setIsDeployedFolderOpen(!isDeployedFolderOpen)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                        {isDeployedFolderOpen ? (
-                          <FolderOpen className="w-5 h-5 text-emerald-600" />
-                        ) : (
-                          <Folder className="w-5 h-5 text-emerald-600" />
-                        )}
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-semibold text-gray-900">Active Strategies</h3>
-                        <p className="text-xs text-gray-500">{deployedStrategies.length} running</p>
-                      </div>
-                    </div>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isDeployedFolderOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {isDeployedFolderOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-4 pb-4 space-y-3">
-                          {deployedStrategies.map(deployment => (
-                            <motion.div
-                              key={deployment.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100"
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
-                                    <h4 className="font-semibold text-gray-900">{deployment.strategyName}</h4>
-                                    {deployment.status === 'active' && (
-                                      <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                        Scanning
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {deployment.mode === 'paper' ? 'Paper Trading' : 'Live Trading'} • {deployment.trades || 0} trades
-                                  </p>
-                                  {deployment.strategy?.symbol && (
-                                    <p className="text-xs text-indigo-600 mt-0.5">
-                                      Watching: {deployment.strategy.symbol}
-                                    </p>
-                                  )}
-                                </div>
-                                <div className={`text-lg font-bold ${(deployment.pnl || 0) >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                  {(deployment.pnl || 0) >= 0 ? '+' : ''}{(deployment.pnl || 0).toFixed(1)}%
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                {deployment.status === 'active' ? (
-                                  <button
-                                    onClick={() => pauseStrategy(deployment.id)}
-                                    className="flex-1 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                                  >
-                                    <Pause className="w-4 h-4" />
-                                    Pause
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => resumeStrategy(deployment.id)}
-                                    className="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                                  >
-                                    <Play className="w-4 h-4" />
-                                    Resume
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => stopStrategy(deployment.id)}
-                                  className="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-colors"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-
-              {/* Saved Strategies Folder */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button
-                  onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                      {isStrategiesFolderOpen ? (
-                        <FolderOpen className="w-5 h-5 text-indigo-600" />
-                      ) : (
-                        <Folder className="w-5 h-5 text-indigo-600" />
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <h3 className="font-semibold text-gray-900">My Strategies</h3>
-                      <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
-                    </div>
-                  </div>
-                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isStrategiesFolderOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <AnimatePresence>
-                  {isStrategiesFolderOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-4 pb-4 space-y-3">
-                        {savedStrategies.length === 0 ? (
-                          <div className="text-center py-8">
-                            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                              <Sparkles className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-500 text-sm">No strategies yet</p>
-                            <p className="text-gray-400 text-xs mt-1">Create one in Alpha Lab</p>
-                          </div>
-                        ) : (
-                          savedStrategies.map(strategy => {
-                            const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
-                            return (
-                              <motion.div
-                                key={strategy.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
-                              >
-                                <div className="flex items-start justify-between mb-3">
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <h4 className="font-semibold text-gray-900">{strategy.name}</h4>
-                                      <span className="px-2 py-0.5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded">
-                                        {strategy.symbol || 'SPY'}
-                                      </span>
-                                      {isDeployed && (
-                                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-xs font-medium rounded flex items-center gap-1">
-                                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                          Live
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                                      {strategy.interpretation || strategy.description || 'Custom strategy'}
-                                    </p>
-                                    {strategy.backtestResults && (
-                                      <div className="flex items-center gap-3 mt-2 text-xs">
-                                        <span className={`font-medium ${strategy.backtestResults.totalReturn >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                          {strategy.backtestResults.totalReturn >= 0 ? '+' : ''}{strategy.backtestResults.totalReturn?.toFixed(1)}% return
-                                        </span>
-                                        <span className="text-gray-400">•</span>
-                                        <span className="text-gray-500">{strategy.backtestResults.winRate?.toFixed(0)}% win rate</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2">
-                                  {!isDeployed ? (
-                                    <button
-                                      onClick={async () => {
-                                        const result = await deployStrategy(strategy, tradingMode)
-                                        if (result && strategy.backtestResults?.totalReturn > 0) {
-                                          setCelebrationProfit(strategy.backtestResults.totalReturn)
-                                          setShowCelebration(true)
-                                        }
-                                      }}
-                                      className="flex-1 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                                    >
-                                      <Play className="w-4 h-4" />
-                                      Deploy
-                                    </button>
-                                  ) : (
-                                    <button
-                                      disabled
-                                      className="flex-1 py-2 bg-gray-100 text-gray-400 font-medium text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5"
-                                    >
-                                      <Check className="w-4 h-4" />
-                                      Deployed
-                                    </button>
-                                  )}
-                                  <button
-                                    onClick={() => setShowShareSheet(true)}
-                                    className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-colors"
-                                  >
-                                    <Share2 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => deleteStrategy(strategy.id)}
-                                    className="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </motion.div>
-                            )
-                          })
-                        )}
-                      </div>
-                    </motion.div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                  {isStrategiesFolderOpen ? (
+                    <FolderOpen className="w-5 h-5 text-indigo-600" />
+                  ) : (
+                    <Folder className="w-5 h-5 text-indigo-600" />
                   )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Challenges Tab */}
-          {activeTab === 'challenges' && (
-            <motion.div
-              key="challenges"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                  Daily Challenges
-                </h3>
-                <div className="flex items-center gap-1.5 text-gray-400 text-xs">
-                  <Clock className="w-3.5 h-3.5" />
-                  Resets in 8h
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">My Strategies</h3>
+                  <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
                 </div>
               </div>
+              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isStrategiesFolderOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-              <div className="space-y-3">
-                {challenges.map(challenge => {
-                  const isComplete = challenge.progress >= challenge.target
-                  const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
-
-                  return (
-                    <div
-                      key={challenge.id}
-                      className={`bg-white rounded-2xl p-4 shadow-sm border ${
-                        isComplete ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-100'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          isComplete
-                            ? 'bg-emerald-100 text-emerald-600'
-                            : 'bg-gray-100 text-gray-500'
-                        }`}>
-                          <challenge.icon className="w-5 h-5" />
+            <AnimatePresence>
+              {isStrategiesFolderOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                    {savedStrategies.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                          <Sparkles className="w-8 h-8 text-gray-400" />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-medium text-gray-900">{challenge.title}</h4>
-                            <span className="text-sm font-semibold text-amber-500">+{challenge.reward}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progress}%` }}
-                                className={`h-full rounded-full ${
-                                  isComplete ? 'bg-emerald-500' : 'bg-indigo-500'
-                                }`}
-                              />
+                        <p className="text-gray-500 text-sm">No strategies yet</p>
+                        <p className="text-gray-400 text-xs mt-1">Create one in Alpha Lab</p>
+                      </div>
+                    ) : (
+                      savedStrategies.map(strategy => {
+                        const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
+                        return (
+                          <motion.div
+                            key={strategy.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h4 className="font-semibold text-gray-900 text-sm truncate">{strategy.name}</h4>
+                                  <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded">
+                                    {strategy.symbol || 'SPY'}
+                                  </span>
+                                  {isDeployed && (
+                                    <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-600 text-xs font-medium rounded flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                      Live
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                  {strategy.interpretation || strategy.description || 'Custom strategy'}
+                                </p>
+                                {strategy.backtestResults && (
+                                  <div className="flex items-center gap-2 mt-1 text-xs">
+                                    <span className={`font-medium ${strategy.backtestResults.totalReturn >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                      {strategy.backtestResults.totalReturn >= 0 ? '+' : ''}{strategy.backtestResults.totalReturn?.toFixed(1)}%
+                                    </span>
+                                    <span className="text-gray-400">•</span>
+                                    <span className="text-gray-500">{strategy.backtestResults.winRate?.toFixed(0)}% win</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <span className="text-xs text-gray-500">
-                              {challenge.progress}/{challenge.target}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {isComplete && (
-                        <button className="w-full mt-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm rounded-xl transition-colors">
-                          Claim Reward
-                        </button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Badges Preview */}
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Badges</h3>
-                  <button className="text-sm text-indigo-600 font-medium flex items-center gap-1">
-                    View all <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex gap-3">
-                  {[
-                    { icon: Rocket, name: 'First Launch', earned: true },
-                    { icon: Trophy, name: 'Winner', earned: true },
-                    { icon: Flame, name: 'Hot Streak', earned: false },
-                    { icon: Crown, name: 'Champion', earned: false },
-                  ].map((badge, i) => (
-                    <div
-                      key={i}
-                      className={`flex-1 p-3 rounded-xl text-center ${
-                        badge.earned
-                          ? 'bg-gradient-to-br from-indigo-50 to-purple-50'
-                          : 'bg-gray-50 opacity-50'
-                      }`}
-                    >
-                      <badge.icon className={`w-6 h-6 mx-auto mb-1 ${
-                        badge.earned ? 'text-indigo-500' : 'text-gray-400'
-                      }`} />
-                      <p className="text-xs font-medium text-gray-600 truncate">{badge.name}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Compete Tab */}
-          {activeTab === 'compete' && (
-            <motion.div
-              key="compete"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-4"
-            >
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
-                Active Tournaments
-              </h3>
-
-              <div className="space-y-3">
-                {tournaments.map(tournament => (
-                  <div
-                    key={tournament.id}
-                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 overflow-hidden"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Trophy className="w-4 h-4 text-amber-500" />
-                          <h4 className="font-semibold text-gray-900">{tournament.name}</h4>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5" />
-                            {tournament.participants}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Timer className="w-3.5 h-3.5" />
-                            {tournament.endsIn}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-500">
-                          ${tournament.prize.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-gray-500">Prize Pool</p>
-                      </div>
-                    </div>
-
-                    <button
-                      className={`w-full py-2.5 font-medium text-sm rounded-xl transition-colors ${
-                        tournament.joined
-                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          : 'bg-indigo-500 text-white hover:bg-indigo-600'
-                      }`}
-                    >
-                      {tournament.joined ? 'View Leaderboard' : 'Join Tournament'}
-                    </button>
+                            <div className="flex gap-2">
+                              {!isDeployed ? (
+                                <button
+                                  onClick={async () => {
+                                    const result = await deployStrategy(strategy, tradingMode)
+                                    if (result && strategy.backtestResults?.totalReturn > 0) {
+                                      setCelebrationProfit(strategy.backtestResults.totalReturn)
+                                      setShowCelebration(true)
+                                    }
+                                  }}
+                                  className="flex-1 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                >
+                                  <Play className="w-3 h-3" />
+                                  Deploy
+                                </button>
+                              ) : (
+                                <button
+                                  disabled
+                                  className="flex-1 py-1.5 bg-gray-100 text-gray-400 font-medium text-xs rounded-lg cursor-not-allowed flex items-center justify-center gap-1"
+                                >
+                                  <Check className="w-3 h-3" />
+                                  Active
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setShowShareSheet(true)}
+                                className="py-1.5 px-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+                              >
+                                <Share2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => deleteStrategy(strategy.id)}
+                                className="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        )
+                      })
+                    )}
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-              {/* Create Tournament CTA */}
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-center text-white">
-                <Award className="w-10 h-10 mx-auto mb-3 opacity-90" />
-                <h3 className="font-semibold text-lg mb-1">Host a Tournament</h3>
-                <p className="text-sm text-white/70 mb-4">
-                  Create private competitions with friends
-                </p>
-                <button className="px-6 py-2.5 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors">
-                  Create Tournament
+          {/* Column 2: Active Strategies */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => setIsActiveFolderOpen(!isActiveFolderOpen)}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                  {isActiveFolderOpen ? (
+                    <Activity className="w-5 h-5 text-emerald-600" />
+                  ) : (
+                    <Activity className="w-5 h-5 text-emerald-600" />
+                  )}
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">Active Strategies</h3>
+                  <p className="text-xs text-gray-500">{deployedStrategies.length} running</p>
+                </div>
+              </div>
+              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isActiveFolderOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {isActiveFolderOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                    {deployedStrategies.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                          <Activity className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 text-sm">No active strategies</p>
+                        <p className="text-gray-400 text-xs mt-1">Deploy one from My Strategies</p>
+                      </div>
+                    ) : (
+                      deployedStrategies.map(deployment => {
+                        const pnl = getStrategyPnL(deployment.id)
+                        const openTrades = getOpenTrades(deployment.id)
+                        return (
+                          <motion.div
+                            key={deployment.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+                                  <h4 className="font-semibold text-gray-900 text-sm truncate">{deployment.strategyName}</h4>
+                                </div>
+                                {deployment.status === 'active' && (
+                                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
+                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                    Scanning
+                                  </span>
+                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {deployment.mode === 'paper' ? 'Paper' : 'Live'} • {openTrades.length} open trades
+                                </p>
+                              </div>
+                              <div className={`text-lg font-bold ${pnl.totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              {deployment.status === 'active' ? (
+                                <button
+                                  onClick={() => pauseStrategy(deployment.id)}
+                                  className="flex-1 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                >
+                                  <Pause className="w-3 h-3" />
+                                  Pause
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => resumeStrategy(deployment.id)}
+                                  className="flex-1 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                >
+                                  <Play className="w-3 h-3" />
+                                  Resume
+                                </button>
+                              )}
+                              <button
+                                onClick={() => killStrategy(deployment.id)}
+                                className="py-1.5 px-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
+                              >
+                                <AlertTriangle className="w-3 h-3" />
+                                Kill
+                              </button>
+                            </div>
+                          </motion.div>
+                        )
+                      })
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Column 3: Positions */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">Positions</h3>
+                  <p className="text-xs text-gray-500">
+                    {strategyTrades.filter(t => t.status === 'open').length} open, {strategyTrades.filter(t => t.status === 'closed').length} closed
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-bold ${totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                  {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
+                </span>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isPositionsFolderOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+
+            <AnimatePresence>
+              {isPositionsFolderOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  {/* Open/Closed Tabs */}
+                  <div className="px-4 pb-2">
+                    <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                      <button
+                        onClick={() => setPositionsTab('open')}
+                        className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
+                          positionsTab === 'open'
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Open
+                      </button>
+                      <button
+                        onClick={() => setPositionsTab('closed')}
+                        className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
+                          positionsTab === 'closed'
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Closed
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                    {positionsTab === 'open' ? (
+                      // Open Positions
+                      openTradesByStrategy.length === 0 ? (
+                        <div className="text-center py-6">
+                          <TrendingUp className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">No open positions</p>
+                          <p className="text-gray-400 text-xs mt-1">Waiting for signals...</p>
+                        </div>
+                      ) : (
+                        openTradesByStrategy.map(group => (
+                          <div key={group.deployment.id} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase">{group.deployment.strategyName}</h4>
+                              <span className={`text-xs font-bold ${group.pnl.openPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                {group.pnl.openPnL >= 0 ? '+' : ''}${group.pnl.openPnL.toFixed(2)}
+                              </span>
+                            </div>
+                            {group.trades.map(trade => {
+                              const position = positions.find(p => p.symbol === trade.symbol)
+                              const currentPnL = position
+                                ? (trade.side === 'buy'
+                                    ? (position.currentPrice - trade.entryPrice) * trade.quantity
+                                    : (trade.entryPrice - position.currentPrice) * trade.quantity)
+                                : 0
+                              return (
+                                <div key={trade.id} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.side === 'buy' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                        {trade.side.toUpperCase()}
+                                      </span>
+                                      <span className="font-semibold text-sm">{trade.symbol}</span>
+                                      <span className="text-xs text-gray-400">x{trade.quantity}</span>
+                                    </div>
+                                    <span className={`text-sm font-bold ${currentPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                      {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                    <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
+                                    <span>Current: ${position?.currentPrice?.toFixed(2) || '-'}</span>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ))
+                      )
+                    ) : (
+                      // Closed Positions
+                      closedTradesByStrategy.length === 0 ? (
+                        <div className="text-center py-6">
+                          <TrendingDown className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">No closed trades yet</p>
+                        </div>
+                      ) : (
+                        closedTradesByStrategy.map(group => (
+                          <div key={group.deployment.id} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase">{group.deployment.strategyName}</h4>
+                              <span className={`text-xs font-bold ${group.pnl.closedPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                {group.pnl.closedPnL >= 0 ? '+' : ''}${group.pnl.closedPnL.toFixed(2)}
+                              </span>
+                            </div>
+                            {group.trades.map(trade => (
+                              <div key={trade.id} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.pnl >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                      {trade.pnl >= 0 ? 'WIN' : 'LOSS'}
+                                    </span>
+                                    <span className="font-semibold text-sm">{trade.symbol}</span>
+                                  </div>
+                                  <span className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                  <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
+                                  <span>Exit: ${trade.exitPrice?.toFixed(2)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))
+                      )
+                    )}
+
+                    {/* Total P&L Summary */}
+                    {(openTradesByStrategy.length > 0 || closedTradesByStrategy.length > 0) && (
+                      <div className="pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">Total P&L</span>
+                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                            {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Challenges & Tournaments Section */}
+      <div className="p-4 space-y-6">
+        {/* Challenges Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              Daily Challenges
+            </h3>
+            <div className="flex items-center gap-1.5 text-gray-400 text-xs">
+              <Clock className="w-3.5 h-3.5" />
+              Resets in 8h
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {challenges.map(challenge => {
+              const isComplete = challenge.progress >= challenge.target
+              const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
+
+              return (
+                <div
+                  key={challenge.id}
+                  className={`bg-white rounded-2xl p-4 shadow-sm border ${
+                    isComplete ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-100'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      isComplete
+                        ? 'bg-emerald-100 text-emerald-600'
+                        : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      <challenge.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-medium text-gray-900 text-sm">{challenge.title}</h4>
+                        <span className="text-sm font-semibold text-amber-500">+{challenge.reward}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            className={`h-full rounded-full ${
+                              isComplete ? 'bg-emerald-500' : 'bg-indigo-500'
+                            }`}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {challenge.progress}/{challenge.target}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {isComplete && (
+                    <button className="w-full mt-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm rounded-xl transition-colors">
+                      Claim Reward
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Tournaments Section */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
+            Active Tournaments
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {tournaments.map(tournament => (
+              <div
+                key={tournament.id}
+                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 overflow-hidden"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Trophy className="w-4 h-4 text-amber-500" />
+                      <h4 className="font-semibold text-gray-900">{tournament.name}</h4>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        {tournament.participants}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Timer className="w-3.5 h-3.5" />
+                        {tournament.endsIn}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-emerald-500">
+                      ${tournament.prize.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500">Prize Pool</p>
+                  </div>
+                </div>
+
+                <button
+                  className={`w-full py-2.5 font-medium text-sm rounded-xl transition-colors ${
+                    tournament.joined
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-indigo-500 text-white hover:bg-indigo-600'
+                  }`}
+                >
+                  {tournament.joined ? 'View Leaderboard' : 'Join Tournament'}
                 </button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
