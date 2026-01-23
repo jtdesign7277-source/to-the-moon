@@ -139,6 +139,137 @@ const TradeStation = () => {
     coins: 1250,
   }
 
+  // ==========================================
+  // MOCK DATA - For UI demonstration
+  // ==========================================
+  const mockDeployedStrategies = [
+    {
+      id: 'mock-dep-1',
+      strategyId: 'mock-strat-1',
+      strategyName: 'RSI Momentum',
+      symbol: 'SPY',
+      status: 'active',
+      deployedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      mode: 'paper',
+    },
+    {
+      id: 'mock-dep-2',
+      strategyId: 'mock-strat-2',
+      strategyName: 'MACD Crossover',
+      symbol: 'TSLA',
+      status: 'active',
+      deployedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+      mode: 'paper',
+    },
+    {
+      id: 'mock-dep-3',
+      strategyId: 'mock-strat-3',
+      strategyName: 'Bollinger Breakout',
+      symbol: 'NVDA',
+      status: 'paused',
+      deployedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      mode: 'paper',
+    },
+  ]
+
+  const mockOpenTrades = [
+    {
+      id: 'mock-trade-1',
+      deploymentId: 'mock-dep-1',
+      symbol: 'SPY',
+      side: 'buy',
+      quantity: 10,
+      entryPrice: 478.50,
+      entryTime: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      status: 'open',
+    },
+    {
+      id: 'mock-trade-2',
+      deploymentId: 'mock-dep-1',
+      symbol: 'QQQ',
+      side: 'buy',
+      quantity: 15,
+      entryPrice: 412.25,
+      entryTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      status: 'open',
+    },
+    {
+      id: 'mock-trade-3',
+      deploymentId: 'mock-dep-2',
+      symbol: 'TSLA',
+      side: 'buy',
+      quantity: 5,
+      entryPrice: 248.30,
+      entryTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      status: 'open',
+    },
+  ]
+
+  const mockClosedTrades = [
+    {
+      id: 'mock-trade-closed-1',
+      deploymentId: 'mock-dep-1',
+      symbol: 'AAPL',
+      side: 'buy',
+      quantity: 8,
+      entryPrice: 185.20,
+      exitPrice: 188.45,
+      entryTime: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+      exitTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      status: 'closed',
+      pnl: 26.00,
+    },
+    {
+      id: 'mock-trade-closed-2',
+      deploymentId: 'mock-dep-2',
+      symbol: 'TSLA',
+      side: 'buy',
+      quantity: 3,
+      entryPrice: 245.00,
+      exitPrice: 242.50,
+      entryTime: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      exitTime: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      status: 'closed',
+      pnl: -7.50,
+    },
+  ]
+
+  const mockPositions = [
+    { symbol: 'SPY', currentPrice: 481.75 },
+    { symbol: 'QQQ', currentPrice: 415.80 },
+    { symbol: 'TSLA', currentPrice: 252.40 },
+    { symbol: 'AAPL', currentPrice: 188.45 },
+    { symbol: 'NVDA', currentPrice: 875.20 },
+  ]
+
+  // Use mock data if no real data exists
+  const hasRealData = deployedStrategies.length > 0 || strategyTrades.length > 0
+  const displayDeployedStrategies = hasRealData ? deployedStrategies : mockDeployedStrategies
+  const displayPositions = positions.length > 0 ? positions : mockPositions
+
+  // Helper to get mock trades for a deployment
+  const getMockOpenTrades = (depId) => mockOpenTrades.filter(t => t.deploymentId === depId)
+  const getMockClosedTrades = (depId) => mockClosedTrades.filter(t => t.deploymentId === depId)
+
+  // Calculate mock P&L
+  const getMockStrategyPnL = (depId) => {
+    const openTrades = mockOpenTrades.filter(t => t.deploymentId === depId)
+    const closedTrades = mockClosedTrades.filter(t => t.deploymentId === depId)
+
+    const closedPnL = closedTrades.reduce((sum, t) => sum + (t.pnl || 0), 0)
+    const openPnL = openTrades.reduce((sum, t) => {
+      const pos = mockPositions.find(p => p.symbol === t.symbol)
+      if (pos) {
+        return sum + (t.side === 'buy'
+          ? (pos.currentPrice - t.entryPrice) * t.quantity
+          : (t.entryPrice - pos.currentPrice) * t.quantity)
+      }
+      return sum
+    }, 0)
+
+    return { closedPnL, openPnL, totalPnL: closedPnL + openPnL }
+  }
+
   // Get listable strategies (with positive backtest)
   const listableStrategies = savedStrategies.filter(s =>
     s.backtestResults?.totalReturn > 0 && !isStrategyListed(s.id)
@@ -186,24 +317,24 @@ const TradeStation = () => {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Calculate total P&L across all strategies
-  const totalPnL = deployedStrategies.reduce((sum, dep) => {
-    const pnl = getStrategyPnL(dep.id)
+  // Calculate total P&L across all strategies (use mock if no real data)
+  const totalPnL = displayDeployedStrategies.reduce((sum, dep) => {
+    const pnl = hasRealData ? getStrategyPnL(dep.id) : getMockStrategyPnL(dep.id)
     return sum + pnl.totalPnL
   }, 0)
 
   // Get all open trades grouped by strategy
-  const openTradesByStrategy = deployedStrategies.map(dep => ({
+  const openTradesByStrategy = displayDeployedStrategies.map(dep => ({
     deployment: dep,
-    trades: getOpenTrades(dep.id),
-    pnl: getStrategyPnL(dep.id)
+    trades: hasRealData ? getOpenTrades(dep.id) : getMockOpenTrades(dep.id),
+    pnl: hasRealData ? getStrategyPnL(dep.id) : getMockStrategyPnL(dep.id)
   })).filter(g => g.trades.length > 0 || g.pnl.totalPnL !== 0)
 
   // Get all closed trades grouped by strategy
-  const closedTradesByStrategy = deployedStrategies.map(dep => ({
+  const closedTradesByStrategy = displayDeployedStrategies.map(dep => ({
     deployment: dep,
-    trades: getClosedTrades(dep.id),
-    pnl: getStrategyPnL(dep.id)
+    trades: hasRealData ? getClosedTrades(dep.id) : getMockClosedTrades(dep.id),
+    pnl: hasRealData ? getStrategyPnL(dep.id) : getMockStrategyPnL(dep.id)
   })).filter(g => g.trades.length > 0)
 
   return (
@@ -595,7 +726,7 @@ const TradeStation = () => {
                 <Activity className="w-5 h-5 text-emerald-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">Active Strategies</h3>
-                  <p className="text-xs text-gray-500">{deployedStrategies.length} running</p>
+                  <p className="text-xs text-gray-500">{displayDeployedStrategies.length} running</p>
                 </div>
               </div>
               <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isActiveFolderOpen ? 'rotate-180' : ''}`} />
@@ -610,23 +741,27 @@ const TradeStation = () => {
                   className="overflow-hidden"
                 >
                   <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
-                    {deployedStrategies.length === 0 ? (
+                    {displayDeployedStrategies.length === 0 ? (
                       <div className="text-center py-6 text-gray-400 text-sm">
                         No active strategies
                       </div>
                     ) : (
                       <div className="divide-y divide-gray-100">
-                        {deployedStrategies.map(deployment => {
-                          const pnl = getStrategyPnL(deployment.id)
+                        {displayDeployedStrategies.map(deployment => {
+                          const pnl = hasRealData ? getStrategyPnL(deployment.id) : getMockStrategyPnL(deployment.id)
+                          const isMock = !hasRealData
                           return (
                             <div key={deployment.id} className="py-3 px-1">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2 min-w-0">
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
                                   <span className="font-medium text-gray-900 text-sm truncate">{deployment.strategyName}</span>
-                                  <span className="text-xs text-emerald-600">
+                                  <span className={`text-xs ${deployment.status === 'active' ? 'text-emerald-600' : 'text-yellow-600'}`}>
                                     {deployment.status === 'active' ? 'Scanning' : 'Paused'}
                                   </span>
+                                  {isMock && (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 rounded">DEMO</span>
+                                  )}
                                 </div>
                                 <span className={`text-sm font-semibold ${pnl.totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                                   {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
@@ -635,22 +770,22 @@ const TradeStation = () => {
                               <div className="flex items-center gap-2">
                                 {deployment.status === 'active' ? (
                                   <button
-                                    onClick={() => pauseStrategy(deployment.id)}
-                                    className="px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors"
+                                    onClick={() => !isMock && pauseStrategy(deployment.id)}
+                                    className={`px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                   >
                                     Pause
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => resumeStrategy(deployment.id)}
-                                    className="px-3 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors"
+                                    onClick={() => !isMock && resumeStrategy(deployment.id)}
+                                    className={`px-3 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                   >
                                     Resume
                                   </button>
                                 )}
                                 <button
-                                  onClick={() => killStrategy(deployment.id)}
-                                  className="px-3 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors"
+                                  onClick={() => !isMock && killStrategy(deployment.id)}
+                                  className={`px-3 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                 >
                                   Kill
                                 </button>
@@ -677,7 +812,10 @@ const TradeStation = () => {
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">Positions</h3>
                   <p className="text-xs text-gray-500">
-                    {strategyTrades.filter(t => t.status === 'open').length} open, {strategyTrades.filter(t => t.status === 'closed').length} closed
+                    {hasRealData
+                      ? `${strategyTrades.filter(t => t.status === 'open').length} open, ${strategyTrades.filter(t => t.status === 'closed').length} closed`
+                      : `${mockOpenTrades.length} open, ${mockClosedTrades.length} closed`
+                    }
                   </p>
                 </div>
               </div>
@@ -742,7 +880,7 @@ const TradeStation = () => {
                               </span>
                             </div>
                             {group.trades.map(trade => {
-                              const position = positions.find(p => p.symbol === trade.symbol)
+                              const position = displayPositions.find(p => p.symbol === trade.symbol)
                               const currentPnL = position
                                 ? (trade.side === 'buy'
                                     ? (position.currentPrice - trade.entryPrice) * trade.quantity
