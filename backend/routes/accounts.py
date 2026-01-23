@@ -2,41 +2,16 @@
 Account routes for TO THE MOON.
 Handles connecting external trading platforms and fetching balances.
 """
-import os
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
-from cryptography.fernet import Fernet
 
 from models import db, ConnectedAccount, UserStats
 from utils.auth import jwt_required_custom
+from utils.encryption import encrypt_credential, decrypt_credential
 from services.kalshi_service import connect_kalshi_account, refresh_kalshi_balance
 from services.alpaca_service import connect_alpaca_account, refresh_alpaca_balance
 
 accounts_bp = Blueprint('accounts', __name__)
-
-# Encryption key for storing API credentials securely
-# In production, use a proper secret management system
-ENCRYPTION_KEY = os.environ.get('CREDENTIALS_ENCRYPTION_KEY')
-if not ENCRYPTION_KEY:
-    # Generate a key for development (this should be set in production!)
-    ENCRYPTION_KEY = Fernet.generate_key().decode()
-    print("[WARNING] Using generated encryption key. Set CREDENTIALS_ENCRYPTION_KEY in production!")
-
-fernet = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
-
-
-def encrypt_credential(value: str) -> str:
-    """Encrypt a credential for storage."""
-    if not value:
-        return None
-    return fernet.encrypt(value.encode()).decode()
-
-
-def decrypt_credential(encrypted_value: str) -> str:
-    """Decrypt a stored credential."""
-    if not encrypted_value:
-        return None
-    return fernet.decrypt(encrypted_value.encode()).decode()
 
 
 @accounts_bp.route('', methods=['GET'])

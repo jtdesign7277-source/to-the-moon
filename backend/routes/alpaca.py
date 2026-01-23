@@ -4,32 +4,13 @@ Handles stock trading operations via Alpaca API.
 """
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
-from cryptography.fernet import Fernet
-import os
 
 from models import db, ConnectedAccount
 from utils.auth import jwt_required_custom
+from utils.encryption import decrypt_credential
 from services.alpaca_service import AlpacaService
 
 alpaca_bp = Blueprint('alpaca', __name__)
-
-# Encryption key for decrypting stored credentials
-ENCRYPTION_KEY = os.environ.get('CREDENTIALS_ENCRYPTION_KEY')
-if not ENCRYPTION_KEY:
-    # Generate a fallback key if not set (not recommended for production)
-    ENCRYPTION_KEY = Fernet.generate_key()
-    print("[WARNING] CREDENTIALS_ENCRYPTION_KEY not set. Using generated key - credentials from previous sessions won't decrypt!")
-else:
-    ENCRYPTION_KEY = ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
-
-fernet = Fernet(ENCRYPTION_KEY)
-
-
-def decrypt_credential(encrypted_value: str) -> str:
-    """Decrypt a stored credential."""
-    if not encrypted_value or not fernet:
-        return None
-    return fernet.decrypt(encrypted_value.encode()).decode()
 
 
 def get_alpaca_service(user_id: str):
