@@ -7,6 +7,7 @@ import { trackBacktestRun, trackStrategyDeploy } from '../utils/analytics'
 import { paperTradingApi, strategyApi, accountsApi, liveTradeApi } from '../utils/api'
 import { useAuth } from '../hooks/useAuth'
 import { useApp } from '../hooks/useApp'
+import { useTrading } from '../contexts/TradingContext'
 
 // Strategy Builder - Build and deploy automated trading strategies
 
@@ -205,7 +206,15 @@ const getDifficultyStyle = (difficulty) => {
 
 const StrategyBuilder = () => {
   const { user } = useAuth()
-  const { isPro, openUpgradeModal } = useApp()
+  const { isPro, openUpgradeModal, tradingMode } = useApp()
+  const {
+    strategies: sharedStrategies,
+    deployedStrategies: sharedDeployedStrategies,
+    saveStrategy,
+    deployStrategy: deployToContext,
+    portfolio,
+  } = useTrading()
+
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [isBacktesting, setIsBacktesting] = useState(false)
   const [backtestComplete, setBacktestComplete] = useState(false)

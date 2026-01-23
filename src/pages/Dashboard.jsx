@@ -10,6 +10,7 @@ import {
   DollarSign, Target, Zap, ArrowUpRight, ArrowDownRight, Clock, Info, Filter
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { useTrading } from '../contexts/TradingContext'
 import { useLivePortfolio } from '../hooks/useLiveMarkets'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
 import TradeSlipViewer from '../components/TradeSlipViewer'
@@ -19,10 +20,10 @@ import { Play, Pause, AlertCircle } from 'lucide-react'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const Dashboard = ({ onNavigate }) => {
-  const { 
-    tradingMode, 
-    isPro, 
-    openUpgradeModal, 
+  const {
+    tradingMode,
+    isPro,
+    openUpgradeModal,
     user,
     // Global betting state
     openBets,
@@ -34,6 +35,17 @@ const Dashboard = ({ onNavigate }) => {
     settleStrategyBet,
     getPortfolioByPlatform,
   } = useApp()
+
+  // Unified trading data (shared across all pages)
+  const {
+    portfolio: sharedPortfolio,
+    positions,
+    strategies: savedStrategies,
+    deployedStrategies,
+    orders,
+    refreshData,
+    isLoading: isTradingLoading,
+  } = useTrading()
 
   // Active strategies state
   const [activeStrategies, setActiveStrategies] = useState([])

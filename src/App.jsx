@@ -23,6 +23,7 @@ import {
 
 // Context
 import { AppProvider } from './contexts/AppContext'
+import { TradingProvider } from './contexts/TradingContext'
 import { useApp } from './hooks/useApp'
 import { AuthProvider } from './hooks/useAuth'
 
@@ -542,7 +543,9 @@ function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <AppContent />
+        <TradingProvider>
+          <AppContent />
+        </TradingProvider>
       </AppProvider>
     </AuthProvider>
   )

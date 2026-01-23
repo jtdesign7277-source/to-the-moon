@@ -9,6 +9,7 @@ import {
   Sparkles, Send, Users, Timer
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
+import { useTrading } from '../contexts/TradingContext'
 
 // Celebration animation for big wins
 const CelebrationOverlay = ({ show, profit, onComplete }) => {
@@ -129,7 +130,16 @@ const ProgressRing = ({ progress, size = 48, strokeWidth = 4, children }) => {
 
 // Main Trade Station Component
 const TradeStation = () => {
-  const { isPro } = useApp()
+  const { isPro, tradingMode } = useApp()
+  const {
+    strategies: savedStrategies,
+    deployedStrategies,
+    portfolio,
+    positions,
+    placeOrder,
+    refreshData,
+  } = useTrading()
+
   const [activeTab, setActiveTab] = useState('build')
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationProfit, setCelebrationProfit] = useState(0)

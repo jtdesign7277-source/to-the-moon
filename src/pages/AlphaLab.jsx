@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTrading } from '../contexts/TradingContext'
+import { useApp } from '../hooks/useApp'
 import {
   Brain,
   Mic,
@@ -135,6 +137,15 @@ const MetricCard = ({ icon: Icon, label, value, subValue, positive, color = 'ind
 }
 
 const AlphaLab = () => {
+  const { tradingMode } = useApp()
+  const {
+    strategies: savedStrategies,
+    saveStrategy: saveToContext,
+    deployStrategy: deployToContext,
+    deployedStrategies,
+    portfolio: sharedPortfolio,
+  } = useTrading()
+
   const [strategyText, setStrategyText] = useState('')
   const [strategyName, setStrategyName] = useState('')
   const [isListening, setIsListening] = useState(false)

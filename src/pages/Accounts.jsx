@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft, RefreshCw } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useAuth } from '../hooks/useAuth'
+import { useTrading } from '../contexts/TradingContext'
 import { trackAccountConnect } from '../utils/analytics'
 import { paperTradingApi, accountsApi } from '../utils/api'
 
@@ -164,6 +165,17 @@ const AVAILABLE_PLATFORMS = [
 const Accounts = () => {
   const { tradingMode, setTradingMode, isPro, openUpgradeModal } = useApp()
   const { user } = useAuth()
+
+  // Shared trading data from TradingContext (synced across all pages)
+  const {
+    portfolio: sharedPortfolio,
+    positions: sharedPositions,
+    orders,
+    deployedStrategies,
+    refreshData: refreshTradingData,
+    isLoading: isTradingLoading,
+  } = useTrading()
+
   const [_showAddAccountModal, setShowAddAccountModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [apiCredentials, setApiCredentials] = useState({})
