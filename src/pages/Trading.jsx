@@ -743,32 +743,135 @@ const Trading = () => {
     setShowSearch(false)
   }
 
-  // Render not connected state
-  if (!loading && !alpacaConnected) {
+  // Connection card component (inline, not blocking)
+  const ConnectionCard = () => {
+    const [showForm, setShowForm] = useState(false)
+    const [apiKey, setApiKey] = useState('')
+    const [apiSecret, setApiSecret] = useState('')
+    const [paperMode, setPaperMode] = useState(true)
+    const [isConnecting, setIsConnecting] = useState(false)
+    const [error, setError] = useState(null)
+
+    const handleConnect = async (e) => {
+      e.preventDefault()
+      if (!apiKey || !apiSecret) return
+
+      setIsConnecting(true)
+      setError(null)
+
+      try {
+        const response = await accountsApi.connect('alpaca', {
+          apiKey,
+          apiSecret,
+          paperMode
+        })
+        if (response.data.success) {
+          window.location.reload()
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to connect. Check your credentials.')
+      } finally {
+        setIsConnecting(false)
+      }
+    }
+
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md"
-        >
-          <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl">🦙</span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-linear-to-r from-emerald-500 to-teal-600 p-5 rounded-2xl text-white shadow-lg"
+      >
+        {!showForm ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-2xl">🦙</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Connect Alpaca to Trade</h3>
+                <p className="text-emerald-100 text-sm">Enter your API keys to enable live trading</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-5 py-2.5 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-colors"
+            >
+              Connect Now
+            </button>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Connect Alpaca to Trade</h2>
-          <p className="text-gray-600 mb-6">
-            Connect your Alpaca brokerage account to access real-time market data,
-            view your portfolio, and place trades directly from this dashboard.
-          </p>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => window.location.hash = '#accounts'}
-            className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors"
-          >
-            Connect Alpaca Account
-          </motion.button>
-        </motion.div>
-      </div>
+        ) : (
+          <form onSubmit={handleConnect} className="space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bold text-lg">Enter Alpaca API Keys</h3>
+              <button type="button" onClick={() => setShowForm(false)} className="text-white/70 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="API Key ID (PK...)"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
+              />
+              <input
+                type="password"
+                value={apiSecret}
+                onChange={(e) => setApiSecret(e.target.value)}
+                placeholder="Secret Key"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={paperMode}
+                  onChange={(e) => setPaperMode(e.target.checked)}
+                  className="w-4 h-4 rounded"
+                />
+                <span className="text-sm">Paper Trading (recommended)</span>
+              </label>
+
+              <button
+                type="submit"
+                disabled={!apiKey || !apiSecret || isConnecting}
+                className="px-5 py-2 bg-white text-emerald-600 font-semibold rounded-lg hover:bg-emerald-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Connect
+                  </>
+                )}
+              </button>
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 text-red-200 text-sm bg-red-500/20 px-3 py-2 rounded-lg">
+                <AlertCircle className="w-4 h-4" />
+                {error}
+              </div>
+            )}
+
+            <p className="text-xs text-emerald-100">
+              Get your API keys from{' '}
+              <a href="https://app.alpaca.markets" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                app.alpaca.markets
+              </a>
+              {' '}→ Paper/Live Trading → API Keys
+            </p>
+          </form>
+        )}
+      </motion.div>
     )
   }
 
@@ -812,8 +915,10 @@ const Trading = () => {
         </div>
       </div>
 
-      {/* Account summary cards */}
-      {account && (
+      {/* Connection card or Account summary cards */}
+      {!alpacaConnected ? (
+        <ConnectionCard />
+      ) : account ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -878,7 +983,7 @@ const Trading = () => {
             </p>
           </motion.div>
         </div>
-      )}
+      ) : null}
 
       {/* Search bar */}
       <div className="relative">
