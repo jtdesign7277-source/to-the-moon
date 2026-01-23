@@ -10,6 +10,7 @@ from cryptography.fernet import Fernet
 from models import db, ConnectedAccount, UserStats
 from utils.auth import jwt_required_custom
 from services.kalshi_service import connect_kalshi_account, refresh_kalshi_balance
+from services.alpaca_service import connect_alpaca_account, refresh_alpaca_balance
 
 accounts_bp = Blueprint('accounts', __name__)
 
@@ -86,6 +87,8 @@ def connect_account():
             return _connect_polymarket(user, data)
         elif platform == 'manifold':
             return _connect_manifold(user, data)
+        elif platform == 'alpaca':
+            return _connect_alpaca(user, data)
         else:
             return jsonify({'error': f'Unsupported platform: {platform}'}), 400
             
@@ -153,6 +156,60 @@ def _connect_manifold(user, data):
     return jsonify({'error': 'Manifold connection not yet implemented'}), 501
 
 
+def _connect_alpaca(user, data):
+    """Connect an Alpaca brokerage account."""
+    api_key = data.get('apiKey')
+    api_secret = data.get('apiSecret')
+    paper_mode = data.get('paperMode', True)  # Default to paper trading
+
+    if not api_key or not api_secret:
+        return jsonify({'error': 'API Key and Secret are required'}), 400
+
+    # Verify credentials and get account info
+    success, result = connect_alpaca_account(api_key, api_secret, paper=paper_mode)
+
+    if not success:
+        error_msg = result.get('error', 'Failed to connect to Alpaca')
+        return jsonify({'error': error_msg}), 400
+
+    # Create connected account record
+    account = ConnectedAccount(
+        user_id=user.id,
+        platform='alpaca',
+        platform_user_id=result.get('account_id'),
+        api_key_id=encrypt_credential(api_key),
+        api_secret=encrypt_credential(api_secret),
+        extra_credentials={'paper': paper_mode},
+        balance=result.get('balance', 0),
+        status='connected',
+        last_balance_update=datetime.utcnow()
+    )
+
+    db.session.add(account)
+
+    # Update user stats
+    stats = UserStats.query.filter_by(user_id=user.id).first()
+    if stats:
+        stats.connected_accounts = (stats.connected_accounts or 0) + 1
+        stats.total_balance = (stats.total_balance or 0) + result.get('balance', 0)
+
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'Alpaca {"paper" if paper_mode else "live"} account connected successfully',
+        'account': account.to_dict(),
+        'portfolio': {
+            'balance': result.get('balance', 0),
+            'buyingPower': result.get('buying_power', 0),
+            'cash': result.get('cash', 0),
+            'portfolioValue': result.get('portfolio_value', 0),
+            'positionCount': result.get('positionCount', 0),
+            'paper': paper_mode,
+        }
+    }), 200
+
+
 @accounts_bp.route('/<account_id>/refresh', methods=['POST'])
 @jwt_required_custom
 def refresh_account_balance(account_id):
@@ -181,20 +238,56 @@ def refresh_account_balance(account_id):
                 account.last_balance_update = datetime.utcnow()
                 account.status = 'connected'
                 account.error_message = None
-                
+
                 # Update user stats total balance
                 stats = UserStats.query.filter_by(user_id=user.id).first()
                 if stats:
                     stats.total_balance = (stats.total_balance or 0) - old_balance + account.balance
-                
+
                 db.session.commit()
-                
+
                 return jsonify({
                     'success': True,
                     'account': account.to_dict(),
                     'portfolio': {
                         'balance': result.get('balance', 0),
                         'availableBalance': result.get('availableBalance', 0),
+                        'positionCount': result.get('positionCount', 0)
+                    }
+                }), 200
+            else:
+                account.status = 'error'
+                account.error_message = result.get('error', 'Failed to refresh balance')
+                db.session.commit()
+                return jsonify({'error': result.get('error', 'Failed to refresh')}), 400
+        elif account.platform == 'alpaca':
+            api_key = decrypt_credential(account.api_key_id)
+            api_secret = decrypt_credential(account.api_secret)
+            paper = account.extra_credentials.get('paper', True) if account.extra_credentials else True
+
+            success, result = refresh_alpaca_balance(api_key, api_secret, paper=paper)
+
+            if success:
+                old_balance = account.balance
+                account.balance = result.get('balance', 0)
+                account.last_balance_update = datetime.utcnow()
+                account.status = 'connected'
+                account.error_message = None
+
+                # Update user stats total balance
+                stats = UserStats.query.filter_by(user_id=user.id).first()
+                if stats:
+                    stats.total_balance = (stats.total_balance or 0) - old_balance + account.balance
+
+                db.session.commit()
+
+                return jsonify({
+                    'success': True,
+                    'account': account.to_dict(),
+                    'portfolio': {
+                        'balance': result.get('balance', 0),
+                        'buyingPower': result.get('buying_power', 0),
+                        'cash': result.get('cash', 0),
                         'positionCount': result.get('positionCount', 0)
                     }
                 }), 200
@@ -225,9 +318,9 @@ def refresh_all_balances():
             if account.platform == 'kalshi':
                 api_key_id = decrypt_credential(account.api_key_id)
                 api_secret = decrypt_credential(account.api_secret)
-                
+
                 success, result = refresh_kalshi_balance(api_key_id, api_secret)
-                
+
                 if success:
                     account.balance = result.get('balance', 0)
                     account.last_balance_update = datetime.utcnow()
@@ -238,6 +331,33 @@ def refresh_all_balances():
                         'platform': account.platform,
                         'success': True,
                         'balance': account.balance
+                    })
+                else:
+                    account.status = 'error'
+                    account.error_message = result.get('error')
+                    results.append({
+                        'platform': account.platform,
+                        'success': False,
+                        'error': result.get('error')
+                    })
+            elif account.platform == 'alpaca':
+                api_key = decrypt_credential(account.api_key_id)
+                api_secret = decrypt_credential(account.api_secret)
+                paper = account.extra_credentials.get('paper', True) if account.extra_credentials else True
+
+                success, result = refresh_alpaca_balance(api_key, api_secret, paper=paper)
+
+                if success:
+                    account.balance = result.get('balance', 0)
+                    account.last_balance_update = datetime.utcnow()
+                    account.status = 'connected'
+                    account.error_message = None
+                    total_balance += account.balance
+                    results.append({
+                        'platform': account.platform,
+                        'success': True,
+                        'balance': account.balance,
+                        'paper': paper
                     })
                 else:
                     account.status = 'error'

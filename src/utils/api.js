@@ -371,6 +371,79 @@ export const liveTradeApi = {
 };
 
 // ============================================
+// ALPACA STOCK TRADING ENDPOINTS
+// ============================================
+export const alpacaApi = {
+  /** Get Alpaca account info */
+  getAccount: () =>
+    api.get('/alpaca/account'),
+
+  /** Get portfolio history */
+  getHistory: (period = '1M', timeframe = '1D') =>
+    api.get('/alpaca/history', { params: { period, timeframe } }),
+
+  /** Get all open positions */
+  getPositions: () =>
+    api.get('/alpaca/positions'),
+
+  /** Get position for a specific symbol */
+  getPosition: (symbol) =>
+    api.get(`/alpaca/positions/${symbol}`),
+
+  /** Close a position */
+  closePosition: (symbol, qty = null, percentage = null) =>
+    api.delete(`/alpaca/positions/${symbol}`, { params: { qty, percentage } }),
+
+  /** Close all positions */
+  closeAllPositions: (cancelOrders = true) =>
+    api.delete('/alpaca/positions', { params: { cancel_orders: cancelOrders } }),
+
+  /** Place an order */
+  placeOrder: (orderData) =>
+    api.post('/alpaca/orders', orderData),
+
+  /** Get orders */
+  getOrders: (status = 'open', limit = 50) =>
+    api.get('/alpaca/orders', { params: { status, limit } }),
+
+  /** Get a specific order */
+  getOrder: (orderId) =>
+    api.get(`/alpaca/orders/${orderId}`),
+
+  /** Cancel an order */
+  cancelOrder: (orderId) =>
+    api.delete(`/alpaca/orders/${orderId}`),
+
+  /** Cancel all orders */
+  cancelAllOrders: () =>
+    api.delete('/alpaca/orders'),
+
+  /** Get quote for a symbol */
+  getQuote: (symbol) =>
+    api.get(`/alpaca/quote/${symbol}`),
+
+  /** Get latest trade for a symbol */
+  getTrade: (symbol) =>
+    api.get(`/alpaca/trade/${symbol}`),
+
+  /** Get historical bars */
+  getBars: (symbol, timeframe = '1Day', limit = 100) =>
+    api.get(`/alpaca/bars/${symbol}`, { params: { timeframe, limit } }),
+
+  /** Get asset info */
+  getAsset: (symbol) =>
+    api.get(`/alpaca/asset/${symbol}`),
+
+  /** Get market clock */
+  getClock: () =>
+    api.get('/alpaca/clock'),
+
+  /** Get market calendar */
+  getCalendar: (start = null, end = null) =>
+    api.get('/alpaca/calendar', { params: { start, end } }),
+};
+
+// ============================================
 // SCANNER ENDPOINTS (Live Market Data)
 // ============================================
 export const scannerApi = {

@@ -211,6 +211,8 @@ def signup():
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
         username = data.get('username', '').strip()
+        first_name = data.get('first_name', '').strip() or None
+        last_name = data.get('last_name', '').strip() or None
 
         # Validate email
         if not email or not validate_email(email):
@@ -239,6 +241,8 @@ def signup():
             email=email,
             password_hash=hash_password(password),
             username=username,
+            first_name=first_name,
+            last_name=last_name,
         )
         db.session.add(user)
         db.session.flush()  # Get user ID
@@ -374,3 +378,29 @@ def update_password():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Password update failed: {str(e)}'}), 500
+
+
+@auth_bp.route('/update-profile', methods=['POST'])
+@jwt_required_custom
+def update_profile():
+    """Update user profile information."""
+    try:
+        data = request.get_json()
+        user = g.current_user
+
+        # Update allowed fields
+        if 'first_name' in data:
+            user.first_name = data['first_name'].strip() if data['first_name'] else None
+        if 'last_name' in data:
+            user.last_name = data['last_name'].strip() if data['last_name'] else None
+
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Profile updated successfully',
+            'user': user.to_dict(),
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Profile update failed: {str(e)}'}), 500

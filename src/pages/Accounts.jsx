@@ -8,6 +8,32 @@ import { paperTradingApi, accountsApi } from '../utils/api'
 // Available platforms to connect
 const AVAILABLE_PLATFORMS = [
   {
+    id: 'alpaca',
+    name: 'Alpaca',
+    icon: '🦙',
+    type: 'Stock Brokerage',
+    description: 'Commission-free stock & ETF trading API. Connect to execute automated stock trades.',
+    features: ['Commission-free', 'Stocks & ETFs', 'Paper Trading'],
+    apiDocsUrl: 'https://alpaca.markets/docs/api-documentation/',
+    setupSteps: [
+      'Create an Alpaca account at alpaca.markets',
+      'Go to your Dashboard → Paper Trading or Live Trading',
+      'Click "View" under API Keys',
+      'Generate a new API key pair',
+      'Copy your API Key ID and Secret Key',
+      'Choose Paper or Live mode below'
+    ],
+    fields: [
+      { id: 'apiKey', label: 'API Key ID', placeholder: 'PK...' },
+      { id: 'apiSecret', label: 'Secret Key', placeholder: 'Enter your Alpaca Secret Key', isSecret: true },
+      { id: 'paperMode', label: 'Trading Mode', type: 'select', options: [
+        { value: true, label: 'Paper Trading (Recommended)' },
+        { value: false, label: 'Live Trading' }
+      ]}
+    ],
+    color: 'emerald'
+  },
+  {
     id: 'kalshi',
     name: 'Kalshi',
     icon: '🎯',
@@ -312,7 +338,14 @@ const Accounts = () => {
 
   const selectPlatform = (platform) => {
     setSelectedPlatform(platform)
-    setApiCredentials({})
+    // Set default values for select fields
+    const defaultCredentials = {}
+    platform.fields.forEach(field => {
+      if (field.type === 'select' && field.options?.length > 0) {
+        defaultCredentials[field.id] = field.options[0].value
+      }
+    })
+    setApiCredentials(defaultCredentials)
     setShowSecrets({})
   }
 
@@ -332,7 +365,9 @@ const Accounts = () => {
     if (!selectedPlatform) return false
     return selectedPlatform.fields.every(field => {
       if (field.id.includes('optional')) return true
-      return apiCredentials[field.id]?.trim()
+      // Select fields always have a valid value (default or selected)
+      if (field.type === 'select') return true
+      return apiCredentials[field.id]?.trim?.() || apiCredentials[field.id] !== undefined
     })
   }
 
@@ -418,6 +453,7 @@ const Accounts = () => {
       blue: { bg: 'bg-blue-50', border: 'border-blue-500', text: 'text-blue-600', button: 'bg-blue-600 hover:bg-blue-700' },
       yellow: { bg: 'bg-yellow-50', border: 'border-yellow-500', text: 'text-yellow-600', button: 'bg-yellow-600 hover:bg-yellow-700' },
       teal: { bg: 'bg-teal-50', border: 'border-teal-500', text: 'text-teal-600', button: 'bg-teal-600 hover:bg-teal-700' },
+      emerald: { bg: 'bg-emerald-50', border: 'border-emerald-500', text: 'text-emerald-600', button: 'bg-emerald-600 hover:bg-emerald-700' },
     }
     return colors[color] || colors.indigo
   }
@@ -717,8 +753,20 @@ const Accounts = () => {
                     <button
                       onClick={() => {
                         if (isConnected) return
-                        setSelectedPlatform(isSelected ? null : platform)
-                        setApiCredentials({})
+                        if (isSelected) {
+                          setSelectedPlatform(null)
+                          setApiCredentials({})
+                        } else {
+                          // Set default values for select fields
+                          const defaultCredentials = {}
+                          platform.fields.forEach(field => {
+                            if (field.type === 'select' && field.options?.length > 0) {
+                              defaultCredentials[field.id] = field.options[0].value
+                            }
+                          })
+                          setSelectedPlatform(platform)
+                          setApiCredentials(defaultCredentials)
+                        }
                         setShowSecrets({})
                         setConnectionSuccess(false)
                       }}
@@ -817,7 +865,19 @@ const Accounts = () => {
                                     {field.label}
                                   </label>
                                   <div className="relative">
-                                    {field.isMultiline ? (
+                                    {field.type === 'select' ? (
+                                      <select
+                                        value={apiCredentials[field.id] ?? field.options[0]?.value}
+                                        onChange={(e) => handleCredentialChange(field.id, e.target.value === 'true')}
+                                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white appearance-none cursor-pointer"
+                                      >
+                                        {field.options.map((option) => (
+                                          <option key={String(option.value)} value={String(option.value)}>
+                                            {option.label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    ) : field.isMultiline ? (
                                       <textarea
                                         value={apiCredentials[field.id] || ''}
                                         onChange={(e) => handleCredentialChange(field.id, e.target.value)}
@@ -835,7 +895,7 @@ const Accounts = () => {
                                         className="w-full px-4 py-3 pr-16 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                                       />
                                     )}
-                                    {!field.isMultiline && (
+                                    {!field.isMultiline && field.type !== 'select' && (
                                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                         {field.isSecret && (
                                           <button

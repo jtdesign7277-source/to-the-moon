@@ -547,10 +547,10 @@ const Header = ({
                 </button>
 
                 {/* Enhanced Profile Dropdown */}
-                <div 
-                  className={`absolute right-0 top-full mt-2 ${(activeTab === 'support' || activeTab === 'suggest') ? 'w-96' : 'w-80'} bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
-                    profileOpen 
-                      ? 'opacity-100 scale-100 translate-y-0' 
+                <div
+                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                    profileOpen
+                      ? 'opacity-100 scale-100 translate-y-0'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                   }`}
                 >
@@ -617,15 +617,31 @@ const Header = ({
                         <div>
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
+                            {/* First Name */}
                             <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
                               <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
                                 <User className="w-4 h-4 text-indigo-600" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500">Full Name</p>
-                                <p className="text-sm font-medium text-gray-900">{user.username || 'Not set'}</p>
+                                <p className="text-xs text-gray-500">First Name</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {user.first_name || (user.username?.includes(' ') ? user.username.split(' ')[0] : user.username) || 'Not set'}
+                                </p>
                               </div>
                             </div>
+                            {/* Last Name */}
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <UserCircle className="w-4 h-4 text-indigo-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Last Name</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {user.last_name || (user.username?.includes(' ') ? user.username.split(' ').slice(1).join(' ') : '—')}
+                                </p>
+                              </div>
+                            </div>
+                            {/* Email */}
                             <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
                               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                                 <Mail className="w-4 h-4 text-purple-600" />
@@ -635,6 +651,7 @@ const Header = ({
                                 <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
                               </div>
                             </div>
+                            {/* Member Since */}
                             <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
                               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                                 <Calendar className="w-4 h-4 text-green-600" />
@@ -844,28 +861,78 @@ const Header = ({
 
           {/* User Section - Pinned to bottom */}
           {user && (
-            <div className="mt-auto p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-indigo-600" />
+            <div className="mt-auto border-t border-gray-200 bg-gray-50">
+              {/* User Info Header */}
+              <div className="p-4 bg-linear-to-r from-indigo-500 to-purple-600">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {(user.username || user.email)?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-semibold truncate">{user.username || user.email?.split('@')[0]}</p>
+                      {isPro && (
+                        <span className="px-2 py-0.5 bg-white/20 backdrop-blur text-white text-xs font-bold rounded-full">
+                          PRO
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-indigo-200 text-sm truncate">{user.email}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{user.username}</p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                </div>
-                {isPro && (
-                  <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-full">
-                    PRO
-                  </span>
-                )}
               </div>
-              <button
-                onClick={() => { setMobileMenuOpen(false); onLogout(); }}
-                className="w-full px-4 py-2.5 text-red-600 hover:bg-red-100 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Log Out
-              </button>
+
+              {/* User Details */}
+              <div className="p-4 space-y-3">
+                {/* Member Since */}
+                <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Member Since</p>
+                    <p className="text-sm font-medium text-gray-900">{getMemberSince()}</p>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); openLunaChat(); }}
+                    className="flex items-center justify-center gap-2 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl text-indigo-700 text-sm font-medium transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Support
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); setProfileOpen(true); setActiveTab('suggest'); }}
+                    className="flex items-center justify-center gap-2 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl text-amber-700 text-sm font-medium transition-colors"
+                  >
+                    <Lightbulb className="w-4 h-4" />
+                    Suggest
+                  </button>
+                </div>
+
+                {/* Subscription Status */}
+                {!isPro && (
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); openUpgradeModal(); }}
+                    className="w-full p-3 bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-xl text-white text-sm font-medium flex items-center justify-center gap-2 transition-all shadow-lg"
+                  >
+                    <Crown className="w-4 h-4" />
+                    Upgrade to Pro
+                  </button>
+                )}
+
+                {/* Sign Out */}
+                <button
+                  onClick={() => { setMobileMenuOpen(false); onLogout(); }}
+                  className="w-full px-4 py-2.5 text-red-600 hover:bg-red-50 border border-red-200 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           )}
         </div>

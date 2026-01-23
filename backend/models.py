@@ -25,6 +25,8 @@ class User(db.Model):
     id = db.Column(db.String(50), primary_key=True, default=lambda: f'user_{generate_uuid()}')
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    first_name = db.Column(db.String(50), nullable=True)
+    last_name = db.Column(db.String(50), nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
     tier = db.Column(db.String(20), default='free')  # 'free' or 'pro'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -42,6 +44,8 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
             'tier': self.tier,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
@@ -52,6 +56,8 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
             'tier': self.tier,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
@@ -739,6 +745,8 @@ def create_demo_user():
             id='user_1',
             email=demo_email,
             username='DemoUser',
+            first_name='Demo',
+            last_name='User',
             password_hash=password_hash,
             tier='pro',
         )
