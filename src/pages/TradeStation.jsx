@@ -5,12 +5,14 @@ import {
   Rocket, Zap, Trophy, Target, TrendingUp,
   Flame, Star, Crown, Award, Clock,
   Play, ChevronRight, ChevronDown, ArrowUpRight,
-  Share2, Copy, Check, X, Pause, Trash2,
+  Copy, Check, X, Pause, Trash2,
   Sparkles, Send, Users, Timer, FolderOpen, Folder,
-  AlertTriangle, Activity, DollarSign, TrendingDown
+  AlertTriangle, Activity, DollarSign, TrendingDown,
+  ShoppingCart, Tag, BadgeCheck
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useTrading } from '../contexts/TradingContext'
+import { useMarketplace } from '../contexts/MarketplaceContext'
 import { Button } from '../components/ui'
 
 // Celebration animation for big wins
@@ -112,11 +114,19 @@ const TradeStation = () => {
     killStrategy,
     killAllStrategies,
   } = useTrading()
+  const { listStrategy, myListings, isStrategyListed } = useMarketplace()
 
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationProfit, setCelebrationProfit] = useState(0)
   const [showShareSheet, setShowShareSheet] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Marketplace listing sheet state
+  const [showListingSheet, setShowListingSheet] = useState(false)
+  const [selectedStrategyToList, setSelectedStrategyToList] = useState(null)
+  const [listingPrice, setListingPrice] = useState('')
+  const [listingDescription, setListingDescription] = useState('')
+  const [listingSuccess, setListingSuccess] = useState(false)
 
   // Collapsible states
   const [isStrategiesFolderOpen, setIsStrategiesFolderOpen] = useState(true)
@@ -129,12 +139,40 @@ const TradeStation = () => {
     coins: 1250,
   }
 
-  // Challenges
+  // Get listable strategies (with positive backtest)
+  const listableStrategies = savedStrategies.filter(s =>
+    s.backtestResults?.totalReturn > 0 && !isStrategyListed(s.id)
+  )
+
+  // Challenges - dynamic progress based on actual data
   const challenges = [
-    { id: 1, title: 'Build 3 strategies', progress: 2, target: 3, reward: 50, icon: Sparkles },
-    { id: 2, title: 'Achieve 10% backtest profit', progress: 8, target: 10, reward: 100, icon: Target },
-    { id: 3, title: 'Share a winning strategy', progress: 0, target: 1, reward: 25, icon: Share2 },
+    { id: 1, title: 'Build 3 strategies', progress: Math.min(savedStrategies.length, 3), target: 3, reward: 50, icon: Sparkles },
+    { id: 2, title: 'Achieve 10% backtest profit', progress: Math.min(Math.max(...savedStrategies.map(s => s.backtestResults?.totalReturn || 0), 0), 10), target: 10, reward: 100, icon: Target },
+    { id: 3, title: 'List on Marketplace', progress: myListings.length, target: 1, reward: 25, icon: ShoppingCart, action: () => setShowListingSheet(true) },
   ]
+
+  // Handle listing submission
+  const handleListStrategy = () => {
+    if (!selectedStrategyToList || !listingPrice) return
+
+    const price = parseInt(listingPrice, 10)
+    if (isNaN(price) || price < 1) return
+
+    listStrategy(selectedStrategyToList, {
+      price,
+      description: listingDescription,
+      sellerName: 'You',
+    })
+
+    setListingSuccess(true)
+    setTimeout(() => {
+      setShowListingSheet(false)
+      setSelectedStrategyToList(null)
+      setListingPrice('')
+      setListingDescription('')
+      setListingSuccess(false)
+    }, 2000)
+  }
 
   // Tournaments
   const tournaments = [
@@ -224,6 +262,180 @@ const TradeStation = () => {
                   {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5 text-gray-400" />}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Marketplace Listing Sheet */}
+      <AnimatePresence>
+        {showListingSheet && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowListingSheet(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full sm:w-[420px] bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[85vh] flex flex-col"
+            >
+              {/* Handle bar for mobile */}
+              <div className="flex justify-center pt-3 pb-2 sm:hidden">
+                <div className="w-10 h-1 bg-gray-300 rounded-full" />
+              </div>
+
+              {/* Header */}
+              <div className="px-5 pb-4 pt-2 sm:pt-5 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                      <ShoppingCart className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">List on Marketplace</h3>
+                      <p className="text-xs text-gray-500">Sell your strategy to other traders</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowListingSheet(false)}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                {listingSuccess ? (
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-center py-8"
+                  >
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BadgeCheck className="w-8 h-8 text-emerald-600" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Listed Successfully!</h4>
+                    <p className="text-sm text-gray-500">Your strategy is now live on the marketplace</p>
+                  </motion.div>
+                ) : (
+                  <>
+                    {/* Strategy Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Strategy
+                      </label>
+                      {listableStrategies.length === 0 ? (
+                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                          <p className="text-sm text-amber-700">
+                            You need a strategy with positive backtest results to list on the marketplace.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {listableStrategies.map(strategy => (
+                            <button
+                              key={strategy.id}
+                              onClick={() => setSelectedStrategyToList(strategy)}
+                              className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
+                                selectedStrategyToList?.id === strategy.id
+                                  ? 'border-indigo-500 bg-indigo-50'
+                                  : 'border-gray-200 hover:border-gray-300 bg-white'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-gray-900">{strategy.name}</p>
+                                  <p className="text-xs text-gray-500">{strategy.symbol || 'SPY'}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-semibold text-emerald-600">
+                                    +{strategy.backtestResults?.totalReturn?.toFixed(1)}%
+                                  </p>
+                                  <p className="text-xs text-gray-400">backtest</p>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Price Input */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price (coins)
+                      </label>
+                      <div className="relative">
+                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                          type="number"
+                          value={listingPrice}
+                          onChange={(e) => setListingPrice(e.target.value)}
+                          placeholder="100"
+                          min="1"
+                          className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1.5">Recommended: 50-500 coins based on performance</p>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description (optional)
+                      </label>
+                      <textarea
+                        value={listingDescription}
+                        onChange={(e) => setListingDescription(e.target.value)}
+                        placeholder="Describe what makes your strategy unique..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Preview */}
+                    {selectedStrategyToList && listingPrice && (
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Preview</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-900">{selectedStrategyToList.name}</p>
+                            <p className="text-sm text-gray-500">by You</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-indigo-600">{listingPrice} coins</p>
+                            <p className="text-xs text-emerald-600">+{selectedStrategyToList.backtestResults?.totalReturn?.toFixed(1)}% returns</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Footer */}
+              {!listingSuccess && (
+                <div className="p-5 border-t border-gray-100 bg-gray-50">
+                  <button
+                    onClick={handleListStrategy}
+                    disabled={!selectedStrategyToList || !listingPrice || listableStrategies.length === 0}
+                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors active:scale-[0.98]"
+                  >
+                    List for {listingPrice || '0'} Coins
+                  </button>
+                  <p className="text-xs text-center text-gray-500 mt-3">
+                    You'll earn coins when other traders purchase your strategy
+                  </p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
@@ -585,17 +797,23 @@ const TradeStation = () => {
             {challenges.map(challenge => {
               const isComplete = challenge.progress >= challenge.target
               const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
+              const hasAction = challenge.action && !isComplete
 
               return (
                 <div
                   key={challenge.id}
-                  className={`bg-white rounded-2xl p-4 shadow-sm border ${
-                    isComplete ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-100'
+                  onClick={hasAction ? challenge.action : undefined}
+                  className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${
+                    isComplete
+                      ? 'border-emerald-200 bg-emerald-50/30'
+                      : hasAction
+                        ? 'border-gray-100 hover:border-indigo-200 hover:shadow-md cursor-pointer active:scale-[0.98]'
+                        : 'border-gray-100'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <challenge.icon className={`w-5 h-5 shrink-0 mt-0.5 ${
-                      isComplete ? 'text-emerald-500' : 'text-gray-400'
+                      isComplete ? 'text-emerald-500' : hasAction ? 'text-indigo-500' : 'text-gray-400'
                     }`} />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -618,10 +836,15 @@ const TradeStation = () => {
                       </div>
                     </div>
                   </div>
-                  {isComplete && (
+                  {isComplete ? (
                     <button className="w-full mt-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm rounded-xl transition-colors">
                       Claim Reward
                     </button>
+                  ) : hasAction && (
+                    <div className="mt-3 flex items-center justify-center gap-1.5 text-indigo-600 text-sm font-medium">
+                      <span>Tap to start</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
                   )}
                 </div>
               )

@@ -24,6 +24,7 @@ import {
 // Context
 import { AppProvider } from './contexts/AppContext'
 import { TradingProvider } from './contexts/TradingContext'
+import { MarketplaceProvider } from './contexts/MarketplaceContext'
 import { useApp } from './hooks/useApp'
 import { AuthProvider } from './hooks/useAuth'
 
@@ -545,9 +546,11 @@ function App() {
     <AuthProvider>
       <AppProvider>
         <TradingProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
+          <MarketplaceProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </MarketplaceProvider>
         </TradingProvider>
       </AppProvider>
     </AuthProvider>
