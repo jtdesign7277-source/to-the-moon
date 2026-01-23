@@ -18,6 +18,7 @@ import {
   Lightbulb,
   ChevronDown,
   X,
+  Rocket,
 } from 'lucide-react'
 
 // Context
@@ -47,6 +48,7 @@ import Admin from './pages/Admin'
 import Education from './pages/Education'
 import StrategyDiscovery from './pages/StrategyDiscovery'
 import TradeHistory from './pages/TradeHistory'
+import TradeStation from './pages/TradeStation'
 import Legal from './pages/Legal'
 
 // Navigation configuration - Main nav items
@@ -77,6 +79,13 @@ const NAV_ITEMS = [
     label: 'Strategy Builder',
     shortLabel: 'Strategy',
     icon: Wrench,
+    requiresPro: false,
+  },
+  {
+    id: 'trade-station',
+    label: 'Trade Station',
+    shortLabel: 'Station',
+    icon: Rocket,
     requiresPro: false,
   },
 ]
@@ -133,6 +142,8 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
       return <Legal initialTab={legalTab} />
     case 'scanner':
       return <ScannerDashboard />
+    case 'trade-station':
+      return <TradeStation />
     default:
       return <Dashboard onNavigate={onNavigate} />
   }
