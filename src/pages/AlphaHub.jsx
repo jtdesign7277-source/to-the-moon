@@ -206,7 +206,7 @@ const TradeRow = ({ trade }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-900">{trade.symbol}</span>
-          <span className={`text-xs px-1.5 py-0.5 rounded ${trade.side === 'BUY' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+          <span className={`text-xs font-bold ${trade.side === 'BUY' ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
             {trade.side}
           </span>
           <StatusBadge status={trade.status} />
@@ -596,9 +596,9 @@ export default function AlphaHub() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900">{signal.symbol}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-                    signal.signal === 'BUY' ? 'bg-emerald-100 text-emerald-700' :
-                    signal.signal === 'SELL' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                  <span className={`text-xs font-bold ${
+                    signal.signal === 'BUY' ? 'text-emerald-700 dark:text-emerald-400' :
+                    signal.signal === 'SELL' ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-400'
                   }`}>
                     {signal.signal}
                   </span>

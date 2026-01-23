@@ -979,10 +979,10 @@ const Dashboard = ({ onNavigate }) => {
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex flex-col items-center">
                           <span className="text-lg">{bet.strategyIcon || '⚡'}</span>
-                          <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                            bet.position === 'YES' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-red-100 text-red-700'
+                          <span className={`text-[10px] font-bold ${
+                            bet.position === 'YES'
+                              ? 'text-green-700 dark:text-green-400'
+                              : 'text-red-700 dark:text-red-400'
                           }`}>
                             {bet.position}
                           </span>
@@ -1006,13 +1006,11 @@ const Dashboard = ({ onNavigate }) => {
                           <p className="text-xs text-gray-500 dark:text-gray-400">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
                           <p className="text-xs text-gray-400 dark:text-gray-500">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
                         </div>
-                        <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
-                          isProfit ? 'bg-green-50' : 'bg-red-50'
-                        }`}>
-                          <p className={`text-sm font-semibold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className="text-right min-w-[70px]">
+                          <p className={`text-sm font-semibold ${isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
                           </p>
-                          <p className={`text-[10px] ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+                          <p className={`text-[10px] ${isProfit ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                             {isProfit ? '+' : ''}{(bet.profitPercent || 0).toFixed(1)}%
                           </p>
                         </div>

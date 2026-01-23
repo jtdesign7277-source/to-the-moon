@@ -723,9 +723,7 @@ const TradeStation = () => {
                               </div>
                               <div className="flex items-center gap-3 shrink-0">
                                 {strategy.backtestResults?.totalReturn !== undefined && (
-                                  <div className={`text-right px-2 py-1 rounded-lg ${
-                                    strategy.backtestResults.totalReturn >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
-                                  }`}>
+                                  <div className="text-right">
                                     <p className={`text-sm font-semibold ${strategy.backtestResults.totalReturn >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                       {strategy.backtestResults.totalReturn >= 0 ? '+' : ''}{strategy.backtestResults.totalReturn}%
                                     </p>
@@ -815,9 +813,7 @@ const TradeStation = () => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-3 shrink-0">
-                                <div className={`text-right px-2 py-1 rounded-lg ${
-                                  pnl.totalPnL >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
-                                }`}>
+                                <div className="text-right">
                                   <p className={`text-sm font-semibold ${pnl.totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                     {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
                                   </p>
@@ -946,10 +942,10 @@ const TradeStation = () => {
                                   <div className="flex items-center gap-3 min-w-0 flex-1">
                                     <div className="flex flex-col items-center">
                                       <span className="text-lg">📈</span>
-                                      <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                      <span className={`text-[10px] font-bold ${
                                         trade.side === 'buy'
-                                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                          ? 'text-green-700 dark:text-green-400'
+                                          : 'text-red-700 dark:text-red-400'
                                       }`}>
                                         {trade.side.toUpperCase()}
                                       </span>
@@ -969,9 +965,7 @@ const TradeStation = () => {
                                       <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
                                       <p className="text-xs text-gray-400 dark:text-gray-500">Current: ${position?.currentPrice?.toFixed(2) || '-'}</p>
                                     </div>
-                                    <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
-                                      currentPnL >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
-                                    }`}>
+                                    <div className="text-right min-w-[70px]">
                                       <p className={`text-sm font-semibold ${currentPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                         {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
                                       </p>
@@ -1025,9 +1019,7 @@ const TradeStation = () => {
                                     <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
                                     <p className="text-xs text-gray-400 dark:text-gray-500">Exit: ${trade.exitPrice?.toFixed(2)}</p>
                                   </div>
-                                  <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
-                                    trade.pnl >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
-                                  }`}>
+                                  <div className="text-right min-w-[70px]">
                                     <p className={`text-sm font-semibold ${trade.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                       {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
                                     </p>
@@ -1045,11 +1037,9 @@ const TradeStation = () => {
                       <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total P&L</span>
-                          <div className={`px-3 py-1.5 rounded-lg ${totalPnL >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-                            <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
-                            </span>
-                          </div>
+                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -1187,11 +1177,11 @@ const TradeStation = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <div className={`text-right px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/20`}>
+                    <div className="text-right">
                       <p className="text-sm font-semibold text-green-600 dark:text-green-400">
                         ${tournament.prize.toLocaleString()}
                       </p>
-                      <p className="text-[10px] text-green-500 dark:text-green-400">Prize Pool</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Prize Pool</p>
                     </div>
                     <button
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
