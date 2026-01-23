@@ -21,6 +21,7 @@ import {
   Star,
 } from 'lucide-react'
 import { trackWaitlistSignup } from '../utils/analytics'
+import { useAuth } from '../hooks/useAuth'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -83,12 +84,20 @@ function FAQItem({ question, answer, isOpen, onClick }) {
   )
 }
 
-export default function Landing({ onEnterApp, onLegal }) {
+export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
+  const { loginAsGuest } = useAuth()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [realWaitlistCount, setRealWaitlistCount] = useState(500)
   const [openFAQ, setOpenFAQ] = useState(null)
+
+  const handleGuestLogin = () => {
+    const result = loginAsGuest()
+    if (result.success && onGuestLogin) {
+      onGuestLogin(result.user)
+    }
+  }
 
   useEffect(() => {
     fetch(`${API_URL}/api/waitlist/count`)
@@ -243,6 +252,20 @@ export default function Landing({ onEnterApp, onLegal }) {
               <p className="mt-4 text-gray-500 text-sm">
                 ✨ Join {realWaitlistCount}+ traders already on the waitlist
               </p>
+
+              {/* Continue as Guest */}
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <button
+                  onClick={handleGuestLogin}
+                  className="w-full px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+                >
+                  Continue as Guest
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <p className="mt-2 text-gray-500 text-xs">
+                  Explore the full app without signing up
+                </p>
+              </div>
             </div>
           </div>
 

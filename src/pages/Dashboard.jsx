@@ -12,7 +12,6 @@ import {
 import { useApp } from '../hooks/useApp'
 import { useLivePortfolio } from '../hooks/useLiveMarkets'
 import { trackPageView, trackButtonClick, trackUpgradeModalOpen, trackStatView } from '../utils/analytics'
-import LiveScanner from '../components/LiveScanner'
 import TradeSlipViewer from '../components/TradeSlipViewer'
 import { strategyApi } from '../utils/api'
 import { Play, Pause, AlertCircle } from 'lucide-react'
@@ -342,11 +341,6 @@ const Dashboard = ({ onNavigate }) => {
     fetchUserData()
   }, [user, tradingMode])
 
-  // Callback when a trade is placed from the scanner
-  const handleTradeComplete = (trade) => {
-    // Immediately refetch dashboard data to show the new trade
-    fetchUserData()
-  }
 
   // Format currency
   const formatCurrency = (value) => {
@@ -606,7 +600,7 @@ const Dashboard = ({ onNavigate }) => {
             {hasData ? "Here's your trading overview." : "Welcome! Connect an account to start trading."}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mr-40">
           <span className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 ${
             tradingMode === 'live'
               ? 'bg-green-100 text-green-700'
@@ -1019,14 +1013,6 @@ const Dashboard = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Live Market Scanner */}
-      <LiveScanner 
-        maxEvents={50} 
-        scanInterval={3000} 
-        onTradeComplete={handleTradeComplete}
-        tradingMode={tradingMode}
-        isPro={isPro}
-      />
 
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">

@@ -17,6 +17,18 @@ export function AuthProvider({ children }) {
 
   // Fetch current user on mount
   const fetchUser = useCallback(async () => {
+    // Check for guest session first
+    const guestUser = localStorage.getItem('ttm_guest_user');
+    if (guestUser) {
+      try {
+        setUser(JSON.parse(guestUser));
+        setLoading(false);
+        return;
+      } catch (e) {
+        localStorage.removeItem('ttm_guest_user');
+      }
+    }
+
     if (!tokenManager.isAuthenticated()) {
       setLoading(false);
       return;
@@ -104,18 +116,45 @@ export function AuthProvider({ children }) {
   // LOGOUT
   // ============================================
   const logout = async () => {
+    // Check if guest user - no API call needed
+    const isGuest = user?.is_guest;
+
     try {
       setLoading(true);
-      await authApi.logout();
+      if (!isGuest) {
+        await authApi.logout();
+      }
     } catch (err) {
       // Ignore logout errors - we're logging out anyway
       console.warn('Logout API error:', err);
     } finally {
       tokenManager.clearTokens();
+      localStorage.removeItem('ttm_guest_user');
       setUser(null);
       setError(null);
       setLoading(false);
     }
+  };
+
+  // ============================================
+  // GUEST LOGIN (no backend required)
+  // ============================================
+  const loginAsGuest = () => {
+    const guestUser = {
+      id: 'guest-' + Date.now(),
+      email: 'guest@tothemoon.app',
+      username: 'Guest User',
+      is_pro: true, // Give guests pro access to test features
+      is_guest: true,
+      created_at: new Date().toISOString(),
+    };
+
+    // Store guest session in localStorage
+    localStorage.setItem('ttm_guest_user', JSON.stringify(guestUser));
+    setUser(guestUser);
+    setError(null);
+
+    return { success: true, user: guestUser };
   };
 
   // ============================================
@@ -137,6 +176,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     signup,
     login,
+    loginAsGuest,
     logout,
     refreshUser,
     clearError,

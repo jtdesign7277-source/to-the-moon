@@ -54,24 +54,10 @@ import Legal from './pages/Legal'
 // Navigation configuration - Main nav items
 const NAV_ITEMS = [
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    shortLabel: 'Dashboard',
-    icon: LayoutDashboard,
-    requiresPro: false,
-  },
-  {
-    id: 'accounts',
-    label: 'Accounts',
-    shortLabel: 'Accounts',
-    icon: Wallet,
-    requiresPro: false,
-  },
-  {
-    id: 'strategy',
-    label: 'Strategy Builder',
-    shortLabel: 'Strategy',
-    icon: Wrench,
+    id: 'alpha-lab',
+    label: 'Alpha Lab',
+    shortLabel: 'Alpha',
+    icon: Brain,
     requiresPro: false,
   },
   {
@@ -82,30 +68,34 @@ const NAV_ITEMS = [
     requiresPro: false,
   },
   {
-    id: 'alpha-lab',
-    label: 'Alpha Lab',
-    shortLabel: 'Alpha',
-    icon: Brain,
-    requiresPro: true,
+    id: 'dashboard',
+    label: 'Dashboard',
+    shortLabel: 'Dashboard',
+    icon: LayoutDashboard,
+    requiresPro: false,
+  },
+  {
+    id: 'strategy',
+    label: 'Strategy Builder',
+    shortLabel: 'Strategy',
+    icon: Wrench,
+    requiresPro: false,
+  },
+  {
+    id: 'accounts',
+    label: 'Accounts',
+    shortLabel: 'Accounts',
+    icon: Wallet,
+    requiresPro: false,
   },
 ]
 
 // Explore section items
 const EXPLORE_ITEMS = [
   {
-    id: 'leaderboard',
-    label: 'Leaderboard',
-    icon: Trophy,
-  },
-  {
     id: 'marketplace',
     label: 'Marketplace',
     icon: ShoppingCart,
-  },
-  {
-    id: 'education',
-    label: 'Education',
-    icon: BookOpen,
   },
   {
     id: 'discover',
@@ -113,9 +103,19 @@ const EXPLORE_ITEMS = [
     icon: Compass,
   },
   {
+    id: 'leaderboard',
+    label: 'Leaderboard',
+    icon: Trophy,
+  },
+  {
     id: 'history',
     label: 'Trade History',
     icon: History,
+  },
+  {
+    id: 'education',
+    label: 'Education',
+    icon: BookOpen,
   },
 ]
 
@@ -168,6 +168,7 @@ const AppContent = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [legalTab, setLegalTab] = useState('terms')
   const [profileOpen, setProfileOpen] = useState(false)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const profileRef = useRef(null)
   const { isPro, openUpgradeModal, setIsPro, openLunaChat } = useApp()
 
@@ -194,8 +195,22 @@ const AppContent = () => {
     return 'January 2026'
   }
 
-  // Check for existing auth on mount
+  // Check for existing auth on mount (including guest sessions)
   useEffect(() => {
+    // Check for guest session first
+    const guestUser = localStorage.getItem('ttm_guest_user')
+    if (guestUser) {
+      try {
+        const parsed = JSON.parse(guestUser)
+        setUser(parsed)
+        setIsPro(true) // Guests get pro access
+        setView('app')
+        return
+      } catch (e) {
+        localStorage.removeItem('ttm_guest_user')
+      }
+    }
+
     const token = localStorage.getItem('ttm_access_token')
     if (token) {
       // Verify token and get user info
@@ -234,6 +249,7 @@ const AppContent = () => {
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('ttm_access_token')
+    localStorage.removeItem('ttm_guest_user')
     setUser(null)
     setIsPro(false)
     setView('landing')
@@ -268,6 +284,11 @@ const AppContent = () => {
     return (
       <Landing
         onEnterApp={() => setView('auth')}
+        onGuestLogin={(guestUser) => {
+          setUser(guestUser)
+          setIsPro(true)
+          setView('app')
+        }}
         onLegal={(tab) => {
           setLegalTab(tab)
           setView('legal')
@@ -308,24 +329,26 @@ const AppContent = () => {
         onNavigate={handleNavigation}
         user={user}
         onLogout={handleLogout}
+        isExpanded={sidebarExpanded}
+        setIsExpanded={setSidebarExpanded}
       />
 
-      {/* Main Content Area - No left margin on mobile (sidebar is hidden), margin on desktop */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 lg:ml-14">
+      {/* Main Content Area - Dynamic margin based on sidebar state */}
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 ${sidebarExpanded ? 'lg:ml-56' : 'lg:ml-12'}`}>
         {/* Top Right Header Bar */}
         <div className="fixed top-3 right-4 z-50 flex items-center gap-2">
           {/* Crown / PRO Badge */}
           {isPro ? (
-            <span className="px-2.5 py-1 bg-linear-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+            <span className="px-2.5 py-1 bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
               PRO
             </span>
           ) : (
             <button
               onClick={openUpgradeModal}
-              className="px-2.5 py-1 bg-linear-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all"
+              className="px-2.5 py-1 bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-indigo-50 transition-all"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
               Upgrade
             </button>
           )}
