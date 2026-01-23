@@ -18,7 +18,6 @@ import {
   Lightbulb,
   ChevronDown,
   X,
-  TrendingUp,
 } from 'lucide-react'
 
 // Context
@@ -49,7 +48,6 @@ import Education from './pages/Education'
 import StrategyDiscovery from './pages/StrategyDiscovery'
 import TradeHistory from './pages/TradeHistory'
 import Legal from './pages/Legal'
-import Trading from './pages/Trading'
 
 // Navigation configuration - Main nav items
 const NAV_ITEMS = [
@@ -58,13 +56,6 @@ const NAV_ITEMS = [
     label: 'Dashboard',
     shortLabel: 'Dashboard',
     icon: LayoutDashboard,
-    requiresPro: false,
-  },
-  {
-    id: 'trading',
-    label: 'Trading',
-    shortLabel: 'Trade',
-    icon: TrendingUp,
     requiresPro: false,
   },
   {
@@ -124,8 +115,6 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
   switch (currentPage) {
     case 'dashboard':
       return <Dashboard onNavigate={onNavigate} />
-    case 'trading':
-      return <Trading />
     case 'history':
       return <TradeHistory />
     case 'accounts':
