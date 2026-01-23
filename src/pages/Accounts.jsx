@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useTrading } from '../contexts/TradingContext'
 import { trackAccountConnect } from '../utils/analytics'
 import { paperTradingApi, accountsApi } from '../utils/api'
+import { Button } from '../components/ui'
 
 // Available platforms to connect
 const AVAILABLE_PLATFORMS = [
@@ -543,13 +544,15 @@ const Accounts = () => {
             
             {/* Reset Button */}
             <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-              <button
+              <Button
                 onClick={handleResetPortfolio}
                 disabled={isResetting}
-                className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-red-600"
               >
                 {isResetting ? 'Resetting...' : 'Reset Paper Account to $100,000'}
-              </button>
+              </Button>
               <button
                 onClick={fetchPaperPortfolio}
                 disabled={isLoading}

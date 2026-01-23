@@ -1,17 +1,68 @@
 @import "tailwindcss";
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
 
 /* Custom base styles */
 @layer base {
   html {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Disable pull-to-refresh on mobile for native feel */
+    overscroll-behavior: none;
   }
 
   body {
     background-color: var(--color-gray-50);
     color: var(--color-gray-900);
+    /* Prevent text selection on double tap for native feel */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Custom monospace for numbers/code */
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  /* Number styling - tabular figures for aligned numbers */
+  .font-numbers {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Better focus states for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--color-indigo-500);
+    outline-offset: 2px;
+  }
+
+  /* Remove default focus outline */
+  *:focus {
+    outline: none;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -58,5 +109,43 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Native-feel active state for buttons/cards */
+  .active-scale {
+    transition: transform 100ms ease-out;
+  }
+
+  .active-scale:active {
+    transform: scale(0.97);
+  }
+
+  /* Smooth transitions for interactive elements */
+  .interactive {
+    transition: all 150ms ease-out;
+  }
+
+  .interactive:hover {
+    transform: translateY(-1px);
+  }
+
+  .interactive:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Price change animations */
+  .price-up {
+    animation: priceFlash 400ms ease-out;
+    color: #00C853;
+  }
+
+  .price-down {
+    animation: priceFlash 400ms ease-out;
+    color: #FF3D00;
+  }
+
+  @keyframes priceFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 }

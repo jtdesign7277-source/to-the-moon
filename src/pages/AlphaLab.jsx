@@ -45,6 +45,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
+import { Button } from '../components/ui'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -868,9 +869,9 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                         </span>
                       </div>
                     </div>
-                    <button onClick={resetAll} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                    <Button onClick={resetAll} variant="ghost" size="sm">
                       Create Another Strategy
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

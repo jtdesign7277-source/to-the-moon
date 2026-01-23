@@ -34,6 +34,7 @@ import MobileNav from './components/MobileNav'
 import UpgradeModal from './components/UpgradeModal'
 import DevTools from './components/DevTools'
 import LunaChatWidget from './components/LunaChatWidget'
+import { ToastProvider } from './components/ui/Toast'
 
 // Pages
 import Landing from './pages/Landing'
@@ -544,7 +545,9 @@ function App() {
     <AuthProvider>
       <AppProvider>
         <TradingProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </TradingProvider>
       </AppProvider>
     </AuthProvider>

@@ -19,6 +19,27 @@ export default {
           800: '#3730a3',
           900: '#312e81',
         },
+        // Native-feel semantic colors
+        gain: {
+          DEFAULT: '#00C853',
+          light: '#E8F5E9',
+          dark: '#00A844',
+        },
+        loss: {
+          DEFAULT: '#FF3D00',
+          light: '#FFEBEE',
+          dark: '#DD2C00',
+        },
+        text: {
+          primary: '#1A1A1A',
+          secondary: '#6B7280',
+          muted: '#9CA3AF',
+        },
+        surface: {
+          DEFAULT: '#FFFFFF',
+          elevated: '#FAFAFA',
+          muted: '#F3F4F6',
+        },
       },
       animation: {
         // Page & Modal Transitions
@@ -65,6 +86,10 @@ export default {
         // Advanced
         'morph': 'morph 3s ease-in-out infinite',
         'gradient-shift': 'gradientShift 8s ease-infinite infinite',
+        // Native-feel animations
+        'press': 'press 100ms ease-out',
+        'slide-up-fade': 'slideUpFade 200ms ease-out',
+        'scale-fade-in': 'scaleFadeIn 200ms ease-out',
       },
       keyframes: {
         // Page Transitions
@@ -190,6 +215,19 @@ export default {
         gradientShift: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
+        },
+        // Native-feel keyframes
+        press: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(0.97)' },
+        },
+        slideUpFade: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleFadeIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
 

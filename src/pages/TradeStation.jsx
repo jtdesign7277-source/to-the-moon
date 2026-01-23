@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useTrading } from '../contexts/TradingContext'
+import { Button } from '../components/ui'
 
 // Celebration animation for big wins
 const CelebrationOverlay = ({ show, profit, onComplete }) => {
@@ -220,12 +221,12 @@ const TradeStation = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Share Strategy</h3>
 
               <div className="flex gap-3 mb-4">
-                <button className="flex-1 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors">
+                <Button variant="primary" className="flex-1 bg-gray-900! hover:bg-gray-800!">
                   Twitter
-                </button>
-                <button className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors">
+                </Button>
+                <Button variant="primary" className="flex-1">
                   Discord
-                </button>
+                </Button>
               </div>
 
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
