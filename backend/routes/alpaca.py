@@ -15,10 +15,14 @@ alpaca_bp = Blueprint('alpaca', __name__)
 
 # Encryption key for decrypting stored credentials
 ENCRYPTION_KEY = os.environ.get('CREDENTIALS_ENCRYPTION_KEY')
-if ENCRYPTION_KEY:
-    fernet = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
+if not ENCRYPTION_KEY:
+    # Generate a fallback key if not set (not recommended for production)
+    ENCRYPTION_KEY = Fernet.generate_key()
+    print("[WARNING] CREDENTIALS_ENCRYPTION_KEY not set. Using generated key - credentials from previous sessions won't decrypt!")
 else:
-    fernet = None
+    ENCRYPTION_KEY = ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
+
+fernet = Fernet(ENCRYPTION_KEY)
 
 
 def decrypt_credential(encrypted_value: str) -> str:
