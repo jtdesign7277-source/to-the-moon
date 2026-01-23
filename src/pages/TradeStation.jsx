@@ -4,9 +4,9 @@ import confetti from 'canvas-confetti'
 import {
   Rocket, Zap, Trophy, Target, TrendingUp,
   Flame, Star, Crown, Award, Clock,
-  Play, ChevronRight, ArrowUpRight,
-  Share2, Copy, Check, X,
-  Sparkles, Send, Users, Timer
+  Play, ChevronRight, ChevronDown, ArrowUpRight,
+  Share2, Copy, Check, X, Pause, Trash2,
+  Sparkles, Send, Users, Timer, FolderOpen, Folder
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useTrading } from '../contexts/TradingContext'
@@ -138,13 +138,22 @@ const TradeStation = () => {
     positions,
     placeOrder,
     refreshData,
+    deleteStrategy,
+    pauseStrategy,
+    resumeStrategy,
+    stopStrategy,
+    deployStrategy,
   } = useTrading()
 
   const [activeTab, setActiveTab] = useState('build')
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationProfit, setCelebrationProfit] = useState(0)
-    const [showShareSheet, setShowShareSheet] = useState(false)
+  const [showShareSheet, setShowShareSheet] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // Collapsible folder states
+  const [isStrategiesFolderOpen, setIsStrategiesFolderOpen] = useState(true)
+  const [isDeployedFolderOpen, setIsDeployedFolderOpen] = useState(true)
 
   // User stats
   const stats = {
@@ -154,12 +163,6 @@ const TradeStation = () => {
     streak: 7,
     coins: 1250,
   }
-
-  // Strategies
-  const [strategies, setStrategies] = useState([
-    { id: 1, name: 'RSI Reversal', ticker: 'SPY', profit: 24.5, winRate: 68, status: 'active' },
-    { id: 2, name: 'Momentum Breakout', ticker: 'QQQ', profit: -5.2, winRate: 45, status: 'paused' },
-  ])
 
   // Challenges
   const challenges = [
@@ -315,59 +318,215 @@ const TradeStation = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
-              {/* Strategies List */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
-                  Your Strategies
-                </h3>
-                <div className="space-y-3">
-                  {strategies.map(strategy => (
-                    <motion.div
-                      key={strategy.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-gray-900">{strategy.name}</h4>
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded">
-                              {strategy.ticker}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {strategy.winRate}% win rate
-                          </p>
-                        </div>
-                        <div className={`text-lg font-bold ${strategy.profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {strategy.profit >= 0 ? '+' : ''}{strategy.profit.toFixed(1)}%
-                        </div>
+              {/* Deployed Strategies Folder */}
+              {deployedStrategies.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <button
+                    onClick={() => setIsDeployedFolderOpen(!isDeployedFolderOpen)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        {isDeployedFolderOpen ? (
+                          <FolderOpen className="w-5 h-5 text-emerald-600" />
+                        ) : (
+                          <Folder className="w-5 h-5 text-emerald-600" />
+                        )}
                       </div>
+                      <div className="text-left">
+                        <h3 className="font-semibold text-gray-900">Active Strategies</h3>
+                        <p className="text-xs text-gray-500">{deployedStrategies.length} running</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isDeployedFolderOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            if (strategy.profit > 0) {
-                              setCelebrationProfit(strategy.profit)
-                              setShowCelebration(true)
-                            }
-                          }}
-                          className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <Play className="w-4 h-4" />
-                          Deploy
-                        </button>
-                        <button
-                          onClick={() => setShowShareSheet(true)}
-                          className="py-2 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl transition-colors"
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
+                  <AnimatePresence>
+                    {isDeployedFolderOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 space-y-3">
+                          {deployedStrategies.map(deployment => (
+                            <motion.div
+                              key={deployment.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+                                    <h4 className="font-semibold text-gray-900">{deployment.strategyName}</h4>
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {deployment.mode === 'paper' ? 'Paper Trading' : 'Live Trading'} • {deployment.trades || 0} trades
+                                  </p>
+                                </div>
+                                <div className={`text-lg font-bold ${(deployment.pnl || 0) >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                  {(deployment.pnl || 0) >= 0 ? '+' : ''}{(deployment.pnl || 0).toFixed(1)}%
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {deployment.status === 'active' ? (
+                                  <button
+                                    onClick={() => pauseStrategy(deployment.id)}
+                                    className="flex-1 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                                  >
+                                    <Pause className="w-4 h-4" />
+                                    Pause
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => resumeStrategy(deployment.id)}
+                                    className="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                                  >
+                                    <Play className="w-4 h-4" />
+                                    Resume
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => stopStrategy(deployment.id)}
+                                  className="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
+              {/* Saved Strategies Folder */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button
+                  onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                      {isStrategiesFolderOpen ? (
+                        <FolderOpen className="w-5 h-5 text-indigo-600" />
+                      ) : (
+                        <Folder className="w-5 h-5 text-indigo-600" />
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-gray-900">My Strategies</h3>
+                      <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isStrategiesFolderOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isStrategiesFolderOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 space-y-3">
+                        {savedStrategies.length === 0 ? (
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                              <Sparkles className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-500 text-sm">No strategies yet</p>
+                            <p className="text-gray-400 text-xs mt-1">Create one in Alpha Lab</p>
+                          </div>
+                        ) : (
+                          savedStrategies.map(strategy => {
+                            const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
+                            return (
+                              <motion.div
+                                key={strategy.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
+                              >
+                                <div className="flex items-start justify-between mb-3">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="font-semibold text-gray-900">{strategy.name}</h4>
+                                      <span className="px-2 py-0.5 bg-indigo-100 text-indigo-600 text-xs font-medium rounded">
+                                        {strategy.symbol || 'SPY'}
+                                      </span>
+                                      {isDeployed && (
+                                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-xs font-medium rounded flex items-center gap-1">
+                                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                          Live
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                      {strategy.interpretation || strategy.description || 'Custom strategy'}
+                                    </p>
+                                    {strategy.backtestResults && (
+                                      <div className="flex items-center gap-3 mt-2 text-xs">
+                                        <span className={`font-medium ${strategy.backtestResults.totalReturn >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                          {strategy.backtestResults.totalReturn >= 0 ? '+' : ''}{strategy.backtestResults.totalReturn?.toFixed(1)}% return
+                                        </span>
+                                        <span className="text-gray-400">•</span>
+                                        <span className="text-gray-500">{strategy.backtestResults.winRate?.toFixed(0)}% win rate</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  {!isDeployed ? (
+                                    <button
+                                      onClick={async () => {
+                                        const result = await deployStrategy(strategy, tradingMode)
+                                        if (result && strategy.backtestResults?.totalReturn > 0) {
+                                          setCelebrationProfit(strategy.backtestResults.totalReturn)
+                                          setShowCelebration(true)
+                                        }
+                                      }}
+                                      className="flex-1 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                                    >
+                                      <Play className="w-4 h-4" />
+                                      Deploy
+                                    </button>
+                                  ) : (
+                                    <button
+                                      disabled
+                                      className="flex-1 py-2 bg-gray-100 text-gray-400 font-medium text-sm rounded-xl cursor-not-allowed flex items-center justify-center gap-1.5"
+                                    >
+                                      <Check className="w-4 h-4" />
+                                      Deployed
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => setShowShareSheet(true)}
+                                    className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-colors"
+                                  >
+                                    <Share2 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteStrategy(strategy.id)}
+                                    className="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )
+                          })
+                        )}
                       </div>
                     </motion.div>
-                  ))}
-                </div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           )}
