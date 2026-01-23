@@ -25,7 +25,6 @@ import {
   ChevronDown,
   Send,
   TrendingUp,
-  TrendingDown,
   AlertCircle,
 } from 'lucide-react'
 import {
@@ -60,8 +59,34 @@ const LOOKBACKS = [
   { id: '6m', label: '6 Months' },
   { id: '1y', label: '1 Year' },
 ]
-const INDICATORS = ['RSI', 'MACD', 'SMA', 'EMA', 'VWAP', 'BBANDS', 'Volume']
+const INDICATORS = ['RSI', 'MACD', 'SMA', 'EMA', 'VWAP', 'BBANDS', 'Volume', 'Stochastic', 'ADX', 'ATR', 'OBV', 'Williams %R', 'CCI', 'MFI', 'ROC', 'Momentum']
 const OPERATORS = ['<', '>', '<=', '>=', '=']
+
+const TECHNICAL_SIGNALS = [
+  { id: 'golden_cross', label: 'Golden Cross' },
+  { id: 'death_cross', label: 'Death Cross' },
+  { id: 'overbought', label: 'Overbought' },
+  { id: 'oversold', label: 'Oversold' },
+  { id: 'breakout', label: 'Breakout' },
+  { id: 'breakdown', label: 'Breakdown' },
+  { id: 'gap_up', label: 'Gap Up' },
+  { id: 'gap_down', label: 'Gap Down' },
+  { id: 'divergence', label: 'Divergence' },
+  { id: 'squeeze', label: 'Squeeze' },
+]
+
+const CLASSIC_PATTERNS = [
+  { id: 'head_shoulders', label: 'Head and Shoulders' },
+  { id: 'double_top', label: 'Double Top' },
+  { id: 'double_bottom', label: 'Double Bottom' },
+  { id: 'cup_handle', label: 'Cup and Handle' },
+  { id: 'bull_flag', label: 'Bull Flag' },
+  { id: 'bear_flag', label: 'Bear Flag' },
+  { id: 'ascending_triangle', label: 'Ascending Triangle' },
+  { id: 'descending_triangle', label: 'Descending Triangle' },
+  { id: 'wedge', label: 'Wedge' },
+  { id: 'channel', label: 'Channel' },
+]
 
 // Luna Avatar Component
 const LunaAvatar = ({ size = 'md' }) => {
@@ -245,6 +270,8 @@ const AlphaLab = () => {
   // Strategy state (editable)
   const [strategy, setStrategy] = useState(null)
   const [strategyName, setStrategyName] = useState('')
+  const [selectedSignals, setSelectedSignals] = useState([])
+  const [selectedPatterns, setSelectedPatterns] = useState([])
 
   // Backtest settings
   const [timeframe, setTimeframe] = useState('1d')
@@ -374,6 +401,18 @@ const AlphaLab = () => {
     }
   }
 
+  const toggleSignal = (signalId) => {
+    setSelectedSignals((prev) =>
+      prev.includes(signalId) ? prev.filter((s) => s !== signalId) : [...prev, signalId]
+    )
+  }
+
+  const togglePattern = (patternId) => {
+    setSelectedPatterns((prev) =>
+      prev.includes(patternId) ? prev.filter((p) => p !== patternId) : [...prev, patternId]
+    )
+  }
+
   // Run backtest
   const runBacktest = async () => {
     if (!strategy) return
@@ -422,6 +461,8 @@ const AlphaLab = () => {
         symbol: strategy.symbol,
         description: inputText,
         strategy: strategy,
+        technicalSignals: selectedSignals,
+        classicPatterns: selectedPatterns,
         backtestResults: backtestResults,
         capital: deploymentCapital,
         timeframe: timeframe,
@@ -443,6 +484,8 @@ const AlphaLab = () => {
     setInputText('')
     setStrategy(null)
     setStrategyName('')
+    setSelectedSignals([])
+    setSelectedPatterns([])
     setBacktestResults(null)
     setIsDeployed(false)
     setLunaMessage("Hi! I'm Luna. Tell me about your trading strategy in plain English, and I'll build it for you.")
@@ -644,6 +687,62 @@ const AlphaLab = () => {
                         <p className="text-sm text-gray-400 italic">No exit conditions. Click "Add" to create one.</p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Technical Signals */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
+                      <TrendingUp className="w-4 h-4 text-amber-600" />
+                      Technical Signals
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {TECHNICAL_SIGNALS.map((signal) => (
+                        <button
+                          key={signal.id}
+                          onClick={() => toggleSignal(signal.id)}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                            selectedSignals.includes(signal.id)
+                              ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300'
+                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-amber-300 dark:hover:border-amber-600'
+                          }`}
+                        >
+                          {signal.label}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedSignals.length > 0 && (
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        {selectedSignals.length} signal{selectedSignals.length !== 1 ? 's' : ''} selected
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Classic Patterns */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
+                      <BarChart3 className="w-4 h-4 text-purple-600" />
+                      Classic Patterns
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {CLASSIC_PATTERNS.map((pattern) => (
+                        <button
+                          key={pattern.id}
+                          onClick={() => togglePattern(pattern.id)}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                            selectedPatterns.includes(pattern.id)
+                              ? 'bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
+                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-600'
+                          }`}
+                        >
+                          {pattern.label}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedPatterns.length > 0 && (
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        {selectedPatterns.length} pattern{selectedPatterns.length !== 1 ? 's' : ''} selected
+                      </p>
+                    )}
                   </div>
 
                   {/* Risk Management */}
@@ -864,7 +963,7 @@ const AlphaLab = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Capital</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Capital allocated to this strategy</label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                         <input
