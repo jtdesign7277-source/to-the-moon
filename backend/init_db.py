@@ -175,14 +175,21 @@ def run_migrations(app):
         print("Running database migrations...")
         
         migrations = [
+            # User table migrations
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(50)", "users.first_name"),
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(50)", "users.last_name"),
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)", "users.password_hash"),
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS tier VARCHAR(20) DEFAULT 'free'", "users.tier"),
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP", "users.created_at"),
+            ("ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP", "users.updated_at"),
             # Add is_paper column to trades table
-            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS is_paper BOOLEAN DEFAULT TRUE", "is_paper"),
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS is_paper BOOLEAN DEFAULT TRUE", "trades.is_paper"),
             # Add platform column to trades table
-            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS platform VARCHAR(50)", "platform"),
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS platform VARCHAR(50)", "trades.platform"),
             # Add amount column to trades table
-            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS amount FLOAT", "amount"),
+            ("ALTER TABLE trades ADD COLUMN IF NOT EXISTS amount FLOAT", "trades.amount"),
             # Extend pair column size
-            ("ALTER TABLE trades ALTER COLUMN pair TYPE VARCHAR(200)", "pair extended to 200"),
+            ("ALTER TABLE trades ALTER COLUMN pair TYPE VARCHAR(200)", "trades.pair extended to 200"),
         ]
         
         for sql, description in migrations:
