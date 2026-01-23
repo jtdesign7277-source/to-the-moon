@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Plus, AlertCircle, Check, TrendingUp, TrendingDown, X, ExternalLink, Eye, EyeOff, Copy, Shield, Key, ChevronRight, ArrowLeft, RefreshCw, Wallet, Briefcase } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { useAuth } from '../hooks/useAuth'
 import { useTrading } from '../contexts/TradingContext'
@@ -498,28 +498,34 @@ const Accounts = () => {
       {tradingMode === 'paper' ? (
         <div className="space-y-6">
           {/* Paper Account Card */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl flex items-center justify-center text-3xl">
-                  {paperAccount.icon}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+            {/* Card Header */}
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                  <Wallet className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{paperAccount.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{paperAccount.type}</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{paperAccount.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{paperAccount.type}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{paperAccount.balance}</p>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded">
-                  <Check className="w-3 h-3" />
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   {paperAccount.status}
                 </span>
               </div>
             </div>
 
+            {/* Balance Display */}
+            <div className="px-4 py-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Balance</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{paperAccount.balance}</p>
+            </div>
+
             {/* Paper Trading Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 px-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total P&L</p>
                 <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -543,7 +549,7 @@ const Accounts = () => {
             </div>
 
             {/* Reset Button */}
-            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <div className="mt-4 mx-4 mb-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <Button
                 onClick={handleResetPortfolio}
                 disabled={isResetting}
@@ -566,11 +572,19 @@ const Accounts = () => {
 
           {/* Open Positions */}
           {paperPositions.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Open Positions</h3>
-              <div className="space-y-3">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <Briefcase className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Open Positions</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{paperPositions.length} active</p>
+                </div>
+              </div>
+              <div className="p-4 space-y-3">
                 {paperPositions.map((position) => (
-                  <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 dark:text-white text-sm">{position.marketTitle}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -593,9 +607,17 @@ const Accounts = () => {
 
           {/* Recent Trades */}
           {recentTrades.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Recent Trades</h3>
-              <div className="space-y-2">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Recent Trades</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{recentTrades.length} trades</p>
+                </div>
+              </div>
+              <div className="p-4 space-y-2">
                 {recentTrades.slice(0, 5).map((trade) => (
                   <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
                     <div>

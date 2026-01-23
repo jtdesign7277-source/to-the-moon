@@ -13,7 +13,6 @@ import {
   Shield,
   BarChart3,
   Check,
-  X,
   Loader2,
   RefreshCw,
   DollarSign,
@@ -87,16 +86,6 @@ const CLASSIC_PATTERNS = [
   { id: 'wedge', label: 'Wedge' },
   { id: 'channel', label: 'Channel' },
 ]
-
-// Luna Avatar Component
-const LunaAvatar = ({ size = 'md' }) => {
-  const sizes = { sm: 'w-8 h-8', md: 'w-10 h-10', lg: 'w-12 h-12' }
-  return (
-    <div className={`${sizes[size]} rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center`}>
-      <Brain className="w-5 h-5 text-white" />
-    </div>
-  )
-}
 
 // Editable Dropdown Component
 const EditableSelect = ({ value, options, onChange, className = '' }) => (
@@ -519,14 +508,16 @@ const AlphaLab = () => {
         {/* Left Column: Chat & Strategy Card */}
         <div className="lg:col-span-2 space-y-6">
           {/* Luna Chat Input */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
             {/* Luna Message */}
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-indigo-50 dark:from-indigo-900/20 to-purple-50 dark:to-purple-900/20">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-start gap-3">
-                <LunaAvatar />
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                  <Brain className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">Luna</p>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{lunaMessage}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">Luna</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{lunaMessage}</p>
                 </div>
               </div>
             </div>
@@ -592,27 +583,30 @@ const AlphaLab = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
               >
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-emerald-50 dark:from-emerald-900/20 to-teal-50 dark:to-teal-900/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Strategy Builder</h3>
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                        strategy.confidence >= 0.8 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' :
-                        strategy.confidence >= 0.5 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' :
-                        'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
-                      }`}>
-                        {Math.round(strategy.confidence * 100)}% parsed
-                      </span>
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                      <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <button onClick={resetAll} className="text-sm text-gray-500 hover:text-rose-500 flex items-center gap-1">
-                      <X className="w-4 h-4" /> Reset
-                    </button>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Strategy Builder</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Configure your trading rules</p>
+                    </div>
                   </div>
+                  <span className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-full ${
+                    strategy.confidence >= 0.8 ? 'bg-emerald-100 text-emerald-700' :
+                    strategy.confidence >= 0.5 ? 'bg-amber-100 text-amber-700' :
+                    'bg-rose-100 text-rose-700'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      strategy.confidence >= 0.8 ? 'bg-emerald-500' :
+                      strategy.confidence >= 0.5 ? 'bg-amber-500' :
+                      'bg-rose-500'
+                    }`} />
+                    {Math.round(strategy.confidence * 100)}% parsed
+                  </span>
                 </div>
 
                 <div className="p-4 space-y-6">
@@ -789,19 +783,21 @@ const AlphaLab = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
               >
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5 text-indigo-600" />
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Backtest Results</h3>
-                      <span className="text-xs text-gray-500">{backtestResults.bars_analyzed} bars analyzed</span>
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                      <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <button onClick={runBacktest} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                      <RefreshCw className="w-4 h-4" /> Re-run
-                    </button>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Backtest Results</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{backtestResults.bars_analyzed} bars analyzed</p>
+                    </div>
                   </div>
+                  <button onClick={runBacktest} className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg transition-colors">
+                    <RefreshCw className="w-3.5 h-3.5" /> Re-run
+                  </button>
                 </div>
                 <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <MetricCard icon={DollarSign} label="Final Capital" value={`$${backtestResults.final_capital?.toLocaleString()}`} positive={backtestResults.total_return > 0} color={backtestResults.total_return > 0 ? 'green' : 'red'} />
@@ -864,12 +860,15 @@ const AlphaLab = () => {
         <div className="space-y-6">
           {/* Backtest Settings */}
           {strategy && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
                   <BarChart3 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  Backtest Settings
-                </h3>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Backtest Settings</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Configure simulation parameters</p>
+                </div>
               </div>
               <div className="p-4 space-y-4">
                 <div>
@@ -934,12 +933,21 @@ const AlphaLab = () => {
 
           {/* Deploy Panel */}
           {backtestResults && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-purple-50 dark:from-purple-900/20 to-indigo-50 dark:to-indigo-900/20">
-                <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Rocket className="w-5 h-5 text-purple-600" />
-                  Deploy Strategy
-                </h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                    <Rocket className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Deploy Strategy</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Go live with your strategy</p>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                  READY
+                </span>
               </div>
               <div className="p-4 space-y-4">
                 {!isDeployed ? (

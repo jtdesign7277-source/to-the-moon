@@ -1,4 +1,4 @@
-import { Users, GitFork } from 'lucide-react'
+import { Users, GitFork, Trophy } from 'lucide-react'
 
 const traders = [
   { rank: 1, name: 'CryptoKing', returns: '+245.6%', winRate: '78%', trades: 432, badge: '🥇', followers: 1234 },
@@ -64,6 +64,18 @@ const Leaderboard = () => {
 
       {/* Full Rankings Table */}
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+        {/* Card Header */}
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+              <Trophy className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Full Rankings</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{traders.length} traders</p>
+            </div>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800">

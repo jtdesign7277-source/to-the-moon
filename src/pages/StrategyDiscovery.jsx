@@ -359,7 +359,7 @@ const StrategyDetailModal = ({ strategy, onClose, onFork }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 bg-linear-to-r from-indigo-500 to-purple-600">
           <div className="flex items-start justify-between">

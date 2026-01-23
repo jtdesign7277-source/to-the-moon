@@ -144,7 +144,7 @@ const Marketplace = () => {
 
       {/* Empty State for Community */}
       {activeTab === 'community' && allListings.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
+        <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
           <ShoppingCart className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No community strategies yet</h3>
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Be the first to list your winning strategy!</p>
@@ -161,7 +161,7 @@ const Marketplace = () => {
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
             >
               {/* Card Header with Gradient */}
               <div className={`h-28 flex items-center justify-center relative overflow-hidden ${

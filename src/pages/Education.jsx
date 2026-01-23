@@ -34,16 +34,18 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
             <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+          <div className="text-left">
+            <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
+          </div>
         </div>
         {isOpen ? (
           <ChevronUp className="w-5 h-5 text-gray-400" />
@@ -52,7 +54,7 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
         )}
       </button>
       {isOpen && (
-        <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-800">
+        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-800">
           {children}
         </div>
       )}
@@ -641,7 +643,7 @@ if trend > min_edge:
       </div>
 
       {/* Final CTA */}
-      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white">
+      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-3">Ready to Explore Strategies?</h2>
         <p className="text-indigo-100 mb-6 max-w-xl mx-auto">
           Now that you understand our methodology, explore our pre-built strategies

@@ -644,17 +644,19 @@ const TradeStation = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
 
           {/* Column 1: My Strategies */}
-          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                {isStrategiesFolderOpen ? (
-                  <FolderOpen className="w-5 h-5 text-indigo-500" />
-                ) : (
-                  <Folder className="w-5 h-5 text-indigo-500" />
-                )}
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                  {isStrategiesFolderOpen ? (
+                    <FolderOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  ) : (
+                    <Folder className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  )}
+                </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">My Strategies</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{savedStrategies.length} saved</p>
@@ -717,13 +719,15 @@ const TradeStation = () => {
           </motion.div>
 
           {/* Column 2: Active Strategies */}
-          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsActiveFolderOpen(!isActiveFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <Activity className="w-5 h-5 text-emerald-500" />
+                <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                  <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{displayDeployedStrategies.length} running</p>
@@ -802,13 +806,15 @@ const TradeStation = () => {
           </motion.div>
 
           {/* Column 3: Positions */}
-          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <DollarSign className="w-5 h-5 text-amber-500" />
+                <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Positions</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -993,7 +999,7 @@ const TradeStation = () => {
                 <div
                   key={challenge.id}
                   onClick={hasAction ? challenge.action : undefined}
-                  className={`bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border transition-all ${
+                  className={`bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border transition-all ${
                     isComplete
                       ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-900/20'
                       : hasAction
@@ -1052,7 +1058,7 @@ const TradeStation = () => {
             {tournaments.map(tournament => (
               <div
                 key={tournament.id}
-                className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
