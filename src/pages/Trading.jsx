@@ -862,13 +862,24 @@ const Trading = () => {
               </div>
             )}
 
-            <p className="text-xs text-emerald-100">
-              Get your API keys from{' '}
-              <a href="https://app.alpaca.markets" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-                app.alpaca.markets
+            <div className="flex flex-col sm:flex-row gap-2 mt-1">
+              <a
+                href="https://app.alpaca.markets/paper/dashboard/overview"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors"
+              >
+                <span>📄</span> Get Paper Trading Keys
               </a>
-              {' '}→ Paper/Live Trading → API Keys
-            </p>
+              <a
+                href="https://app.alpaca.markets/live/dashboard/overview"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors"
+              >
+                <span>💰</span> Get Live Trading Keys
+              </a>
+            </div>
           </form>
         )}
       </motion.div>
