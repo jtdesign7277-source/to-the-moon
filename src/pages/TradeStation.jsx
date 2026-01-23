@@ -338,7 +338,7 @@ const TradeStation = () => {
   })).filter(g => g.trades.length > 0)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f10] pb-24 transition-colors duration-200">
       {/* Celebration */}
       <AnimatePresence>
         {showCelebration && (
@@ -625,12 +625,12 @@ const TradeStation = () => {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 transition-colors duration-200">
         <div className="px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Trade Station</h1>
-              <p className="text-gray-500 text-sm">Build, test, and deploy strategies</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade Station</h1>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">Build, test, and deploy strategies</p>
             </div>
             <div className="flex items-center gap-3">
               <StatPill icon={Star} value={stats.coins} color="indigo" />
@@ -644,7 +644,7 @@ const TradeStation = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
 
           {/* Column 1: My Strategies */}
-          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -656,7 +656,7 @@ const TradeStation = () => {
                   <Folder className="w-5 h-5 text-indigo-500" />
                 )}
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">My Strategies</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">My Strategies</h3>
                   <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
                 </div>
               </div>
@@ -717,7 +717,7 @@ const TradeStation = () => {
           </motion.div>
 
           {/* Column 2: Active Strategies */}
-          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsActiveFolderOpen(!isActiveFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -725,7 +725,7 @@ const TradeStation = () => {
               <div className="flex items-center gap-3">
                 <Activity className="w-5 h-5 text-emerald-500" />
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Active Strategies</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h3>
                   <p className="text-xs text-gray-500">{displayDeployedStrategies.length} running</p>
                 </div>
               </div>
@@ -802,7 +802,7 @@ const TradeStation = () => {
           </motion.div>
 
           {/* Column 3: Positions */}
-          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -810,7 +810,7 @@ const TradeStation = () => {
               <div className="flex items-center gap-3">
                 <DollarSign className="w-5 h-5 text-amber-500" />
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Positions</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Positions</h3>
                   <p className="text-xs text-gray-500">
                     {hasRealData
                       ? `${strategyTrades.filter(t => t.status === 'open').length} open, ${strategyTrades.filter(t => t.status === 'closed').length} closed`

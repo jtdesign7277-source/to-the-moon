@@ -25,7 +25,7 @@ const Sidebar = ({
       {/* Mobile: Floating menu button when collapsed */}
       <button
         onClick={() => setIsExpanded(true)}
-        className={`lg:hidden fixed left-2 top-2 z-50 w-10 h-10 bg-white border-2 border-indigo-500 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`lg:hidden fixed left-2 top-2 z-50 w-10 h-10 bg-white dark:bg-gray-800 border-2 border-indigo-500 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 ${
           isExpanded ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100'
         }`}
       >
@@ -39,10 +39,10 @@ const Sidebar = ({
         }`}
       >
         {/* Sidebar Container */}
-        <div className="h-full bg-white border-r border-gray-200 shadow-lg flex flex-col">
+        <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-lg flex flex-col transition-colors duration-200">
           
           {/* Logo & Toggle */}
-          <div className="p-2 border-b border-gray-100">
+          <div className="p-2 border-b border-gray-100 dark:border-gray-800">
             {isExpanded ? (
               /* Expanded: Logo + Name + Collapse Button */
               <div className="flex items-center justify-between">
@@ -50,7 +50,7 @@ const Sidebar = ({
                   <div className="w-8 h-8 border-2 border-indigo-500 rounded-lg flex items-center justify-center">
                     <Rocket className="w-5 h-5 text-indigo-600" strokeWidth={1.5} />
                   </div>
-                  <span className="font-bold text-sm text-gray-900 whitespace-nowrap">TO THE MOON</span>
+                  <span className="font-bold text-sm text-gray-900 dark:text-white whitespace-nowrap">TO THE MOON</span>
                 </div>
                 <button
                   onClick={() => setIsExpanded(false)}
@@ -76,8 +76,8 @@ const Sidebar = ({
 
           {/* Trading Mode Toggle */}
           {isExpanded && (
-            <div className="p-2 border-b border-gray-100">
-              <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <div className="p-2 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
                 <button
                   onClick={() => setTradingMode('paper')}
                   className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${

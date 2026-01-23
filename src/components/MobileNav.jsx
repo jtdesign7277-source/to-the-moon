@@ -13,7 +13,7 @@ const MobileNav = ({ navItems, currentPage, onNavigate }) => {
   }
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 pb-safe">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40 pb-safe transition-colors duration-200">
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon

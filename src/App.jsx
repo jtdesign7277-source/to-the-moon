@@ -25,6 +25,7 @@ import {
 import { AppProvider } from './contexts/AppContext'
 import { TradingProvider } from './contexts/TradingContext'
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { useApp } from './hooks/useApp'
 import { AuthProvider } from './hooks/useAuth'
 
@@ -323,7 +324,7 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f10] flex transition-colors duration-200">
       {/* Sidebar Navigation */}
       <Sidebar
         navItems={NAV_ITEMS}
@@ -499,7 +500,7 @@ const AppContent = () => {
         </main>
 
         {/* Footer with Legal Links */}
-        <footer className="hidden lg:block bg-white border-t border-gray-200 py-4 mt-auto">
+        <footer className="hidden lg:block bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 mt-auto transition-colors duration-200">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
             <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} ToTheMoon. All rights reserved.
@@ -543,17 +544,19 @@ const AppContent = () => {
 // Root App component with providers
 function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <TradingProvider>
-          <MarketplaceProvider>
-            <ToastProvider>
-              <AppContent />
-            </ToastProvider>
-          </MarketplaceProvider>
-        </TradingProvider>
-      </AppProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppProvider>
+          <TradingProvider>
+            <MarketplaceProvider>
+              <ToastProvider>
+                <AppContent />
+              </ToastProvider>
+            </MarketplaceProvider>
+          </TradingProvider>
+        </AppProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 
