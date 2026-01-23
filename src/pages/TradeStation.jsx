@@ -330,41 +330,76 @@ const TradeStation = () => {
                     {/* Strategy Selection */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Select Strategy
+                        Select from Your Strategies
                       </label>
-                      {listableStrategies.length === 0 ? (
-                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                          <p className="text-sm text-amber-700">
-                            You need a strategy with positive backtest results to list on the marketplace.
-                          </p>
+                      {savedStrategies.length === 0 ? (
+                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
+                          <FolderOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 font-medium">No strategies yet</p>
+                          <p className="text-xs text-gray-400 mt-1">Create a strategy in Alpha Lab first</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          {listableStrategies.map(strategy => (
-                            <button
-                              key={strategy.id}
-                              onClick={() => setSelectedStrategyToList(strategy)}
-                              className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
-                                selectedStrategyToList?.id === strategy.id
-                                  ? 'border-indigo-500 bg-indigo-50'
-                                  : 'border-gray-200 hover:border-gray-300 bg-white'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium text-gray-900">{strategy.name}</p>
-                                  <p className="text-xs text-gray-500">{strategy.symbol || 'SPY'}</p>
+                          {savedStrategies.map(strategy => {
+                            const hasPositiveBacktest = strategy.backtestResults?.totalReturn > 0
+                            const alreadyListed = isStrategyListed(strategy.id)
+                            const isEligible = hasPositiveBacktest && !alreadyListed
+                            const backtestReturn = strategy.backtestResults?.totalReturn
+
+                            return (
+                              <button
+                                key={strategy.id}
+                                onClick={() => isEligible && setSelectedStrategyToList(strategy)}
+                                disabled={!isEligible}
+                                className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
+                                  selectedStrategyToList?.id === strategy.id
+                                    ? 'border-indigo-500 bg-indigo-50'
+                                    : isEligible
+                                      ? 'border-gray-200 hover:border-indigo-300 bg-white cursor-pointer'
+                                      : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-medium text-gray-900 truncate">{strategy.name}</p>
+                                      {alreadyListed && (
+                                        <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-[10px] font-semibold rounded">
+                                          LISTED
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-500">{strategy.symbol || 'SPY'}</p>
+                                  </div>
+                                  <div className="text-right ml-3">
+                                    {backtestReturn !== undefined && backtestReturn !== null ? (
+                                      <>
+                                        <p className={`text-sm font-semibold ${
+                                          backtestReturn > 0 ? 'text-emerald-600' : 'text-rose-500'
+                                        }`}>
+                                          {backtestReturn > 0 ? '+' : ''}{backtestReturn.toFixed(1)}%
+                                        </p>
+                                        <p className="text-xs text-gray-400">backtest</p>
+                                      </>
+                                    ) : (
+                                      <span className="text-xs text-amber-600 font-medium">No backtest</span>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-sm font-semibold text-emerald-600">
-                                    +{strategy.backtestResults?.totalReturn?.toFixed(1)}%
+                                {!isEligible && !alreadyListed && (
+                                  <p className="text-xs text-amber-600 mt-1.5">
+                                    {!hasPositiveBacktest ? 'Needs positive backtest to list' : ''}
                                   </p>
-                                  <p className="text-xs text-gray-400">backtest</p>
-                                </div>
-                              </div>
-                            </button>
-                          ))}
+                                )}
+                              </button>
+                            )
+                          })}
                         </div>
+                      )}
+                      {savedStrategies.length > 0 && listableStrategies.length === 0 && (
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          Run a backtest with positive results to list a strategy
+                        </p>
                       )}
                     </div>
 
