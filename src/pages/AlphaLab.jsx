@@ -491,7 +491,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                 className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
                   strategyText.trim() && !isParsing
                     ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {isParsing ? (
