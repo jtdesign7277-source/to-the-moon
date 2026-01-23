@@ -608,8 +608,8 @@ const Dashboard = ({ onNavigate }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             {hasData ? "Here's your trading overview." : "Welcome! Connect an account to start trading."}
           </p>
         </div>
@@ -659,35 +659,35 @@ const Dashboard = ({ onNavigate }) => {
         {/* Trade Expectancy / Total P&L Card */}
         <div 
           onClick={() => handleStatClick(stats[0])}
-          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all cursor-pointer"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-medium text-gray-600">Net P&L</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Net P&L</span>
               <Info className="w-3.5 h-3.5 text-gray-400" />
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className={`text-3xl font-bold ${displayStats.totalPnl >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+            <span className={`text-3xl font-bold ${displayStats.totalPnl >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
               {formatCurrency(displayStats.totalPnl)}
             </span>
-            <div className={`p-2.5 rounded-xl ${displayStats.totalPnl >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+            <div className={`p-2.5 rounded-xl ${displayStats.totalPnl >= 0 ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30'}`}>
               <DollarSign className={`w-5 h-5 ${displayStats.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`} />
             </div>
           </div>
         </div>
 
         {/* Profit Factor Card with Gauge */}
-        <div 
+        <div
           onClick={() => handleStatClick(stats[0])}
-          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all cursor-pointer"
         >
           <div className="flex items-center gap-1.5 mb-3">
-            <span className="text-sm font-medium text-gray-600">Profit Factor</span>
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Profit Factor</span>
             <Info className="w-3.5 h-3.5 text-gray-400" />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-3xl font-bold text-gray-900">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
               {displayStats.winLossRatio > 0 && displayStats.winLossRatio !== Infinity 
                 ? displayStats.winLossRatio.toFixed(2) 
                 : displayStats.avgWin > 0 && displayStats.avgLoss > 0 
@@ -720,12 +720,12 @@ const Dashboard = ({ onNavigate }) => {
         </div>
 
         {/* Win % Card with Donut */}
-        <div 
+        <div
           onClick={() => handleStatClick(stats[1])}
-          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all cursor-pointer"
         >
           <div className="flex items-center gap-1.5 mb-3">
-            <span className="text-sm font-medium text-gray-600">Win %</span>
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Win %</span>
             <Info className="w-3.5 h-3.5 text-gray-400" />
             {displayStats.winningTrades > 0 && (
               <div className="flex items-center gap-1.5 ml-auto">
@@ -739,7 +739,7 @@ const Dashboard = ({ onNavigate }) => {
             )}
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-3xl font-bold text-gray-900">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
               {displayStats.totalTrades > 0 ? `${displayStats.winRate}%` : '—'}
             </span>
             {/* Donut chart */}
@@ -769,16 +769,16 @@ const Dashboard = ({ onNavigate }) => {
         </div>
 
         {/* Avg Win/Loss Card with Bar */}
-        <div 
+        <div
           onClick={() => handleStatClick(stats[0])}
-          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all cursor-pointer"
         >
           <div className="flex items-center gap-1.5 mb-3">
-            <span className="text-sm font-medium text-gray-600">Avg win/loss trade</span>
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg win/loss trade</span>
             <Info className="w-3.5 h-3.5 text-gray-400" />
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-3xl font-bold text-gray-900">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
               {displayStats.winLossRatio > 0 && displayStats.winLossRatio !== Infinity 
                 ? displayStats.winLossRatio.toFixed(1) 
                 : '—'}
@@ -805,44 +805,44 @@ const Dashboard = ({ onNavigate }) => {
 
       {/* Quick Stats Row - Additional metrics */}
       <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Open Positions</p>
-          <p className="text-xl font-bold text-gray-900">{displayStats.openPositions}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Open Positions</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{displayStats.openPositions}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Total Trades</p>
-          <p className="text-xl font-bold text-gray-900">{displayStats.totalTrades}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Trades</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{displayStats.totalTrades}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Realized P&L</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Realized P&L</p>
           <p className={`text-xl font-bold ${displayStats.realizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(displayStats.realizedPnl)}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Unrealized P&L</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Unrealized P&L</p>
           <p className={`text-xl font-bold ${displayStats.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(displayStats.unrealizedPnl)}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500 mb-1">Active Strategies</p>
-          <p className="text-xl font-bold text-indigo-600">{displayStats.activeStrategies}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Active Strategies</p>
+          <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{displayStats.activeStrategies}</p>
         </div>
       </div>
 
       {/* Active Strategies & Strategy Bets - Side by Side */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Active Strategies Section - Always show */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-50 rounded-lg">
-                <Zap className="w-5 h-5 text-indigo-600" />
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                <Zap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900">Active Strategies</h2>
-                <p className="text-sm text-gray-500">{activeStrategies.length} running now</p>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{activeStrategies.length} running now</p>
               </div>
             </div>
             <button
@@ -853,13 +853,13 @@ const Dashboard = ({ onNavigate }) => {
             </button>
           </div>
           
-          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[300px] overflow-y-auto">
             {activeStrategies.length === 0 ? (
               <div className="p-8 text-center">
-                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Zap className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-gray-500 text-sm mb-2">No active strategies</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">No active strategies</p>
                 <button
                   onClick={() => onNavigate && onNavigate('strategies')}
                   className="text-indigo-600 text-sm font-medium hover:text-indigo-700"
@@ -873,9 +873,9 @@ const Dashboard = ({ onNavigate }) => {
                 const isLive = strategy.mode === 'live'
                 
                 return (
-                  <div 
+                  <div
                     key={strategy.id}
-                    className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                     onClick={() => onNavigate && onNavigate('strategies')}
                   >
                     <div className="flex items-center justify-between">
@@ -883,7 +883,7 @@ const Dashboard = ({ onNavigate }) => {
                         <span className="text-2xl">{strategy.icon || '⚡'}</span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-gray-900">{strategy.name}</h3>
+                            <h3 className="font-medium text-gray-900 dark:text-white">{strategy.name}</h3>
                             <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
                               isLive 
                                 ? 'bg-red-100 text-red-700' 
@@ -892,7 +892,7 @@ const Dashboard = ({ onNavigate }) => {
                               {isLive ? '🔴 LIVE' : '📝 Paper'}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             ${strategy.allocatedCapital?.toLocaleString() || '0'} allocated
                           </p>
                         </div>
@@ -901,11 +901,11 @@ const Dashboard = ({ onNavigate }) => {
                       <div className="flex items-center gap-4">
                         {/* Activity indicator */}
                         <div className="text-right hidden sm:block">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             <span>{activity.message?.icon} {activity.message?.text || 'Running...'}</span>
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                             {activity.marketsScanned || 0} markets scanned
                           </p>
                         </div>
@@ -917,11 +917,11 @@ const Dashboard = ({ onNavigate }) => {
                           }`}>
                             {(strategy.totalPnl || 0) >= 0 ? '+' : ''}${(strategy.totalPnl || 0).toFixed(2)}
                           </p>
-                          <p className="text-xs text-gray-500">{strategy.totalTrades || 0} trades</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{strategy.totalTrades || 0} trades</p>
                         </div>
                         
-                        <div className="p-2 bg-green-50 rounded-lg">
-                          <Play className="w-4 h-4 text-green-600" />
+                        <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                          <Play className="w-4 h-4 text-green-600 dark:text-green-400" />
                         </div>
                       </div>
                     </div>
@@ -933,15 +933,15 @@ const Dashboard = ({ onNavigate }) => {
         </div>
 
         {/* Strategy Bets - Live trades executed by automated strategies */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <Rocket className="w-5 h-5 text-purple-600" />
+              <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                <Rocket className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900">Strategy Bets</h2>
-                <p className="text-xs text-gray-500">{strategyBets?.length || 0} live position{(strategyBets?.length || 0) !== 1 ? 's' : ''} from automated strategies</p>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Strategy Bets</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{strategyBets?.length || 0} live position{(strategyBets?.length || 0) !== 1 ? 's' : ''} from automated strategies</p>
               </div>
             </div>
             <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
@@ -950,14 +950,14 @@ const Dashboard = ({ onNavigate }) => {
             </span>
           </div>
             
-          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[300px] overflow-y-auto">
             {(!strategyBets || strategyBets.length === 0) ? (
               <div className="p-8 text-center">
-                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Rocket className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-gray-500 text-sm mb-2">No automated bets yet</p>
-                <p className="text-gray-400 text-xs">Bets placed by strategies appear here</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">No automated bets yet</p>
+                <p className="text-gray-400 dark:text-gray-500 text-xs">Bets placed by strategies appear here</p>
               </div>
             ) : (
               strategyBets.map(bet => {
@@ -970,9 +970,9 @@ const Dashboard = ({ onNavigate }) => {
                     : `${Math.floor(timeSincePlaced / 1440)}d ago`
                 
                 return (
-                  <div 
+                  <div
                     key={bet.id}
-                    className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-4">
                       {/* Left: Strategy & Market Info */}
@@ -988,14 +988,14 @@ const Dashboard = ({ onNavigate }) => {
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{bet.ticker}</p>
-                          <p className="text-xs text-gray-500 truncate">{bet.event}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{bet.ticker}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{bet.event}</p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-purple-600 font-medium">{bet.strategy}</span>
-                            <span className="text-[10px] text-gray-400">•</span>
-                            <span className="text-[10px] text-gray-400">{bet.platform}</span>
-                            <span className="text-[10px] text-gray-400">•</span>
-                            <span className="text-[10px] text-gray-400">{timeLabel}</span>
+                            <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">{bet.strategy}</span>
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500">{bet.platform}</span>
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500">{timeLabel}</span>
                           </div>
                         </div>
                       </div>
@@ -1003,8 +1003,8 @@ const Dashboard = ({ onNavigate }) => {
                       {/* Right: Trade Details & P&L */}
                       <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right hidden sm:block">
-                          <p className="text-xs text-gray-500">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
-                          <p className="text-xs text-gray-400">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
                         </div>
                         <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
                           isProfit ? 'bg-green-50' : 'bg-red-50'
@@ -1031,17 +1031,17 @@ const Dashboard = ({ onNavigate }) => {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Performance Chart */}
-        <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">Performance</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance</h2>
               {!hasCompletedTrades && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
+                <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-full">
                   Sample Data
                 </span>
               )}
             </div>
-            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {[
                 { key: '1D', label: '1D' },
                 { key: '1W', label: '1W' },
@@ -1054,8 +1054,8 @@ const Dashboard = ({ onNavigate }) => {
                   onClick={() => setPerformancePeriod(period.key)}
                   className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
                     performancePeriod === period.key
-                      ? 'bg-white text-indigo-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   {period.label}
@@ -1067,7 +1067,7 @@ const Dashboard = ({ onNavigate }) => {
           <div className="h-64 relative">
             {!hasCompletedTrades && (
               <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none z-10">
-                <p className="text-xs text-gray-400 bg-white/80 px-3 py-1 rounded-full">
+                <p className="text-xs text-gray-400 dark:text-gray-500 bg-white/80 dark:bg-gray-900/80 px-3 py-1 rounded-full">
                   Complete your first bet to see your real performance
                 </p>
               </div>
@@ -1101,13 +1101,13 @@ const Dashboard = ({ onNavigate }) => {
         </div>
 
         {/* Portfolio Allocation */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Portfolio Allocation</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Portfolio Allocation</h2>
           {!hasData ? (
             <div className="h-48 flex flex-col items-center justify-center text-center">
-              <Wallet className="w-10 h-10 text-gray-300 mb-3" />
-              <p className="text-gray-500 text-sm font-medium">No positions yet</p>
-              <p className="text-gray-400 text-xs mt-1">
+              <Wallet className="w-10 h-10 text-gray-300 dark:text-gray-600 mb-3" />
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">No positions yet</p>
+              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
                 Connect an account to see your allocation
               </p>
             </div>
@@ -1138,9 +1138,9 @@ const Dashboard = ({ onNavigate }) => {
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-sm text-gray-600">{item.name}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.name}</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{item.value}%</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{item.value}%</span>
                   </div>
                 ))}
               </div>
@@ -1149,9 +1149,9 @@ const Dashboard = ({ onNavigate }) => {
         </div>
       </div>
       {/* Recent Bets */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Recent Bets</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Bets</h2>
           {openBets.length > 0 && (
             <button
               onClick={handleViewAllTrades}
@@ -1164,23 +1164,23 @@ const Dashboard = ({ onNavigate }) => {
 
         {openBets.length === 0 ? (
           <div className="p-6 text-center">
-            <Activity className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm font-medium">No bets yet</p>
-            <p className="text-gray-400 text-xs mt-0.5">
+            <Activity className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">No bets yet</p>
+            <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">
               Place your first trade to see it here
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {openBets.slice(0, 3).map((bet) => (
               <div
                 key={bet.id}
                 onClick={() => setSelectedTrade(bet)}
-                className="px-3 py-2 hover:bg-indigo-50 cursor-pointer transition-colors"
+                className="px-3 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors"
               >
                 {/* Compact single row */}
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-gray-900 text-xs">{bet.ticker}</span>
+                  <span className="font-mono font-bold text-gray-900 dark:text-white text-xs">{bet.ticker}</span>
                   <span className={`px-1 py-0.5 text-[9px] font-semibold rounded ${
                     bet.platform === 'Kalshi' ? 'bg-blue-100 text-blue-700' :
                     bet.platform === 'Polymarket' ? 'bg-purple-100 text-purple-700' :
@@ -1193,8 +1193,8 @@ const Dashboard = ({ onNavigate }) => {
                   }`}>
                     {bet.position}
                   </span>
-                  <span className="text-gray-400 text-[10px] truncate flex-1 max-w-[120px]">{bet.event}</span>
-                  <span className="text-[10px] text-gray-500">
+                  <span className="text-gray-400 dark:text-gray-500 text-[10px] truncate flex-1 max-w-[120px]">{bet.event}</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">
                     {bet.contracts}@${bet.entryPrice.toFixed(2)}
                   </span>
                   <span className={`font-mono font-bold text-xs ${bet.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -1219,8 +1219,8 @@ const Dashboard = ({ onNavigate }) => {
       {/* Stat Detail Modal */}
       {selectedStat && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedStat(null)}>
-          <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200"
+          <div
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -1251,8 +1251,8 @@ const Dashboard = ({ onNavigate }) => {
             </div>
 
             {/* Main Value */}
-            <div className="px-6 py-6 text-center border-b border-gray-100">
-              <p className="text-sm text-gray-500 mb-1">{selectedStat.label}</p>
+            <div className="px-6 py-6 text-center border-b border-gray-100 dark:border-gray-800">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedStat.label}</p>
               <p className={`text-4xl font-bold ${
                 selectedStat.color === 'green' ? 'text-green-600' :
                 selectedStat.color === 'red' ? 'text-red-600' :
@@ -1272,30 +1272,30 @@ const Dashboard = ({ onNavigate }) => {
               {selectedStat.details.metrics.map((metric, i) => {
                 const MetricIcon = metric.icon
                 return (
-                  <div key={i} className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-1">
+                  <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
                       <MetricIcon className="w-3 h-3" />
                       {metric.label}
                     </div>
-                    <p className="font-semibold text-gray-900">{metric.value}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{metric.value}</p>
                   </div>
                 )
               })}
             </div>
 
             {/* Pro Tip */}
-            <div className="px-6 py-4 bg-linear-to-r from-indigo-50 to-purple-50 border-t border-indigo-100">
+            <div className="px-6 py-4 bg-linear-to-r from-indigo-50 dark:from-indigo-900/30 to-purple-50 dark:to-purple-900/30 border-t border-indigo-100 dark:border-indigo-800">
               <div className="flex items-start gap-2">
-                <Zap className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" />
-                <p className="text-sm text-indigo-700">{selectedStat.details.tip}</p>
+                <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0" />
+                <p className="text-sm text-indigo-700 dark:text-indigo-300">{selectedStat.details.tip}</p>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+            <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800">
               <button
                 onClick={() => setSelectedStat(null)}
-                className="w-full py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="w-full py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Close
               </button>

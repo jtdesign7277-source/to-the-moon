@@ -34,16 +34,16 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <Icon className="w-5 h-5 text-indigo-600" />
+          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+            <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
         </div>
         {isOpen ? (
           <ChevronUp className="w-5 h-5 text-gray-400" />
@@ -52,7 +52,7 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
         )}
       </button>
       {isOpen && (
-        <div className="px-6 pb-6 border-t border-gray-100">
+        <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-800">
           {children}
         </div>
       )}
@@ -63,19 +63,19 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
 // Comparison card for good vs bad practices
 const ComparisonCard = ({ good, bad, title }) => (
   <div className="grid md:grid-cols-2 gap-4 mt-4">
-    <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
       <div className="flex items-center gap-2 mb-3">
-        <XCircle className="w-5 h-5 text-red-500" />
-        <span className="font-medium text-red-700">Bad Practice (Hindsight Bias)</span>
+        <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
+        <span className="font-medium text-red-700 dark:text-red-400">Bad Practice (Hindsight Bias)</span>
       </div>
-      <p className="text-sm text-red-600">{bad}</p>
+      <p className="text-sm text-red-600 dark:text-red-300">{bad}</p>
     </div>
-    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
       <div className="flex items-center gap-2 mb-3">
-        <CheckCircle className="w-5 h-5 text-green-500" />
-        <span className="font-medium text-green-700">Our Approach (No Hindsight)</span>
+        <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+        <span className="font-medium text-green-700 dark:text-green-400">Our Approach (No Hindsight)</span>
       </div>
-      <p className="text-sm text-green-600">{good}</p>
+      <p className="text-sm text-green-600 dark:text-green-300">{good}</p>
     </div>
   </div>
 )
@@ -83,17 +83,17 @@ const ComparisonCard = ({ good, bad, title }) => (
 // Metric explanation card
 const MetricCard = ({ title, formula, interpretation, example, color = 'indigo' }) => {
   const colorStyles = {
-    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-700',
-    green: 'bg-green-50 border-green-200 text-green-700',
-    purple: 'bg-purple-50 border-purple-200 text-purple-700',
-    orange: 'bg-orange-50 border-orange-200 text-orange-700',
+    indigo: 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
+    green: 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
+    purple: 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300',
+    orange: 'bg-orange-50 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300',
   }
 
   return (
     <div className={`p-4 rounded-xl border ${colorStyles[color]}`}>
       <h4 className="font-semibold mb-2">{title}</h4>
       {formula && (
-        <div className="font-mono text-sm bg-white/50 px-3 py-2 rounded-lg mb-2">
+        <div className="font-mono text-sm bg-white/50 dark:bg-gray-800/50 px-3 py-2 rounded-lg mb-2">
           {formula}
         </div>
       )}
@@ -110,14 +110,14 @@ const Education = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium mb-4">
           <BookOpen className="w-4 h-4" />
           Education Center
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
           Understanding Our Backtesting Methodology
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Transparency builds trust. Learn exactly how we test strategies, collect data,
           and calculate metrics. No black boxes, no misleading statistics.
         </p>
@@ -125,21 +125,21 @@ const Education = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
-          <div className="text-2xl font-bold text-indigo-600">6 Mo</div>
-          <div className="text-sm text-gray-500">Backtest Period</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 text-center">
+          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">6 Mo</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Backtest Period</div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
-          <div className="text-2xl font-bold text-indigo-600">200+</div>
-          <div className="text-sm text-gray-500">Historical Markets</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 text-center">
+          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">200+</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Historical Markets</div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
-          <div className="text-2xl font-bold text-indigo-600">0%</div>
-          <div className="text-sm text-gray-500">Hindsight Bias</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 text-center">
+          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">0%</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Hindsight Bias</div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
-          <div className="text-2xl font-bold text-indigo-600">2</div>
-          <div className="text-sm text-gray-500">Data Sources</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 text-center">
+          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">2</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Data Sources</div>
         </div>
       </div>
 
@@ -152,60 +152,60 @@ const Education = () => {
           defaultOpen={true}
         >
           <div className="mt-4 space-y-4">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               A backtest simulates how a trading strategy would have performed on historical data.
               It's like a time machine for trading - we replay past market conditions and see how
               our rules would have triggered trades.
             </p>
 
-            <div className="bg-gray-50 rounded-xl p-5">
-              <h4 className="font-semibold text-gray-900 mb-3">The Backtesting Process</h4>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">The Backtesting Process</h4>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-indigo-600">1</span>
+                  <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">1</span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Collect Historical Data</p>
-                    <p className="text-sm text-gray-500">Gather resolved markets with complete price history from Kalshi and Manifold</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Collect Historical Data</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gather resolved markets with complete price history from Kalshi and Manifold</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-indigo-600">2</span>
+                  <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">2</span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Apply Strategy Rules</p>
-                    <p className="text-sm text-gray-500">For each market, check if our entry conditions would have been met</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Apply Strategy Rules</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">For each market, check if our entry conditions would have been met</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-indigo-600">3</span>
+                  <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">3</span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Simulate Trades</p>
-                    <p className="text-sm text-gray-500">Execute virtual trades based on entry signals, without knowing outcomes</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Simulate Trades</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Execute virtual trades based on entry signals, without knowing outcomes</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-indigo-600">4</span>
+                  <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">4</span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Calculate Results</p>
-                    <p className="text-sm text-gray-500">Measure P&L, win rate, drawdowns, and risk-adjusted metrics</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Calculate Results</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Measure P&L, win rate, drawdowns, and risk-adjusted metrics</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-yellow-800">Important Limitation</p>
-                  <p className="text-sm text-yellow-700">
+                  <p className="font-medium text-yellow-800 dark:text-yellow-300">Important Limitation</p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400">
                     Backtests show what <em>would have</em> happened, not what <em>will</em> happen.
                     Market conditions change, liquidity varies, and execution differs in live trading.
                   </p>
@@ -221,32 +221,32 @@ const Education = () => {
           icon={Eye}
         >
           <div className="mt-4 space-y-4">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               <strong>Hindsight bias</strong> is the #1 reason backtests fail in live trading.
               It's when a strategy "knows" information it couldn't have known at the time -
               like trading based on tomorrow's news.
             </p>
 
-            <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-indigo-600" />
+            <div className="bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 How We Eliminate Hindsight Bias
               </h4>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
                   <span><strong>Entry decisions use only early price data</strong> - We look at the first third of a market's price history, not the resolution</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
                   <span><strong>No knowledge of outcomes</strong> - The strategy doesn't know if a market resolved YES or NO when deciding to enter</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
                   <span><strong>Realistic entry logic</strong> - Trades are based on price signals and momentum, not future events</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0" />
                   <span><strong>Win rates are NOT 100%</strong> - Our strategies lose trades, just like in real markets</span>
                 </li>
               </ul>
@@ -257,10 +257,10 @@ const Education = () => {
               good="Looking at early price momentum (e.g., price rising from $0.45 to $0.55), then deciding to buy YES based on that signal alone."
             />
 
-            <div className="bg-gray-50 rounded-xl p-5">
-              <h4 className="font-semibold text-gray-900 mb-3">Example: Momentum Strategy Entry</h4>
-              <div className="font-mono text-sm bg-white p-4 rounded-lg border border-gray-200 overflow-x-auto">
-                <pre className="text-gray-700">{`// At entry time, we only see early prices
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Example: Momentum Strategy Entry</h4>
+              <div className="font-mono text-sm bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <pre className="text-gray-700 dark:text-gray-300">{`// At entry time, we only see early prices
 early_prices = market.price_history[:len/3]  // First third only
 
 // Calculate momentum from visible data
@@ -285,98 +285,98 @@ if trend > min_edge:
           icon={Database}
         >
           <div className="mt-4 space-y-4">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Our backtests use real historical data from two major prediction market platforms.
               We only use <strong>resolved markets</strong> where the outcome is known, giving us
               ground truth for measuring strategy performance.
             </p>
 
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl p-5 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="text-2xl">🎲</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Kalshi</h4>
-                    <p className="text-xs text-gray-500">CFTC-Regulated Exchange</p>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Kalshi</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">CFTC-Regulated Exchange</p>
                   </div>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-indigo-500" />
+                    <ArrowRight className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
                     Politics & Elections
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-indigo-500" />
+                    <ArrowRight className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
                     Economics & Fed Decisions
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-indigo-500" />
+                    <ArrowRight className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
                     Sports Events
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-indigo-500" />
+                    <ArrowRight className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
                     Real USD liquidity
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-white rounded-xl p-5 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="text-2xl">🔮</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Manifold Markets</h4>
-                    <p className="text-xs text-gray-500">Community Prediction Platform</p>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Manifold Markets</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Community Prediction Platform</p>
                   </div>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-purple-500" />
+                    <ArrowRight className="w-3 h-3 text-purple-500 dark:text-purple-400" />
                     Tech & AI Predictions
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-purple-500" />
+                    <ArrowRight className="w-3 h-3 text-purple-500 dark:text-purple-400" />
                     Crypto Markets
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-purple-500" />
+                    <ArrowRight className="w-3 h-3 text-purple-500 dark:text-purple-400" />
                     Wide variety of topics
                   </li>
                   <li className="flex items-center gap-2">
-                    <ArrowRight className="w-3 h-3 text-purple-500" />
+                    <ArrowRight className="w-3 h-3 text-purple-500 dark:text-purple-400" />
                     High market volume
                   </li>
                 </ul>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-5">
-              <h4 className="font-semibold text-gray-900 mb-3">Data We Collect Per Market</h4>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Data We Collect Per Market</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white p-3 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500">Market Title</p>
-                  <p className="font-medium text-gray-900 text-sm">"Will X happen?"</p>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Market Title</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">"Will X happen?"</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500">Price History</p>
-                  <p className="font-medium text-gray-900 text-sm">Time-series data</p>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Price History</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Time-series data</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500">Resolution</p>
-                  <p className="font-medium text-gray-900 text-sm">YES / NO</p>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Resolution</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">YES / NO</p>
                 </div>
-                <div className="bg-white p-3 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500">Volume</p>
-                  <p className="font-medium text-gray-900 text-sm">Trading activity</p>
+                <div className="bg-white dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Volume</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Trading activity</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
               <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-800">Data Freshness</p>
-                  <p className="text-sm text-blue-700">
+                  <p className="font-medium text-blue-800 dark:text-blue-300">Data Freshness</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
                     Our historical data is cached for 24 hours and can be refreshed on-demand.
                     We analyze 6 months of resolved markets for statistically significant results.
                   </p>
@@ -392,35 +392,35 @@ if trend > min_edge:
           icon={TrendingUp}
         >
           <div className="mt-4 space-y-4">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               The <strong>Sharpe Ratio</strong> is the gold standard for measuring risk-adjusted returns.
               It answers: "How much return am I getting for each unit of risk I'm taking?"
             </p>
 
-            <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
-              <h4 className="font-semibold text-gray-900 mb-3">The Formula</h4>
-              <div className="bg-white p-4 rounded-lg border border-green-200 mb-4">
-                <p className="font-mono text-lg text-center text-gray-800">
+            <div className="bg-linear-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-5 border border-green-200 dark:border-green-800">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">The Formula</h4>
+              <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-green-200 dark:border-green-800 mb-4">
+                <p className="font-mono text-lg text-center text-gray-800 dark:text-gray-200">
                   Sharpe Ratio = (Return - Risk-Free Rate) / Standard Deviation
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-3 text-sm">
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <p className="font-medium text-gray-900">Return</p>
-                  <p className="text-gray-600">Your strategy's gains</p>
+                <div className="bg-white/70 dark:bg-gray-800/70 p-3 rounded-lg">
+                  <p className="font-medium text-gray-900 dark:text-white">Return</p>
+                  <p className="text-gray-600 dark:text-gray-400">Your strategy's gains</p>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <p className="font-medium text-gray-900">Risk-Free Rate</p>
-                  <p className="text-gray-600">~5% (Treasury yield)</p>
+                <div className="bg-white/70 dark:bg-gray-800/70 p-3 rounded-lg">
+                  <p className="font-medium text-gray-900 dark:text-white">Risk-Free Rate</p>
+                  <p className="text-gray-600 dark:text-gray-400">~5% (Treasury yield)</p>
                 </div>
-                <div className="bg-white/70 p-3 rounded-lg">
-                  <p className="font-medium text-gray-900">Std Deviation</p>
-                  <p className="text-gray-600">Volatility of returns</p>
+                <div className="bg-white/70 dark:bg-gray-800/70 p-3 rounded-lg">
+                  <p className="font-medium text-gray-900 dark:text-white">Std Deviation</p>
+                  <p className="text-gray-600 dark:text-gray-400">Volatility of returns</p>
                 </div>
               </div>
             </div>
 
-            <h4 className="font-semibold text-gray-900">How to Interpret Sharpe Ratio</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white">How to Interpret Sharpe Ratio</h4>
             <div className="grid md:grid-cols-2 gap-4">
               <MetricCard
                 title="Sharpe < 1.0"
@@ -448,19 +448,19 @@ if trend > min_edge:
               />
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-5">
-              <h4 className="font-semibold text-gray-900 mb-3">Sharpe vs Sortino Ratio</h4>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Sharpe vs Sortino Ratio</h4>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h5 className="font-medium text-gray-900 mb-2">Sharpe Ratio</h5>
-                  <p className="text-sm text-gray-600">
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-2">Sharpe Ratio</h5>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Penalizes ALL volatility equally - both upside and downside.
                     A strategy that swings wildly but always ends up will have a lower Sharpe.
                   </p>
                 </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h5 className="font-medium text-gray-900 mb-2">Sortino Ratio</h5>
-                  <p className="text-sm text-gray-600">
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <h5 className="font-medium text-gray-900 dark:text-white mb-2">Sortino Ratio</h5>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Only penalizes DOWNSIDE volatility. Better for strategies where
                     upside variance is desirable (you want big wins!).
                   </p>
@@ -476,12 +476,12 @@ if trend > min_edge:
           icon={AlertTriangle}
         >
           <div className="mt-4 space-y-4">
-            <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-5">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-red-500 mt-0.5" />
+                <AlertTriangle className="w-6 h-6 text-red-500 dark:text-red-400 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-red-800 mb-2">Critical Disclaimer</h4>
-                  <p className="text-red-700">
+                  <h4 className="font-semibold text-red-800 dark:text-red-300 mb-2">Critical Disclaimer</h4>
+                  <p className="text-red-700 dark:text-red-400">
                     All backtest results shown are hypothetical and based on historical data.
                     <strong> Past performance is NOT indicative of future results.</strong> You could
                     lose some or all of your investment.
@@ -490,20 +490,20 @@ if trend > min_edge:
               </div>
             </div>
 
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               This isn't just legal boilerplate - there are real reasons why backtests
               don't perfectly predict live performance:
             </p>
 
             <div className="space-y-3">
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Clock className="w-4 h-4 text-orange-600" />
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
+                    <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Market Conditions Change</h4>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Market Conditions Change</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       The 2024 election cycle had unique characteristics. Future markets may behave
                       differently due to new regulations, participants, or events.
                     </p>
@@ -511,14 +511,14 @@ if trend > min_edge:
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Activity className="w-4 h-4 text-purple-600" />
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+                    <Activity className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Execution Slippage</h4>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Execution Slippage</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Backtests assume perfect fills at exact prices. In reality, your orders
                       move the market, especially in lower-liquidity markets.
                     </p>
@@ -526,14 +526,14 @@ if trend > min_edge:
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Zap className="w-4 h-4 text-blue-600" />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Strategy Crowding</h4>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Strategy Crowding</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       If many people use the same strategy, the edge disappears.
                       Profitable strategies attract competition.
                     </p>
@@ -541,14 +541,14 @@ if trend > min_edge:
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <Target className="w-4 h-4 text-red-600" />
+                  <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
+                    <Target className="w-4 h-4 text-red-600 dark:text-red-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Overfitting Risk</h4>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Overfitting Risk</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Strategies optimized too precisely on historical data may fail on new data.
                       We use general rules, not curve-fitted parameters.
                     </p>
@@ -556,14 +556,14 @@ if trend > min_edge:
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <PieChart className="w-4 h-4 text-green-600" />
+                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
+                    <PieChart className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Sample Size Limitations</h4>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-gray-900 dark:text-white">Sample Size Limitations</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       6 months of data (~180 days) provides a reasonable sample, but rare events
                       (black swans) may not be represented.
                     </p>
@@ -572,27 +572,27 @@ if trend > min_edge:
               </div>
             </div>
 
-            <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
-              <h4 className="font-semibold text-gray-900 mb-3">Our Recommendations</h4>
-              <ul className="space-y-2 text-sm text-gray-700">
+            <div className="bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Our Recommendations</h4>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <span><strong>Start with paper trading</strong> - Test strategies with virtual money first</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <span><strong>Use proper position sizing</strong> - Never risk more than you can afford to lose</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <span><strong>Diversify across strategies</strong> - Don't put all capital in one approach</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <span><strong>Monitor live performance</strong> - If results diverge significantly, pause and investigate</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
                   <span><strong>Expect drawdowns</strong> - Even good strategies have losing streaks</span>
                 </li>
               </ul>
@@ -664,7 +664,7 @@ if trend > min_edge:
       </div>
 
       {/* Footer Disclaimer */}
-      <div className="text-center text-xs text-gray-400 pb-8">
+      <div className="text-center text-xs text-gray-400 dark:text-gray-500 pb-8">
         <p>
           This educational content is for informational purposes only and does not constitute
           financial advice. Trading prediction markets involves risk of loss.

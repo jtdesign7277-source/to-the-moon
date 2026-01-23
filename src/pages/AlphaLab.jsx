@@ -94,8 +94,8 @@ const EXAMPLE_STRATEGIES = [
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-        <p className="text-xs text-gray-500">{label}</p>
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700">
+        <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
         <p className={`text-sm font-semibold ${payload[0].value >= 10000 ? 'text-green-600' : 'text-red-600'}`}>
           ${payload[0].value?.toLocaleString()}
         </p>
@@ -107,15 +107,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const MetricCard = ({ icon: Icon, label, value, subValue, positive, color = 'indigo' }) => {
   const colorStyles = {
-    indigo: 'bg-indigo-50 text-indigo-600',
-    green: 'bg-green-50 text-green-600',
-    red: 'bg-red-50 text-red-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    purple: 'bg-purple-50 text-purple-600',
+    indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+    green: 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+    red: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+    purple: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className={`p-2 rounded-lg ${colorStyles[color]}`}>
           <Icon className="w-4 h-4" />
@@ -128,10 +128,10 @@ const MetricCard = ({ icon: Icon, label, value, subValue, positive, color = 'ind
           </span>
         )}
       </div>
-      <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
       {subValue && (
-        <p className="text-xs text-gray-400 mt-1">{subValue}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subValue}</p>
       )}
     </div>
   )
@@ -362,19 +362,19 @@ const AlphaLab = () => {
           <Brain className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Alpha Lab</h1>
-          <p className="text-gray-500 text-sm">AI-powered strategy builder & backtester</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder & backtester</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-gray-50 dark:from-gray-800 to-white dark:to-gray-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Wand2 className="w-5 h-5 text-indigo-600" />
-                  <h2 className="font-semibold text-gray-900">Describe Your Strategy</h2>
+                  <Wand2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <h2 className="font-semibold text-gray-900 dark:text-white">Describe Your Strategy</h2>
                 </div>
                 <button
                   onClick={() => setShowExamples(!showExamples)}
@@ -387,8 +387,8 @@ const AlphaLab = () => {
             </div>
 
             {showExamples && (
-              <div className="p-4 bg-indigo-50/50 border-b border-indigo-100">
-                <p className="text-xs text-indigo-600 font-medium mb-3">TRY ONE OF THESE:</p>
+              <div className="p-4 bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
+                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-3">TRY ONE OF THESE:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {EXAMPLE_STRATEGIES.map((example, i) => (
                     <button
@@ -398,33 +398,33 @@ const AlphaLab = () => {
                         setStrategyName(example.name)
                         setShowExamples(false)
                       }}
-                      className="p-3 bg-white rounded-xl border border-indigo-100 text-left hover:border-indigo-300 hover:shadow-sm transition-all group"
+                      className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-indigo-100 dark:border-indigo-800 text-left hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all group"
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg">{example.icon}</span>
-                        <span className="font-medium text-gray-900 text-sm">{example.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-white text-sm">{example.name}</span>
                       </div>
-                      <p className="text-xs text-gray-500 line-clamp-2">{example.text}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{example.text}</p>
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="p-4 border-b border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Strategy Name</label>
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Strategy Name</label>
               <input
                 type="text"
                 value={strategyName}
                 onChange={(e) => setStrategyName(e.target.value)}
                 placeholder="My Alpha Strategy"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
             </div>
 
             <div className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Strategy Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Strategy Description</label>
                 {strategyText.trim() && (
                   <button
                     onClick={() => {
@@ -449,15 +449,15 @@ const AlphaLab = () => {
 
 Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI hits 70 or after 5% profit. Use a 2% stop loss."
                   rows={6}
-                  className={`w-full px-4 py-3 pr-24 border rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none ${
-                    isListening ? 'border-red-400 bg-red-50/30' : 'border-gray-200'
+                  className={`w-full px-4 py-3 pr-24 border rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none ${
+                    isListening ? 'border-red-400 bg-red-50/30 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700'
                   }`}
                 />
                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
                   {strategyText.trim() && !isListening && (
                     <button
                       onClick={() => setStrategyText('')}
-                      className="p-2 bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500 rounded-lg transition-all"
+                      className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-500 rounded-lg transition-all"
                       title="Clear text"
                     >
                       <X className="w-4 h-4" />
@@ -468,7 +468,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                     className={`p-2.5 rounded-xl transition-all ${
                       isListening
                         ? 'bg-red-500 text-white animate-pulse'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                     title={isListening ? 'Stop recording' : 'Voice input'}
                   >
@@ -484,7 +484,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
               <button
                 onClick={parseStrategy}
                 disabled={!strategyText.trim() || isParsing}
@@ -510,14 +510,14 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
           </div>
 
           {parsedStrategy && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-green-50 dark:from-green-900/20 to-emerald-50 dark:to-emerald-900/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-green-100 rounded-lg">
-                      <Check className="w-4 h-4 text-green-600" />
+                    <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
                     </div>
-                    <h3 className="font-semibold text-gray-900">AI Interpretation</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">AI Interpretation</h3>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                       parsedStrategy.confidence >= 0.8 ? 'bg-green-100 text-green-700' :
                       parsedStrategy.confidence >= 0.5 ? 'bg-yellow-100 text-yellow-700' :
@@ -546,64 +546,64 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
               </div>
 
               <div className="p-4 space-y-4">
-                <div className="p-3 bg-gray-50 rounded-xl">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   {isEditing ? (
                     <textarea
                       value={editedInterpretation || parsedStrategy.interpretation}
                       onChange={(e) => setEditedInterpretation(e.target.value)}
-                      className="w-full text-sm text-gray-700 bg-white border border-indigo-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                      className="w-full text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-indigo-200 dark:border-indigo-700 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                       rows={3}
                     />
                   ) : (
-                    <p className="text-sm text-gray-700">{editedInterpretation || parsedStrategy.interpretation}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{editedInterpretation || parsedStrategy.interpretation}</p>
                   )}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 bg-indigo-50 rounded-xl">
-                    <p className="text-xs text-indigo-600 font-medium">Symbol</p>
-                    <p className="text-lg font-bold text-gray-900">{parsedStrategy.symbol || 'SPY'}</p>
+                  <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Symbol</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{parsedStrategy.symbol || 'SPY'}</p>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-xl">
-                    <p className="text-xs text-purple-600 font-medium">Timeframe</p>
-                    <p className="text-lg font-bold text-gray-900">{parsedStrategy.timeframe?.toUpperCase() || '1D'}</p>
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Timeframe</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{parsedStrategy.timeframe?.toUpperCase() || '1D'}</p>
                   </div>
-                  <div className="p-3 bg-green-50 rounded-xl">
-                    <p className="text-xs text-green-600 font-medium">Take Profit</p>
-                    <p className="text-lg font-bold text-gray-900">{parsedStrategy.risk_management?.take_profit || 5}%</p>
+                  <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium">Take Profit</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{parsedStrategy.risk_management?.take_profit || 5}%</p>
                   </div>
-                  <div className="p-3 bg-red-50 rounded-xl">
-                    <p className="text-xs text-red-600 font-medium">Stop Loss</p>
-                    <p className="text-lg font-bold text-gray-900">{parsedStrategy.risk_management?.stop_loss || 2}%</p>
+                  <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-xl">
+                    <p className="text-xs text-red-600 dark:text-red-400 font-medium">Stop Loss</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{parsedStrategy.risk_management?.stop_loss || 2}%</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <ArrowUpRight className="w-4 h-4 text-green-600" />
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" />
                       Entry Conditions
                     </h4>
                     <div className="space-y-2">
                       {parsedStrategy.entry_conditions?.map((cond, i) => (
-                        <div key={i} className="p-2 bg-green-50 rounded-lg text-sm text-green-800 border border-green-100">
+                        <div key={i} className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-300 border border-green-100 dark:border-green-800">
                           {cond.type === 'indicator' && `${cond.indicator} ${cond.operator} ${cond.value}`}
                           {cond.type === 'crossover' && `Price crosses ${cond.direction} ${cond.period}-period ${cond.indicator}`}
                           {cond.type === 'volume' && `Volume ${cond.multiplier}x normal`}
                           {cond.type === 'time_window' && `Between ${cond.start} - ${cond.end}`}
                         </div>
-                      )) || <p className="text-sm text-gray-400">RSI {'<'} 30 (default)</p>}
+                      )) || <p className="text-sm text-gray-400 dark:text-gray-500">RSI {'<'} 30 (default)</p>}
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <ArrowDownRight className="w-4 h-4 text-red-600" />
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                      <ArrowDownRight className="w-4 h-4 text-red-600 dark:text-red-400" />
                       Exit Conditions
                     </h4>
                     <div className="space-y-2">
                       {parsedStrategy.exit_conditions?.map((cond, i) => (
-                        <div key={i} className="p-2 bg-red-50 rounded-lg text-sm text-red-800 border border-red-100">
+                        <div key={i} className="p-2 bg-red-50 dark:bg-red-900/30 rounded-lg text-sm text-red-800 dark:text-red-300 border border-red-100 dark:border-red-800">
                           {cond.type === 'indicator' && `${cond.indicator} ${cond.operator} ${cond.value}`}
                         </div>
-                      )) || <p className="text-sm text-gray-400">RSI {'>'} 70 (default)</p>}
+                      )) || <p className="text-sm text-gray-400 dark:text-gray-500">RSI {'>'} 70 (default)</p>}
                     </div>
                   </div>
                 </div>
@@ -612,13 +612,13 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
           )}
 
           {backtestResults && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-indigo-600" />
-                    <h3 className="font-semibold text-gray-900">Backtest Results</h3>
-                    <span className="text-xs text-gray-500">{backtestResults.bars_analyzed} bars analyzed</span>
+                    <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Backtest Results</h3>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{backtestResults.bars_analyzed} bars analyzed</span>
                   </div>
                   <button onClick={runBacktest} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
                     <RefreshCw className="w-4 h-4" />
@@ -632,8 +632,8 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                 <MetricCard icon={Target} label="Win Rate" value={`${backtestResults.win_rate}%`} color={backtestResults.win_rate >= 50 ? 'green' : 'yellow'} />
                 <MetricCard icon={Shield} label="Max Drawdown" value={`-${backtestResults.max_drawdown}%`} color={backtestResults.max_drawdown < 10 ? 'green' : 'red'} />
               </div>
-              <div className="p-4 border-t border-gray-100">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Equity Curve</h4>
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Equity Curve</h4>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={backtestResults.equity_curve}>
@@ -652,30 +652,30 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="p-4 border-t border-gray-100 grid grid-cols-3 sm:grid-cols-6 gap-3">
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 sm:grid-cols-6 gap-3">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">{backtestResults.total_trades}</p>
-                  <p className="text-xs text-gray-500">Total Trades</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{backtestResults.total_trades}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Total Trades</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-green-600">{backtestResults.winning_trades}</p>
-                  <p className="text-xs text-gray-500">Winners</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Winners</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-red-600">{backtestResults.losing_trades}</p>
-                  <p className="text-xs text-gray-500">Losers</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Losers</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">{backtestResults.sharpe_ratio}</p>
-                  <p className="text-xs text-gray-500">Sharpe Ratio</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{backtestResults.sharpe_ratio}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Sharpe Ratio</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">{backtestResults.profit_factor}</p>
-                  <p className="text-xs text-gray-500">Profit Factor</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{backtestResults.profit_factor}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Profit Factor</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-green-600">${backtestResults.avg_win}</p>
-                  <p className="text-xs text-gray-500">Avg Win</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Avg Win</p>
                 </div>
               </div>
             </div>
@@ -684,16 +684,16 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
 
         <div className="space-y-6">
           {parsedStrategy && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-gray-600" />
-                  <h3 className="font-semibold text-gray-900">Backtest Settings</h3>
+                  <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Backtest Settings</h3>
                 </div>
               </div>
               <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Chart Timeframe</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chart Timeframe</label>
                   <div className="grid grid-cols-4 gap-2">
                     {TIMEFRAMES.map((tf) => (
                       <button
@@ -702,7 +702,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                         className={`py-2 px-3 text-sm font-medium rounded-lg transition-all ${
                           selectedTimeframe === tf.id
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       >
                         {tf.label}
@@ -711,7 +711,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Backtest Period</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Backtest Period</label>
                   <div className="grid grid-cols-3 gap-2">
                     {LOOKBACKS.map((lb) => (
                       <button
@@ -720,7 +720,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                         className={`py-2 px-3 text-sm font-medium rounded-lg transition-all ${
                           selectedLookback === lb.id
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       >
                         {lb.label}
@@ -729,14 +729,14 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Initial Capital</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Initial Capital</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
                     <input
                       type="number"
                       value={initialCapital}
                       onChange={(e) => setInitialCapital(Number(e.target.value))}
-                      className="w-full pl-8 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full pl-8 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -762,7 +762,7 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   )}
                 </button>
                 {isBacktesting && (
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300" style={{ width: `${backtestProgress}%` }} />
                   </div>
                 )}
@@ -771,61 +771,61 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
           )}
 
           {backtestResults && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-purple-50 dark:from-purple-900/20 to-indigo-50 dark:to-indigo-900/20">
                 <div className="flex items-center gap-2">
-                  <Rocket className="w-5 h-5 text-purple-600" />
-                  <h3 className="font-semibold text-gray-900">Deploy Strategy</h3>
+                  <Rocket className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Deploy Strategy</h3>
                 </div>
               </div>
               <div className="p-4 space-y-4">
                 {!isDeployed ? (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Trading Mode</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Trading Mode</label>
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setDeploymentMode('paper')}
                           className={`p-3 rounded-xl border-2 text-left transition-all ${
                             deploymentMode === 'paper'
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
-                          <p className="font-medium text-gray-900">Paper</p>
-                          <p className="text-xs text-gray-500">Risk-free testing</p>
+                          <p className="font-medium text-gray-900 dark:text-white">Paper</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Risk-free testing</p>
                         </button>
                         <button
                           onClick={() => setDeploymentMode('live')}
                           className={`p-3 rounded-xl border-2 text-left transition-all ${
                             deploymentMode === 'live'
-                              ? 'border-green-500 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
-                          <p className="font-medium text-gray-900">Live</p>
-                          <p className="text-xs text-gray-500">Real money</p>
+                          <p className="font-medium text-gray-900 dark:text-white">Live</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Real money</p>
                         </button>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Capital to Deploy</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Capital to Deploy</label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
                         <input
                           type="number"
                           value={deploymentCapital}
                           onChange={(e) => setDeploymentCapital(Number(e.target.value))}
-                          className="w-full pl-8 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full pl-8 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
                     </div>
                     {deploymentMode === 'live' && (
-                      <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2">
-                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-amber-800">
+                      <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-amber-800 dark:text-amber-300">
                           <p className="font-medium">Live Trading Warning</p>
-                          <p className="text-xs mt-1">Real money will be used. Past performance does not guarantee future results.</p>
+                          <p className="text-xs mt-1 dark:text-amber-400">Real money will be used. Past performance does not guarantee future results.</p>
                         </div>
                       </div>
                     )}
@@ -853,16 +853,16 @@ Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI
                   </>
                 ) : (
                   <div className="text-center py-4">
-                    <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
-                      <Check className="w-8 h-8 text-green-600" />
+                    <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                      <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Strategy Deployed!</h4>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Strategy Deployed!</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       {strategyName || 'Your strategy'} is now running in {deploymentMode} mode
                     </p>
-                    <div className="p-3 bg-gray-50 rounded-xl mb-4">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl mb-4">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Status</span>
+                        <span className="text-gray-500 dark:text-gray-400">Status</span>
                         <span className="flex items-center gap-1.5 text-green-600 font-medium">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                           Active

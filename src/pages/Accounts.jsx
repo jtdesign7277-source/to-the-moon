@@ -475,18 +475,18 @@ const Accounts = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your connected trading platforms and portfolios.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Accounts</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage your connected trading platforms and portfolios.</p>
       </div>
 
       {/* Paper Trading Notice */}
       {tradingMode === 'paper' && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-yellow-800">Paper Trading Mode Active</h3>
-              <p className="text-sm text-yellow-700 mt-1">
+              <h3 className="font-medium text-yellow-800 dark:text-yellow-300">Paper Trading Mode Active</h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
                 You're using simulated funds. Switch to live trading to use real accounts.
               </p>
             </div>
@@ -498,65 +498,65 @@ const Accounts = () => {
       {tradingMode === 'paper' ? (
         <div className="space-y-6">
           {/* Paper Account Card */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center text-3xl">
+                <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl flex items-center justify-center text-3xl">
                   {paperAccount.icon}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">{paperAccount.name}</h3>
-                  <p className="text-sm text-gray-500">{paperAccount.type}</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{paperAccount.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{paperAccount.type}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-gray-900">{paperAccount.balance}</p>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{paperAccount.balance}</p>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded">
                   <Check className="w-3 h-3" />
                   {paperAccount.status}
                 </span>
               </div>
             </div>
-            
+
             {/* Paper Trading Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
               <div>
-                <p className="text-sm text-gray-500">Total P&L</p>
-                <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total P&L</p>
+                <p className={`text-lg font-semibold ${paperPortfolio.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {paperPortfolio.totalPnl >= 0 ? '+' : ''}{formatCurrency(paperPortfolio.totalPnl)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Win Rate</p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Win Rate</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
                   {paperPortfolio.totalTrades > 0 ? `${paperPortfolio.winRate.toFixed(1)}%` : '—'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Trades</p>
-                <p className="text-lg font-semibold text-gray-900">{paperPortfolio.totalTrades}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Trades</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">{paperPortfolio.totalTrades}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Open Positions</p>
-                <p className="text-lg font-semibold text-gray-900">{paperPositions.length}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Open Positions</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">{paperPositions.length}</p>
               </div>
             </div>
-            
+
             {/* Reset Button */}
-            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <Button
                 onClick={handleResetPortfolio}
                 disabled={isResetting}
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-red-600"
+                className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
               >
                 {isResetting ? 'Resetting...' : 'Reset Paper Account to $100,000'}
               </Button>
               <button
                 onClick={fetchPaperPortfolio}
                 disabled={isLoading}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 title="Refresh portfolio"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -566,22 +566,22 @@ const Accounts = () => {
 
           {/* Open Positions */}
           {paperPositions.length > 0 && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-4">Open Positions</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Open Positions</h3>
               <div className="space-y-3">
                 {paperPositions.map((position) => (
-                  <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={position.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 text-sm">{position.marketTitle}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">{position.marketTitle}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {position.quantity} {position.side.toUpperCase()} @ {formatCurrency(position.avgEntryPrice)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-sm font-semibold ${position.unrealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`text-sm font-semibold ${position.unrealizedPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {position.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(position.unrealizedPnl)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {formatPercent(position.unrealizedPnlPercent)}
                       </p>
                     </div>
@@ -593,17 +593,17 @@ const Accounts = () => {
 
           {/* Recent Trades */}
           {recentTrades.length > 0 && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Trades</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Recent Trades</h3>
               <div className="space-y-2">
                 {recentTrades.slice(0, 5).map((trade) => (
-                  <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <div key={trade.id} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
                     <div>
-                      <p className="text-sm text-gray-900">{trade.action.toUpperCase()} {trade.quantity} {trade.side.toUpperCase()}</p>
-                      <p className="text-xs text-gray-500">{trade.marketTitle?.substring(0, 40)}...</p>
+                      <p className="text-sm text-gray-900 dark:text-white">{trade.action.toUpperCase()} {trade.quantity} {trade.side.toUpperCase()}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{trade.marketTitle?.substring(0, 40)}...</p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {trade.status === 'closed' ? (trade.pnl >= 0 ? '+' : '') + formatCurrency(trade.pnl) : 'Open'}
                       </p>
                     </div>
@@ -616,8 +616,8 @@ const Accounts = () => {
           {/* Available Platforms Preview (Paper Mode) */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Available Platforms</h3>
-              <span className="text-xs text-gray-500">Switch to Live to connect</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Available Platforms</h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Switch to Live to connect</span>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {AVAILABLE_PLATFORMS.map((platform) => {
@@ -625,13 +625,13 @@ const Accounts = () => {
                 return (
                   <div
                     key={platform.id}
-                    className="p-4 rounded-xl border-2 border-gray-100 bg-gray-50 opacity-75"
+                    className="p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 opacity-75"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{platform.icon}</span>
                       <div>
-                        <h4 className="font-semibold text-gray-900">{platform.name}</h4>
-                        <p className="text-xs text-gray-500">{platform.type}</p>
+                        <h4 className="font-semibold text-gray-900 dark:text-white">{platform.name}</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{platform.type}</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-3">
@@ -645,14 +645,14 @@ const Accounts = () => {
                 )
               })}
             </div>
-            
+
             {/* Ready for Live Trading CTA */}
-            <div className="mt-6 p-5 bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+            <div className="mt-6 p-5 bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800">
               <div className="flex items-center gap-4">
                 <div className="text-3xl">🚀</div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">Ready for Live Trading?</h4>
-                  <p className="text-sm text-gray-600 mt-0.5">
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Ready for Live Trading?</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
                     {isPro ? 'Switch to live mode to connect real accounts.' : 'Upgrade to Pro ($9.99/mo) to connect real accounts.'}
                   </p>
                 </div>
@@ -674,11 +674,11 @@ const Accounts = () => {
             <>
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Connected Accounts</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Connected Accounts</h3>
                   <button
                     onClick={handleRefreshBalances}
                     disabled={isRefreshing}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors disabled:opacity-50"
                   >
                     <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                     {isRefreshing ? 'Refreshing...' : 'Refresh All'}
@@ -691,33 +691,33 @@ const Accounts = () => {
                     return (
                       <div
                         key={account.id}
-                        className={`bg-white rounded-xl p-5 shadow-sm border-2 border-l-4 ${colors.border} hover:shadow-md transition-all`}
+                        className={`bg-white dark:bg-gray-900 rounded-xl p-5 shadow-sm border-2 border-l-4 ${colors.border} hover:shadow-md transition-all`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{account.icon}</span>
                             <div>
-                              <h4 className="font-semibold text-gray-900">{account.name}</h4>
-                              <p className="text-xs text-gray-500">{account.type}</p>
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{account.name}</h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{account.type}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded flex items-center gap-1">
+                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded flex items-center gap-1">
                               <Check className="w-3 h-3" />
                               Live
                             </span>
                             <button
                               onClick={() => handleDisconnect(account.id)}
-                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                              className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                               title="Disconnect account"
                             >
                               <X className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <p className="text-xs text-gray-500 mb-1">Balance</p>
-                          <p className="text-2xl font-bold text-gray-900">{account.balance}</p>
+                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Balance</p>
+                          <p className="text-2xl font-bold text-gray-900 dark:text-white">{account.balance}</p>
                           {account.lastUpdate && (
                             <p className="text-xs text-gray-400 mt-1">
                               Updated {new Date(account.lastUpdate).toLocaleTimeString()}
@@ -752,7 +752,7 @@ const Accounts = () => {
 
           {/* Available Platforms Grid - 3 and 3 side by side */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
               {accounts.length > 0 ? 'Connect More Platforms' : 'Connect a Platform to Get Started'}
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
@@ -788,36 +788,36 @@ const Accounts = () => {
                       disabled={isConnected}
                       className={`w-full text-left p-5 rounded-xl border-2 transition-all ${
                         isConnected
-                          ? 'border-green-300 bg-green-50'
+                          ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
                           : isSelected
                           ? `${colors.border} ${colors.bg}`
-                          : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-md'
+                          : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-3xl">{platform.icon}</span>
                           <div>
-                            <h4 className="font-semibold text-gray-900">{platform.name}</h4>
-                            <p className="text-xs text-gray-500">{platform.type}</p>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{platform.name}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{platform.type}</p>
                           </div>
                         </div>
                         {isConnected ? (
                           <div className="text-right">
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded">
                               Connected
                             </span>
-                            <p className="text-lg font-bold text-gray-900 mt-2">{connectedAccount?.balance}</p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-white mt-2">{connectedAccount?.balance}</p>
                           </div>
                         ) : (
                           <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
                         )}
                       </div>
-                      
+
                       {/* Description & Features */}
                       {!isConnected && (
                         <>
-                          <p className="text-sm text-gray-600 mt-3 line-clamp-2">{platform.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">{platform.description}</p>
                           <div className="flex flex-wrap gap-1.5 mt-3">
                             {platform.features.map((feature, i) => (
                               <span key={i} className={`px-2 py-0.5 text-xs rounded ${colors.bg} ${colors.text}`}>

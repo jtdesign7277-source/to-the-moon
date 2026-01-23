@@ -25,11 +25,11 @@ const MobileNav = ({ navItems, currentPage, onNavigate }) => {
               key={item.id}
               onClick={() => handleNavigation(item.id, item.requiresPro)}
               className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 transition-colors ${
-                isActive ? 'text-indigo-600' : 'text-gray-500'
+                isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : ''}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
                 {isLocked && (
                   <Lock className="w-2.5 h-2.5 absolute -top-1 -right-1 text-indigo-600" />
                 )}

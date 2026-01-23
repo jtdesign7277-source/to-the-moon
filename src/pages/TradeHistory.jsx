@@ -285,16 +285,16 @@ const TradeHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
+      <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <button
           onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
         >
-          {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {mobileSidebarOpen ? <X className="w-5 h-5 dark:text-gray-400" /> : <Menu className="w-5 h-5 dark:text-gray-400" />}
         </button>
-        <h1 className="font-semibold text-gray-900">Trade History</h1>
+        <h1 className="font-semibold text-gray-900 dark:text-white">Trade History</h1>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
         </div>
@@ -304,21 +304,21 @@ const TradeHistory = () => {
         {/* Left Sidebar - Account Stats */}
         <aside className={`
           ${mobileSidebarOpen ? 'block' : 'hidden'} lg:block
-          w-full lg:w-72 xl:w-80 bg-white border-r border-gray-200
+          w-full lg:w-72 xl:w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
           lg:min-h-[calc(100vh-64px)] shrink-0
         `}>
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600">Trading Stats</span>
-                <button className="p-1 hover:bg-gray-100 rounded">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Trading Stats</span>
+                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
                   <Settings className="w-3.5 h-3.5 text-gray-400" />
                 </button>
               </div>
               <button
                 onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                className="hidden lg:block p-1 hover:bg-gray-100 rounded"
+                className="hidden lg:block p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
               >
                 {sidebarExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
               </button>
@@ -326,10 +326,10 @@ const TradeHistory = () => {
           </div>
 
           {/* Total P&L */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-baseline justify-between">
-              <span className="text-sm text-gray-500">Total P&L</span>
-              <span className={`text-xl font-semibold tabular-nums ${stats.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Total P&L</span>
+              <span className={`text-xl font-semibold tabular-nums ${stats.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                 {stats.totalPnl >= 0 ? '+' : ''}{formatCurrency(stats.totalPnl)}
               </span>
             </div>
@@ -337,14 +337,14 @@ const TradeHistory = () => {
 
           {/* Stats List */}
           {sidebarExpanded && (
-            <div className="p-4 border-b border-gray-200 space-y-3">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
               {sidebarStats.map((stat, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{stat.label}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</span>
                   <span className={`text-sm tabular-nums font-medium ${
-                    stat.color === 'green' ? 'text-green-600' :
-                    stat.color === 'red' ? 'text-red-600' :
-                    'text-gray-900'
+                    stat.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                    stat.color === 'red' ? 'text-red-600 dark:text-red-400' :
+                    'text-gray-900 dark:text-white'
                   }`}>
                     {stat.value}
                   </span>
@@ -354,16 +354,16 @@ const TradeHistory = () => {
           )}
 
           {/* Best/Worst Trade */}
-          <div className="p-4 border-b border-gray-200 space-y-3">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Best Trade</span>
-              <span className="text-sm tabular-nums font-medium text-green-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Best Trade</span>
+              <span className="text-sm tabular-nums font-medium text-green-600 dark:text-green-400">
                 {stats.bestTrade ? `+${formatCurrency(stats.bestTrade)}` : '—'}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Worst Trade</span>
-              <span className="text-sm tabular-nums font-medium text-red-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Worst Trade</span>
+              <span className="text-sm tabular-nums font-medium text-red-600 dark:text-red-400">
                 {stats.worstTrade ? formatCurrency(stats.worstTrade) : '—'}
               </span>
             </div>
@@ -374,7 +374,7 @@ const TradeHistory = () => {
             <div className="flex gap-2">
               <button
                 onClick={fetchTrades}
-                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
@@ -390,7 +390,7 @@ const TradeHistory = () => {
         {/* Main Content */}
         <main className="flex-1 min-w-0">
           {/* Tab Navigation */}
-          <div className="bg-white border-b border-gray-200">
+          <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between px-4 lg:px-6">
               <nav className="flex gap-1 overflow-x-auto no-scrollbar py-1">
                 {mainTabs.map(tab => (
@@ -399,8 +399,8 @@ const TradeHistory = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                       activeTab === tab.id
-                        ? 'text-indigo-600 border-indigo-600'
-                        : 'text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300'
+                        ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400'
+                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
                     {tab.label}
@@ -408,7 +408,7 @@ const TradeHistory = () => {
                 ))}
               </nav>
               <span className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-                tradingMode === 'live' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                tradingMode === 'live' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
                 {tradingMode === 'live' ? 'Live' : 'Paper'}
@@ -418,20 +418,20 @@ const TradeHistory = () => {
 
           <div className="p-4 lg:p-6 space-y-6">
             {/* Equity Curve Chart */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
               {/* Chart Header */}
-              <div className="p-4 lg:p-6 border-b border-gray-100">
+              <div className="p-4 lg:p-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-start gap-6">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Equity Curve</p>
-                      <p className="text-3xl lg:text-4xl font-semibold text-gray-900 tabular-nums">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Equity Curve</p>
+                      <p className="text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tabular-nums">
                         ${formatCurrency(stats.totalPnl)}
                       </p>
                     </div>
                     <div className="pt-5">
-                      <span className="text-xs text-gray-500">Change ({chartPeriod})</span>
-                      <div className={`flex items-center gap-1 ${stats.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Change ({chartPeriod})</span>
+                      <div className={`flex items-center gap-1 ${stats.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {stats.totalPnl >= 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                         <span className="text-lg font-semibold tabular-nums">
                           {formatCurrency(Math.abs(stats.totalPnl), true)}
@@ -439,11 +439,11 @@ const TradeHistory = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                  <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                     <button
                       onClick={() => setChartMode('value')}
                       className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        chartMode === 'value' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                        chartMode === 'value' ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       Value
@@ -451,7 +451,7 @@ const TradeHistory = () => {
                     <button
                       onClick={() => setChartMode('performance')}
                       className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        chartMode === 'performance' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                        chartMode === 'performance' ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       Performance
@@ -504,15 +504,15 @@ const TradeHistory = () => {
                 </div>
 
                 {/* Period Selector */}
-                <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   {periods.map(period => (
                     <button
                       key={period}
                       onClick={() => setChartPeriod(period)}
                       className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
                         chartPeriod === period
-                          ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-200 dark:ring-indigo-800'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       {period}
@@ -545,7 +545,7 @@ const TradeHistory = () => {
             {activeTab === 'trades' && (
               <>
                 {/* Filters */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                   <div className="flex flex-col lg:flex-row gap-4">
                     <div className="flex-1 relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -554,7 +554,7 @@ const TradeHistory = () => {
                         placeholder="Search by market or platform..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                       />
                     </div>
                     <div className="flex gap-2">
@@ -569,15 +569,15 @@ const TradeHistory = () => {
                           onClick={() => setFilter(f.key)}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                             filter === f.key
-                              ? f.color === 'green' ? 'bg-green-100 text-green-700' :
-                                f.color === 'red' ? 'bg-red-100 text-red-700' :
-                                f.color === 'amber' ? 'bg-amber-100 text-amber-700' :
-                                'bg-indigo-100 text-indigo-700'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              ? f.color === 'green' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' :
+                                f.color === 'red' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400' :
+                                f.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' :
+                                'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}
                         >
                           {f.label}
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${filter === f.key ? 'bg-white/50' : 'bg-gray-200'}`}>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${filter === f.key ? 'bg-white/50 dark:bg-black/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
                             {f.count}
                           </span>
                         </button>
@@ -587,7 +587,7 @@ const TradeHistory = () => {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="appearance-none pl-4 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white cursor-pointer"
+                        className="appearance-none pl-4 pr-10 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-800 dark:text-white cursor-pointer"
                       >
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
@@ -600,12 +600,12 @@ const TradeHistory = () => {
                 </div>
 
                 {/* Trades Table */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                   {filteredTrades.length === 0 ? (
                     <div className="p-12 text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No trades found</h3>
-                      <p className="text-gray-500">
+                      <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No trades found</h3>
+                      <p className="text-gray-500 dark:text-gray-400">
                         {trades.length === 0 ? 'Start trading to see your history here' : 'Try adjusting your filters'}
                       </p>
                     </div>
@@ -613,59 +613,59 @@ const TradeHistory = () => {
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
-                          <tr className="bg-gray-50 border-b border-gray-100">
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Market</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Platform</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Entry</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Exit</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">P&L</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                          <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Market</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entry</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exit</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">P&L</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                           {filteredTrades.map((trade, i) => (
-                            <tr key={trade.id || i} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            <tr key={trade.id || i} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                              <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                 <div className="flex items-center gap-2">
                                   <Calendar className="w-4 h-4 text-gray-400" />
                                   {formatDate(trade.timestamp)}
                                 </div>
                               </td>
                               <td className="px-4 py-4">
-                                <p className="text-sm font-medium text-gray-900 max-w-xs truncate">{trade.pair}</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white max-w-xs truncate">{trade.pair}</p>
                               </td>
                               <td className="px-4 py-4 text-sm">
                                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                  trade.platform?.toLowerCase() === 'kalshi' ? 'bg-blue-100 text-blue-700' :
-                                  trade.platform?.toLowerCase() === 'polymarket' ? 'bg-purple-100 text-purple-700' :
-                                  trade.platform?.toLowerCase() === 'manifold' ? 'bg-orange-100 text-orange-700' :
-                                  'bg-gray-100 text-gray-600'
+                                  trade.platform?.toLowerCase() === 'kalshi' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400' :
+                                  trade.platform?.toLowerCase() === 'polymarket' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400' :
+                                  trade.platform?.toLowerCase() === 'manifold' ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400' :
+                                  'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                 }`}>
                                   {trade.platform || 'Unknown'}
                                 </span>
                               </td>
                               <td className="px-4 py-4 text-sm">
                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                                  trade.type === 'YES' || trade.type === 'Long' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                  trade.type === 'YES' || trade.type === 'Long' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
                                 }`}>
                                   {trade.type === 'YES' || trade.type === 'Long' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                   {trade.type}
                                 </span>
                               </td>
-                              <td className="px-4 py-4 text-sm text-gray-600">{trade.entry}</td>
-                              <td className="px-4 py-4 text-sm text-gray-600">{trade.exit || '—'}</td>
+                              <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{trade.entry}</td>
+                              <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{trade.exit || '—'}</td>
                               <td className={`px-4 py-4 text-sm font-semibold tabular-nums ${
-                                (trade.pnlValue || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                                (trade.pnlValue || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                               }`}>
                                 {trade.pnl}
                               </td>
                               <td className="px-4 py-4 text-sm">
                                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                                  trade.status === 'Won' ? 'bg-green-100 text-green-700' :
-                                  trade.status === 'Open' ? 'bg-amber-100 text-amber-700' :
-                                  'bg-red-100 text-red-700'
+                                  trade.status === 'Won' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' :
+                                  trade.status === 'Open' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' :
+                                  'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
                                 }`}>
                                   {trade.status === 'Won' ? <Check className="w-3 h-3" /> :
                                    trade.status === 'Open' ? <Clock className="w-3 h-3" /> :

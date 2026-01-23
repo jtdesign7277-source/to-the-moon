@@ -261,7 +261,7 @@ const Header = ({
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="xl:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -291,8 +291,8 @@ const Header = ({
                   onClick={() => handleNavigation(item.id, item.requiresPro)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -310,8 +310,8 @@ const Header = ({
                 onClick={() => setExploreOpen(!exploreOpen)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   isExploreActive
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 Explore
@@ -320,7 +320,7 @@ const Header = ({
 
               {/* Dropdown Menu with roll-down animation */}
               <div
-                className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50 transform origin-top transition-all duration-200 ease-out ${
+                className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transform origin-top transition-all duration-200 ease-out ${
                   exploreOpen 
                     ? 'opacity-100 scale-y-100 translate-y-0' 
                     : 'opacity-0 scale-y-0 -translate-y-2 pointer-events-none'
@@ -334,18 +334,18 @@ const Header = ({
                       <button
                         key={item.id}
                         onClick={() => handleNavigation(item.id, false)}
-                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-start gap-3 ${
-                          isActive ? 'bg-indigo-50' : ''
+                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-start gap-3 ${
+                          isActive ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''
                         }`}
                       >
-                        <div className={`p-2 rounded-lg ${isActive ? 'bg-indigo-100' : 'bg-gray-100'}`}>
-                          <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`} />
+                        <div className={`p-2 rounded-lg ${isActive ? 'bg-indigo-100 dark:bg-indigo-900/50' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                          <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}`} />
                         </div>
                         <div>
-                          <p className={`text-sm font-medium ${isActive ? 'text-indigo-700' : 'text-gray-900'}`}>
+                          <p className={`text-sm font-medium ${isActive ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-900 dark:text-white'}`}>
                             {item.label}
                           </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {item.description}
                           </p>
                         </div>
@@ -360,13 +360,13 @@ const Header = ({
           {/* Right side controls */}
           <div className="flex items-center gap-2 shrink-0">
             {/* Trading Mode Toggle */}
-            <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
+            <div className="hidden sm:flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
                 onClick={() => setTradingMode('paper')}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   tradingMode === 'paper'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 Paper
@@ -375,24 +375,25 @@ const Header = ({
                 onClick={() => setTradingMode('live')}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   tradingMode === 'live'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 Live
               </button>
             </div>
 
-            {/* Theme Toggle - Subtle */}
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? (
-                <Sun className="w-4 h-4" />
+                <Sun className="w-5 h-5" />
               ) : (
-                <Moon className="w-4 h-4" />
+                <Moon className="w-5 h-5" />
               )}
             </button>
 
@@ -400,7 +401,7 @@ const Header = ({
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative transition-colors"
+                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
@@ -408,104 +409,104 @@ const Header = ({
               
               {/* Notifications Dropdown - Kalshi Style */}
               {notificationsOpen && (
-                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50">
                   {/* Header */}
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <span className="font-semibold text-gray-900">Notifications</span>
-                    <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                    <span className="font-semibold text-gray-900 dark:text-white">Notifications</span>
+                    <button className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium">
                       Mark all as read
                     </button>
                   </div>
                   
                   {/* Notifications List */}
-                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
+                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
                     {/* Market Settled */}
-                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-purple-100 rounded-full shrink-0">
-                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full shrink-0">
+                          <CheckCircle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-900">Market settled</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Market settled</span>
                             <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                             Fed cuts rates in January 2026?
                           </p>
-                          <p className="text-xs text-gray-400 mt-1">Result is <span className="text-gray-600 font-medium">No</span></p>
+                          <p className="text-xs text-gray-400 mt-1">Result is <span className="text-gray-600 dark:text-gray-300 font-medium">No</span></p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Trade Confirmed */}
-                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-green-100 rounded-full shrink-0">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full shrink-0">
+                          <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-900">Trade confirmed</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Trade confirmed</span>
                             <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                             Trump wins 2024 Presidential Election
                           </p>
                           <p className="text-xs text-gray-400 mt-1">1 Yes contract at 42 cents</p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Order Cancelled */}
-                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-red-100 rounded-full shrink-0">
-                          <XCircle className="w-4 h-4 text-red-600" />
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full shrink-0">
+                          <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-900">Order cancelled</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Order cancelled</span>
                             <span className="text-xs text-gray-400 shrink-0">Jan 18</span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                             S&P 500 above 6,000 by March?
                           </p>
                           <p className="text-xs text-gray-400 mt-1">Order for 10 No contracts cancelled</p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Deposit Completed */}
-                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-blue-100 rounded-full shrink-0">
-                          <Banknote className="w-4 h-4 text-blue-600" />
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full shrink-0">
+                          <Banknote className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-900">Deposit completed</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Deposit completed</span>
                             <span className="text-xs text-gray-400 shrink-0">Jan 17</span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             Your deposit of $490.00 to your Kalshi account has been processed.
                           </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Position Update */}
-                    <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-amber-100 rounded-full shrink-0">
-                          <Clock className="w-4 h-4 text-amber-600" />
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full shrink-0">
+                          <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-900">Position expiring soon</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">Position expiring soon</span>
                             <span className="text-xs text-gray-400 shrink-0">Jan 17</span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                             Bitcoin hits $100K in 2024
                           </p>
                           <p className="text-xs text-gray-400 mt-1">Expires in 7 days</p>
@@ -515,13 +516,13 @@ const Header = ({
                   </div>
                   
                   {/* Footer */}
-                  <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                    <button 
+                  <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                    <button
                       onClick={() => {
                         setNotificationsOpen(false)
                         onNavigate?.('history')
                       }}
-                      className="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium py-1"
+                      className="w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium py-1"
                     >
                       View all activity
                     </button>
@@ -551,20 +552,20 @@ const Header = ({
               <div className="relative" ref={profileRef}>
                 <button 
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="relative">
                     <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shrink-0 text-white font-semibold text-sm">
                       {(user.username || user.email)?.[0]?.toUpperCase() || 'U'}
                     </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" />
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Enhanced Profile Dropdown */}
                 <div
-                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen
                       ? 'opacity-100 scale-100 translate-y-0'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -593,13 +594,13 @@ const Header = ({
                   </div>
 
                   {/* Tab Navigation */}
-                  <div className="flex border-b border-gray-100">
+                  <div className="flex border-b border-gray-100 dark:border-gray-800">
                     <button
                       onClick={() => setActiveTab('profile')}
                       className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
-                        activeTab === 'profile' 
-                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
-                          : 'text-gray-500 hover:text-gray-700'
+                        activeTab === 'profile'
+                          ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20'
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
                       <User className="w-3.5 h-3.5 mx-auto mb-1" />
@@ -607,7 +608,7 @@ const Header = ({
                     </button>
                     <button
                       onClick={() => { setProfileOpen(false); openLunaChat(); }}
-                      className="flex-1 px-4 py-2.5 text-xs font-medium transition-colors text-gray-500 hover:text-gray-700"
+                      className="flex-1 px-4 py-2.5 text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                     >
                       <MessageCircle className="w-3.5 h-3.5 mx-auto mb-1" />
                       Support
@@ -615,9 +616,9 @@ const Header = ({
                     <button
                       onClick={() => setActiveTab('suggest')}
                       className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
-                        activeTab === 'suggest' 
-                          ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50' 
-                          : 'text-gray-500 hover:text-gray-700'
+                        activeTab === 'suggest'
+                          ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20'
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
                       <Lightbulb className="w-3.5 h-3.5 mx-auto mb-1" />
@@ -634,65 +635,65 @@ const Header = ({
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
                             {/* First Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                <User className="w-4 h-4 text-indigo-600" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                                <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500">First Name</p>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">First Name</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
                                   {user.first_name || (user.username?.includes(' ') ? user.username.split(' ')[0] : user.username) || 'Not set'}
                                 </p>
                               </div>
                             </div>
                             {/* Last Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                <UserCircle className="w-4 h-4 text-indigo-600" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                                <UserCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500">Last Name</p>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Last Name</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
                                   {user.last_name || (user.username?.includes(' ') ? user.username.split(' ').slice(1).join(' ') : '—')}
                                 </p>
                               </div>
                             </div>
                             {/* Email */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-                              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-purple-600" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
+                                <Mail className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-gray-500">Email Address</p>
-                                <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
                               </div>
                             </div>
                             {/* Member Since */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-                              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-4 h-4 text-green-600" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
+                                <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500">Member Since</p>
-                                <p className="text-sm font-medium text-gray-900">{getMemberSince()}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Member Since</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">{getMemberSince()}</p>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Subscription Status */}
-                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-50 to-purple-50 border border-indigo-100' : 'bg-gray-50'}`}>
+                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800' : 'bg-gray-50 dark:bg-gray-800'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600' : 'text-gray-400'}`} />
-                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-700' : 'text-gray-600'}`}>
+                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`} />
+                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}`}>
                                 {isPro ? 'Pro Member' : 'Free Plan'}
                               </span>
                             </div>
                             {!isPro && (
                               <button
                                 onClick={() => { setProfileOpen(false); openUpgradeModal(); }}
-                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                                className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
                               >
                                 Upgrade →
                               </button>
@@ -718,12 +719,12 @@ const Header = ({
                           </div>
                         </div>
                         
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                           Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of To The Moon.
                         </p>
 
                         {suggestionSent && (
-                          <div className="bg-green-50 text-green-700 text-sm p-3 rounded-xl text-center font-medium">
+                          <div className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm p-3 rounded-xl text-center font-medium">
                             ✓ Opening email client...
                           </div>
                         )}
@@ -732,7 +733,7 @@ const Header = ({
                           value={suggestionMessage}
                           onChange={(e) => setSuggestionMessage(e.target.value)}
                           placeholder="Describe your feature idea in detail..."
-                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-linear-to-b from-gray-50 to-white"
+                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-linear-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 dark:text-white dark:placeholder-gray-500"
                         />
                         
                         <button
@@ -748,10 +749,10 @@ const Header = ({
                   </div>
 
                   {/* Sign Out Button */}
-                  <div className="border-t border-gray-100 p-3">
+                  <div className="border-t border-gray-100 dark:border-gray-800 p-3">
                     <button
                       onClick={() => { setProfileOpen(false); onLogout(); }}
-                      className="w-full py-2.5 text-red-600 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      className="w-full py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -774,22 +775,22 @@ const Header = ({
       />
       
       {/* Drawer */}
-      <div 
-        className={`fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 xl:hidden transform transition-transform duration-300 ease-out ${
+      <div
+        className={`fixed top-0 left-0 h-full w-72 bg-white dark:bg-gray-900 shadow-2xl z-50 xl:hidden transform transition-transform duration-300 ease-out ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Rocket className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-gray-900">TO THE MOON</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-white">TO THE MOON</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -798,15 +799,15 @@ const Header = ({
         {/* Drawer Content */}
         <div className="flex flex-col h-[calc(100%-72px)] overflow-y-auto">
           {/* Trading Mode Toggle */}
-          <div className="p-4 border-b border-gray-100">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Trading Mode</p>
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
                 onClick={() => setTradingMode('paper')}
                 className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                   tradingMode === 'paper'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
                 Paper
@@ -815,8 +816,8 @@ const Header = ({
                 onClick={() => setTradingMode('live')}
                 className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                   tradingMode === 'live'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
                 Live
@@ -836,8 +837,8 @@ const Header = ({
                   onClick={() => handleNavigation(item.id, item.requiresPro)}
                   className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between ${
                     isActive
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -845,7 +846,7 @@ const Header = ({
                     {item.label}
                   </span>
                   {item.requiresPro && !isPro && (
-                    <Lock className="w-4 h-4 text-indigo-600" />
+                    <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                   )}
                 </button>
               )
@@ -864,8 +865,8 @@ const Header = ({
                   onClick={() => handleNavigation(item.id, false)}
                   className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
                     isActive
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -877,7 +878,7 @@ const Header = ({
 
           {/* User Section - Pinned to bottom */}
           {user && (
-            <div className="mt-auto border-t border-gray-200 bg-gray-50">
+            <div className="mt-auto border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
               {/* User Info Header */}
               <div className="p-4 bg-linear-to-r from-indigo-500 to-purple-600">
                 <div className="flex items-center gap-3">
@@ -901,13 +902,13 @@ const Header = ({
               {/* User Details */}
               <div className="p-4 space-y-3">
                 {/* Member Since */}
-                <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-4 h-4 text-green-600" />
+                <div className="flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Member Since</p>
-                    <p className="text-sm font-medium text-gray-900">{getMemberSince()}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Member Since</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{getMemberSince()}</p>
                   </div>
                 </div>
 
@@ -915,14 +916,14 @@ const Header = ({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => { setMobileMenuOpen(false); openLunaChat(); }}
-                    className="flex items-center justify-center gap-2 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl text-indigo-700 text-sm font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl text-indigo-700 dark:text-indigo-400 text-sm font-medium transition-colors"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Support
                   </button>
                   <button
                     onClick={() => { setMobileMenuOpen(false); setProfileOpen(true); setActiveTab('suggest'); }}
-                    className="flex items-center justify-center gap-2 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl text-amber-700 text-sm font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-xl text-amber-700 dark:text-amber-400 text-sm font-medium transition-colors"
                   >
                     <Lightbulb className="w-4 h-4" />
                     Suggest
@@ -943,7 +944,7 @@ const Header = ({
                 {/* Sign Out */}
                 <button
                   onClick={() => { setMobileMenuOpen(false); onLogout(); }}
-                  className="w-full px-4 py-2.5 text-red-600 hover:bg-red-50 border border-red-200 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                  className="w-full px-4 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

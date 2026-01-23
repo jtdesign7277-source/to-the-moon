@@ -3,20 +3,17 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage or default to dark
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('ttm_theme')
       if (saved === 'dark' || saved === 'light') {
         return saved
       }
-      // Check system preference
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark'
-      }
-      return 'light'
+      // Default to dark mode for this app
+      return 'dark'
     } catch {
-      return 'light'
+      return 'dark'
     }
   })
 

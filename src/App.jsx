@@ -19,13 +19,15 @@ import {
   X,
   Rocket,
   Brain,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 // Context
 import { AppProvider } from './contexts/AppContext'
 import { TradingProvider } from './contexts/TradingContext'
 import { MarketplaceProvider } from './contexts/MarketplaceContext'
-import { ThemeProvider } from './contexts/ThemeContext'
+import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import { useApp } from './hooks/useApp'
 import { AuthProvider } from './hooks/useAuth'
 
@@ -175,6 +177,7 @@ const AppContent = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const profileRef = useRef(null)
   const { isPro, openUpgradeModal, setIsPro, openLunaChat } = useApp()
+  const { isDark, toggleTheme } = useTheme()
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -324,7 +327,7 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f10] flex transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-[#0f0f10] flex transition-colors duration-200">
       {/* Sidebar Navigation */}
       <Sidebar
         navItems={NAV_ITEMS}
@@ -341,6 +344,23 @@ const AppContent = () => {
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 ${sidebarExpanded ? 'lg:ml-56' : 'lg:ml-12'}`}>
         {/* Top Right Header Bar */}
         <div className="fixed top-3 right-4 z-50 flex items-center gap-2">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`p-2.5 border-2 rounded-lg transition-colors shadow-md ${
+              isDark
+                ? 'bg-gray-800 border-yellow-500 text-yellow-400 hover:bg-gray-700'
+                : 'bg-yellow-100 border-yellow-400 text-yellow-600 hover:bg-yellow-200'
+            }`}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={isDark ? 'Click for light mode' : 'Click for dark mode'}
+          >
+            {isDark ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
           {/* Crown / PRO Badge */}
           {isPro ? (
             <span className="px-2.5 py-1 bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm">

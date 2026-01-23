@@ -73,18 +73,18 @@ const Marketplace = () => {
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Marketplace</h1>
-          <p className="text-gray-500 text-sm mt-1">Discover and purchase proven trading strategies</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Marketplace</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Discover and purchase proven trading strategies</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+        <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
           <button
             onClick={() => setActiveTab('featured')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === 'featured'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Featured
@@ -93,13 +93,13 @@ const Marketplace = () => {
             onClick={() => setActiveTab('community')}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'community'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Community
             {allListings.length > 0 && (
-              <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-full">
+              <span className="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-full">
                 {allListings.length}
               </span>
             )}
@@ -115,13 +115,13 @@ const Marketplace = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search strategies..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             />
           </div>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           >
             <option value="all">All Categories</option>
             <option value="Crypto">Crypto</option>
@@ -132,7 +132,7 @@ const Marketplace = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           >
             <option value="popular">Most Popular</option>
             <option value="returns">Highest Returns</option>
@@ -144,11 +144,11 @@ const Marketplace = () => {
 
       {/* Empty State for Community */}
       {activeTab === 'community' && allListings.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
-          <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No community strategies yet</h3>
-          <p className="text-gray-500 text-sm mb-4">Be the first to list your winning strategy!</p>
-          <p className="text-xs text-gray-400">Go to Trade Station → Daily Challenges → List on Marketplace</p>
+        <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
+          <ShoppingCart className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No community strategies yet</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Be the first to list your winning strategy!</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Go to Trade Station → Daily Challenges → List on Marketplace</p>
         </div>
       )}
 
@@ -161,7 +161,7 @@ const Marketplace = () => {
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group"
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
             >
               {/* Card Header with Gradient */}
               <div className={`h-28 flex items-center justify-center relative overflow-hidden ${
@@ -188,14 +188,14 @@ const Marketplace = () => {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{strategy.name}</h3>
-                    <p className="text-sm text-gray-500">by {strategy.author}</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{strategy.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">by {strategy.author}</p>
                   </div>
-                  <span className="text-lg font-bold text-indigo-600">{strategy.price} coins</span>
+                  <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{strategy.price} coins</span>
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
                   {strategy.rating > 0 && (
                     <span className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
@@ -219,7 +219,7 @@ const Marketplace = () => {
                   </button>
                   <button
                     onClick={() => handleViewStrategy(strategy)}
-                    className="px-3 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="px-3 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -246,11 +246,11 @@ const Marketplace = () => {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
-              className="w-full sm:w-[440px] bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[85vh] flex flex-col"
+              className="w-full sm:w-[440px] bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[85vh] flex flex-col"
             >
               {/* Handle bar for mobile */}
               <div className="flex justify-center pt-3 pb-2 sm:hidden">
-                <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
               </div>
 
               {/* Header */}
@@ -298,41 +298,41 @@ const Marketplace = () => {
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
                 {/* Price */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="text-gray-600">Price</span>
-                  <span className="text-2xl font-bold text-indigo-600">{selectedListing.price} coins</span>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">Price</span>
+                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedListing.price} coins</span>
                 </div>
 
                 {/* Description */}
                 {selectedListing.listing?.description && (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
-                    <p className="text-gray-600 text-sm">{selectedListing.listing.description}</p>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">{selectedListing.listing.description}</p>
                   </div>
                 )}
 
                 {/* Category */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Category</span>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg">
+                  <span className="text-gray-600 dark:text-gray-400">Category</span>
+                  <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg">
                     {selectedListing.category}
                   </span>
                 </div>
 
                 {/* Verified Badge */}
                 {selectedListing.verified && (
-                  <div className="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
-                    <BadgeCheck className="w-5 h-5 text-indigo-600" />
+                  <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-xl">
+                    <BadgeCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     <div>
-                      <p className="text-sm font-medium text-indigo-900">Verified Strategy</p>
-                      <p className="text-xs text-indigo-600">This strategy has been reviewed and verified by our team</p>
+                      <p className="text-sm font-medium text-indigo-900 dark:text-indigo-300">Verified Strategy</p>
+                      <p className="text-xs text-indigo-600 dark:text-indigo-400">This strategy has been reviewed and verified by our team</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Footer */}
-              <div className="p-5 border-t border-gray-100 bg-gray-50">
+              <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
                 <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
                   Purchase for {selectedListing.price} Coins

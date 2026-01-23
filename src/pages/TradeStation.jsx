@@ -60,7 +60,7 @@ const CelebrationOverlay = ({ show, profit, onComplete }) => {
       <motion.div
         initial={{ scale: 0.8, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        className="bg-white rounded-3xl p-8 mx-4 text-center shadow-2xl"
+        className="bg-white dark:bg-gray-800 rounded-3xl p-8 mx-4 text-center shadow-2xl"
       >
         <motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
@@ -69,9 +69,9 @@ const CelebrationOverlay = ({ show, profit, onComplete }) => {
         >
           🚀
         </motion.div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Strategy Deployed!</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Strategy Deployed!</h2>
         <p className="text-4xl font-bold text-emerald-500 mb-4">+{profit.toFixed(1)}%</p>
-        <p className="text-gray-500">Your strategy is now live</p>
+        <p className="text-gray-500 dark:text-gray-400">Your strategy is now live</p>
       </motion.div>
     </motion.div>
   )
@@ -80,10 +80,10 @@ const CelebrationOverlay = ({ show, profit, onComplete }) => {
 // Clean stat pill
 const StatPill = ({ icon: Icon, label, value, color = 'indigo' }) => {
   const colors = {
-    indigo: 'bg-indigo-50 text-indigo-600',
-    amber: 'bg-amber-50 text-amber-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    rose: 'bg-rose-50 text-rose-600',
+    indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+    amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
+    emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+    rose: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
   }
 
   return (
@@ -365,10 +365,10 @@ const TradeStation = () => {
               animate={{ y: 0 }}
               exit={{ y: 100 }}
               onClick={e => e.stopPropagation()}
-              className="w-full sm:w-96 bg-white rounded-t-3xl sm:rounded-3xl p-6"
+              className="w-full sm:w-96 bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6"
             >
-              <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Share Strategy</h3>
+              <div className="w-12 h-1 bg-gray-200 dark:bg-gray-600 rounded-full mx-auto mb-6 sm:hidden" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Share Strategy</h3>
 
               <div className="flex gap-3 mb-4">
                 <Button variant="primary" className="flex-1 bg-gray-900! hover:bg-gray-800!">
@@ -379,16 +379,16 @@ const TradeStation = () => {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <input
                   type="text"
                   value="https://tothemoon.app/s/demo"
                   readOnly
-                  className="flex-1 bg-transparent text-gray-600 text-sm outline-none"
+                  className="flex-1 bg-transparent text-gray-600 dark:text-gray-300 text-sm outline-none"
                 />
                 <button
                   onClick={handleCopy}
-                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5 text-gray-400" />}
                 </button>
@@ -414,28 +414,28 @@ const TradeStation = () => {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
-              className="w-full sm:w-[420px] bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[85vh] flex flex-col"
+              className="w-full sm:w-[420px] bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl overflow-hidden max-h-[85vh] flex flex-col"
             >
               {/* Handle bar for mobile */}
               <div className="flex justify-center pt-3 pb-2 sm:hidden">
-                <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
               </div>
 
               {/* Header */}
-              <div className="px-5 pb-4 pt-2 sm:pt-5 border-b border-gray-100">
+              <div className="px-5 pb-4 pt-2 sm:pt-5 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                      <ShoppingCart className="w-5 h-5 text-indigo-600" />
+                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                      <ShoppingCart className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">List on Marketplace</h3>
-                      <p className="text-xs text-gray-500">Sell your strategy to other traders</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">List on Marketplace</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Sell your strategy to other traders</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowListingSheet(false)}
-                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
                   >
                     <X className="w-5 h-5 text-gray-400" />
                   </button>
@@ -450,23 +450,23 @@ const TradeStation = () => {
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-center py-8"
                   >
-                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BadgeCheck className="w-8 h-8 text-emerald-600" />
+                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BadgeCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Listed Successfully!</h4>
-                    <p className="text-sm text-gray-500">Your strategy is now live on the marketplace</p>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Listed Successfully!</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Your strategy is now live on the marketplace</p>
                   </motion.div>
                 ) : (
                   <>
                     {/* Strategy Selection - Dropdown */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Select from Your Strategies
                       </label>
                       {savedStrategies.length === 0 ? (
-                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
-                          <FolderOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                          <p className="text-sm text-gray-600 font-medium">No strategies yet</p>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-center">
+                          <FolderOpen className="w-8 h-8 text-gray-300 dark:text-gray-500 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">No strategies yet</p>
                           <p className="text-xs text-gray-400 mt-1">Create a strategy in Alpha Lab first</p>
                         </div>
                       ) : (
@@ -478,7 +478,7 @@ const TradeStation = () => {
                                 const strategy = savedStrategies.find(s => s.id === e.target.value)
                                 setSelectedStrategyToList(strategy || null)
                               }}
-                              className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                              className="w-full px-4 py-3 pr-10 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer"
                             >
                               <option value="">Choose a strategy...</option>
                               {savedStrategies.map(strategy => {
@@ -513,16 +513,16 @@ const TradeStation = () => {
                             <motion.div
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="mt-3 p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl"
+                              className="mt-3 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-xl"
                             >
                               <div className="flex items-center gap-2 mb-2">
-                                <BadgeCheck className="w-4 h-4 text-indigo-600" />
-                                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">Selected Strategy</span>
+                                <BadgeCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Selected Strategy</span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-semibold text-gray-900">{selectedStrategyToList.name}</p>
-                                  <p className="text-sm text-gray-500">{selectedStrategyToList.symbol || 'SPY'}</p>
+                                  <p className="font-semibold text-gray-900 dark:text-white">{selectedStrategyToList.name}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedStrategyToList.symbol || 'SPY'}</p>
                                 </div>
                                 <div className="text-right">
                                   {selectedStrategyToList.backtestResults?.totalReturn !== undefined && (
@@ -553,7 +553,7 @@ const TradeStation = () => {
 
                     {/* Price Input */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Price (coins)
                       </label>
                       <div className="relative">
@@ -564,15 +564,15 @@ const TradeStation = () => {
                           onChange={(e) => setListingPrice(e.target.value)}
                           placeholder="100"
                           min="1"
-                          className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                          className="w-full pl-11 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1.5">Recommended: 50-500 coins based on performance</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Recommended: 50-500 coins based on performance</p>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Description (optional)
                       </label>
                       <textarea
@@ -580,18 +580,18 @@ const TradeStation = () => {
                         onChange={(e) => setListingDescription(e.target.value)}
                         placeholder="Describe what makes your strategy unique..."
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
 
                     {/* Preview */}
                     {selectedStrategyToList && listingPrice && (
-                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Preview</p>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Preview</p>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-semibold text-gray-900">{selectedStrategyToList.name}</p>
-                            <p className="text-sm text-gray-500">by You</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">{selectedStrategyToList.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">by You</p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-indigo-600">{listingPrice} coins</p>
@@ -606,15 +606,15 @@ const TradeStation = () => {
 
               {/* Footer */}
               {!listingSuccess && (
-                <div className="p-5 border-t border-gray-100 bg-gray-50">
+                <div className="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <button
                     onClick={handleListStrategy}
                     disabled={!selectedStrategyToList || !listingPrice || listableStrategies.length === 0}
-                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors active:scale-[0.98]"
+                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors active:scale-[0.98]"
                   >
                     List for {listingPrice || '0'} Coins
                   </button>
-                  <p className="text-xs text-center text-gray-500 mt-3">
+                  <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-3">
                     You'll earn coins when other traders purchase your strategy
                   </p>
                 </div>
@@ -647,7 +647,7 @@ const TradeStation = () => {
           <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
                 {isStrategiesFolderOpen ? (
@@ -657,7 +657,7 @@ const TradeStation = () => {
                 )}
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">My Strategies</h3>
-                  <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{savedStrategies.length} saved</p>
                 </div>
               </div>
               <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isStrategiesFolderOpen ? 'rotate-180' : ''}`} />
@@ -677,7 +677,7 @@ const TradeStation = () => {
                         No strategies yet
                       </div>
                     ) : (
-                      <div className="divide-y divide-gray-100">
+                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {savedStrategies.map(strategy => {
                           const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
                           return (
@@ -695,11 +695,11 @@ const TradeStation = () => {
                               className={`flex items-center justify-between py-3 px-1 transition-colors ${
                                 isDeployed
                                   ? 'opacity-50 cursor-default'
-                                  : 'hover:bg-gray-50 cursor-pointer active:bg-gray-100'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer active:bg-gray-100 dark:active:bg-gray-700'
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <span className="font-medium text-gray-900 text-sm truncate">{strategy.name}</span>
+                                <span className="font-medium text-gray-900 dark:text-white text-sm truncate">{strategy.name}</span>
                                 <span className="text-xs text-gray-400 font-medium">{strategy.symbol || 'SPY'}</span>
                               </div>
                               {!isDeployed && (
@@ -720,13 +720,13 @@ const TradeStation = () => {
           <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsActiveFolderOpen(!isActiveFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Activity className="w-5 h-5 text-emerald-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h3>
-                  <p className="text-xs text-gray-500">{displayDeployedStrategies.length} running</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{displayDeployedStrategies.length} running</p>
                 </div>
               </div>
               <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isActiveFolderOpen ? 'rotate-180' : ''}`} />
@@ -746,7 +746,7 @@ const TradeStation = () => {
                         No active strategies
                       </div>
                     ) : (
-                      <div className="divide-y divide-gray-100">
+                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {displayDeployedStrategies.map(deployment => {
                           const pnl = hasRealData ? getStrategyPnL(deployment.id) : getMockStrategyPnL(deployment.id)
                           const isMock = !hasRealData
@@ -755,12 +755,12 @@ const TradeStation = () => {
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2 min-w-0">
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
-                                  <span className="font-medium text-gray-900 text-sm truncate">{deployment.strategyName}</span>
-                                  <span className={`text-xs ${deployment.status === 'active' ? 'text-emerald-600' : 'text-yellow-600'}`}>
+                                  <span className="font-medium text-gray-900 dark:text-white text-sm truncate">{deployment.strategyName}</span>
+                                  <span className={`text-xs ${deployment.status === 'active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                                     {deployment.status === 'active' ? 'Scanning' : 'Paused'}
                                   </span>
                                   {isMock && (
-                                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 rounded">DEMO</span>
+                                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded">DEMO</span>
                                   )}
                                 </div>
                                 <span className={`text-sm font-semibold ${pnl.totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
@@ -771,21 +771,21 @@ const TradeStation = () => {
                                 {deployment.status === 'active' ? (
                                   <button
                                     onClick={() => !isMock && pauseStrategy(deployment.id)}
-                                    className={`px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
+                                    className={`px-3 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                   >
                                     Pause
                                   </button>
                                 ) : (
                                   <button
                                     onClick={() => !isMock && resumeStrategy(deployment.id)}
-                                    className={`px-3 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
+                                    className={`px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                   >
                                     Resume
                                   </button>
                                 )}
                                 <button
                                   onClick={() => !isMock && killStrategy(deployment.id)}
-                                  className={`px-3 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
+                                  className={`px-3 py-1 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
                                 >
                                   Kill
                                 </button>
@@ -805,13 +805,13 @@ const TradeStation = () => {
           <motion.div layout className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <DollarSign className="w-5 h-5 text-amber-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Positions</h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {hasRealData
                       ? `${strategyTrades.filter(t => t.status === 'open').length} open, ${strategyTrades.filter(t => t.status === 'closed').length} closed`
                       : `${mockOpenTrades.length} open, ${mockClosedTrades.length} closed`
@@ -837,13 +837,13 @@ const TradeStation = () => {
                 >
                   {/* Open/Closed Tabs */}
                   <div className="px-4 pb-2">
-                    <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+                    <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
                       <button
                         onClick={() => setPositionsTab('open')}
                         className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
                           positionsTab === 'open'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                         }`}
                       >
                         Open
@@ -852,8 +852,8 @@ const TradeStation = () => {
                         onClick={() => setPositionsTab('closed')}
                         className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
                           positionsTab === 'closed'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                         }`}
                       >
                         Closed
@@ -887,20 +887,20 @@ const TradeStation = () => {
                                     : (trade.entryPrice - position.currentPrice) * trade.quantity)
                                 : 0
                               return (
-                                <div key={trade.id} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                <div key={trade.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                      <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.side === 'buy' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                      <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.side === 'buy' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
                                         {trade.side.toUpperCase()}
                                       </span>
-                                      <span className="font-semibold text-sm">{trade.symbol}</span>
+                                      <span className="font-semibold text-sm text-gray-900 dark:text-white">{trade.symbol}</span>
                                       <span className="text-xs text-gray-400">x{trade.quantity}</span>
                                     </div>
-                                    <span className={`text-sm font-bold ${currentPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                    <span className={`text-sm font-bold ${currentPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
                                       {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
                                     </span>
                                   </div>
-                                  <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                  <div className="flex items-center justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
                                     <span>Current: ${position?.currentPrice?.toFixed(2) || '-'}</span>
                                   </div>
@@ -927,19 +927,19 @@ const TradeStation = () => {
                               </span>
                             </div>
                             {group.trades.map(trade => (
-                              <div key={trade.id} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                              <div key={trade.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2">
-                                    <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.pnl >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                    <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.pnl >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
                                       {trade.pnl >= 0 ? 'WIN' : 'LOSS'}
                                     </span>
-                                    <span className="font-semibold text-sm">{trade.symbol}</span>
+                                    <span className="font-semibold text-sm text-gray-900 dark:text-white">{trade.symbol}</span>
                                   </div>
-                                  <span className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                  <span className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
                                     {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                <div className="flex items-center justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                                   <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
                                   <span>Exit: ${trade.exitPrice?.toFixed(2)}</span>
                                 </div>
@@ -952,10 +952,10 @@ const TradeStation = () => {
 
                     {/* Total P&L Summary */}
                     {(openTradesByStrategy.length > 0 || closedTradesByStrategy.length > 0) && (
-                      <div className="pt-3 border-t border-gray-200">
+                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">Total P&L</span>
-                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total P&L</span>
+                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
                             {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
                           </span>
                         </div>
@@ -974,7 +974,7 @@ const TradeStation = () => {
         {/* Challenges Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Daily Challenges
             </h3>
             <div className="flex items-center gap-1.5 text-gray-400 text-xs">
@@ -993,12 +993,12 @@ const TradeStation = () => {
                 <div
                   key={challenge.id}
                   onClick={hasAction ? challenge.action : undefined}
-                  className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${
+                  className={`bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border transition-all ${
                     isComplete
-                      ? 'border-emerald-200 bg-emerald-50/30'
+                      ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-900/20'
                       : hasAction
-                        ? 'border-gray-100 hover:border-indigo-200 hover:shadow-md cursor-pointer active:scale-[0.98]'
-                        : 'border-gray-100'
+                        ? 'border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md cursor-pointer active:scale-[0.98]'
+                        : 'border-gray-100 dark:border-gray-800'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -1007,11 +1007,11 @@ const TradeStation = () => {
                     }`} />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-gray-900 text-sm">{challenge.title}</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white text-sm">{challenge.title}</h4>
                         <span className="text-sm font-semibold text-amber-500">+{challenge.reward}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
@@ -1020,7 +1020,7 @@ const TradeStation = () => {
                             }`}
                           />
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {challenge.progress}/{challenge.target}
                         </span>
                       </div>
@@ -1044,7 +1044,7 @@ const TradeStation = () => {
 
         {/* Tournaments Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">
             Active Tournaments
           </h3>
 
@@ -1052,15 +1052,15 @@ const TradeStation = () => {
             {tournaments.map(tournament => (
               <div
                 key={tournament.id}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <Trophy className="w-4 h-4 text-amber-500" />
-                      <h4 className="font-semibold text-gray-900">{tournament.name}</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{tournament.name}</h4>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
                         <Users className="w-3.5 h-3.5" />
                         {tournament.participants}
@@ -1075,14 +1075,14 @@ const TradeStation = () => {
                     <p className="text-lg font-bold text-emerald-500">
                       ${tournament.prize.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-500">Prize Pool</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Prize Pool</p>
                   </div>
                 </div>
 
                 <button
                   className={`w-full py-2.5 font-medium text-sm rounded-xl transition-colors ${
                     tournament.joined
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                       : 'bg-indigo-500 text-white hover:bg-indigo-600'
                   }`}
                 >

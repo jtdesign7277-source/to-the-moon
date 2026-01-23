@@ -192,15 +192,15 @@ const generateBacktestData = (config) => {
 const getDifficultyStyle = (difficulty) => {
   switch (difficulty) {
     case 'Beginner':
-      return 'bg-green-100 text-green-700'
+      return 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
     case 'Intermediate':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
     case 'Advanced':
-      return 'bg-orange-100 text-orange-700'
+      return 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400'
     case 'Expert':
-      return 'bg-red-100 text-red-700'
+      return 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
     default:
-      return 'bg-gray-100 text-gray-700'
+      return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
   }
 }
 
@@ -1153,8 +1153,8 @@ const StrategyBuilder = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Strategy Builder Pro</h1>
-          <p className="text-gray-500 text-sm mt-1">Create, backtest, and deploy custom trading strategies.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Strategy Builder Pro</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Create, backtest, and deploy custom trading strategies.</p>
         </div>
         <button
           onClick={openNewStrategy}
@@ -1273,7 +1273,7 @@ const StrategyBuilder = () => {
       {/* Custom Strategies */}
       {customStrategies.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Custom Strategies</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Your Custom Strategies</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {customStrategies.map((strategy) => (
               <div
@@ -1281,8 +1281,8 @@ const StrategyBuilder = () => {
                 onClick={() => handleSelectCustomStrategy(strategy)}
                 className={`relative text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   selectedTemplate === 'custom' && customStrategy.id === strategy.id
-                    ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                    : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                    : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -1290,7 +1290,7 @@ const StrategyBuilder = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={(e) => editCustomStrategy(strategy, e)}
-                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 rounded-lg transition-colors"
                       title="Edit strategy"
                     >
                       <Settings className="w-4 h-4" />
@@ -1300,24 +1300,24 @@ const StrategyBuilder = () => {
                         e.stopPropagation()
                         setShowDeleteConfirm(strategy.id)
                       }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-lg transition-colors"
                       title="Delete strategy"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 mt-3">{strategy.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white mt-3">{strategy.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {STRATEGY_TYPES.find(t => t.id === strategy.type)?.name} • {strategy.markets.length} market{strategy.markets.length !== 1 ? 's' : ''}
                 </p>
                 <div className="flex items-center gap-3 mt-3">
-                  <span className="text-sm font-medium text-green-600">{strategy.winRate}% Win</span>
+                  <span className="text-sm font-medium text-green-600 dark:text-green-400">{strategy.winRate}% Win</span>
                   <span className="text-sm text-gray-400">•</span>
-                  <span className="text-sm font-medium text-indigo-600">+{strategy.monthlyReturn}%/mo</span>
+                  <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">+{strategy.monthlyReturn}%/mo</span>
                 </div>
                 {strategy.backtestStats && (
-                  <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                  <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                     {strategy.backtestStats.totalTrades} trades • ${strategy.backtestStats.profitLoss?.toLocaleString()} P&L
                   </div>
                 )}
@@ -1391,7 +1391,7 @@ const StrategyBuilder = () => {
 
       {/* Templates */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Start with a Template</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Start with a Template</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.map((t, i) => (
             <button
@@ -1399,8 +1399,8 @@ const StrategyBuilder = () => {
               onClick={() => handleSelectTemplate(i)}
               className={`text-left p-4 rounded-xl border-2 transition-all ${
                 selectedTemplate === i
-                  ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                  : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                  : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 hover:shadow-sm'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -1409,12 +1409,12 @@ const StrategyBuilder = () => {
                   {t.difficulty}
                 </span>
               </div>
-              <h3 className="font-semibold text-gray-900 mt-3">{t.name}</h3>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{t.description}</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white mt-3">{t.name}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{t.description}</p>
               <div className="flex items-center gap-3 mt-3">
-                <span className="text-sm font-medium text-green-600">{t.winRate}% Win</span>
+                <span className="text-sm font-medium text-green-600 dark:text-green-400">{t.winRate}% Win</span>
                 <span className="text-sm text-gray-400">•</span>
-                <span className="text-sm font-medium text-indigo-600">+{t.monthlyReturn}%/mo</span>
+                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">+{t.monthlyReturn}%/mo</span>
               </div>
             </button>
           ))}
@@ -1423,9 +1423,9 @@ const StrategyBuilder = () => {
 
       {/* Strategy Canvas */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {activeStrategy ? (template?.name || customStrategy.name) : 'Strategy Canvas'}
             </h2>
             <div className="flex gap-2">
@@ -1433,7 +1433,7 @@ const StrategyBuilder = () => {
               {selectedTemplate === 'custom' && customStrategy.id && (
                 <button
                   onClick={(e) => editCustomStrategy(customStrategy, e)}
-                  className="px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 text-gray-600 hover:bg-gray-100"
+                  className="px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Settings className="w-4 h-4" />
                   Edit
@@ -1444,12 +1444,12 @@ const StrategyBuilder = () => {
                 disabled={!activeStrategy || isBacktesting}
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
                   activeStrategy && !isBacktesting
-                    ? 'text-gray-600 hover:bg-gray-100'
+                    ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     : 'text-gray-400 cursor-not-allowed'
                 }`}
               >
                 {isBacktesting ? (
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-indigo-600 rounded-full animate-spin" />
                 ) : backtestComplete ? (
                   <RefreshCw className="w-4 h-4" />
                 ) : (
@@ -1463,7 +1463,7 @@ const StrategyBuilder = () => {
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1 ${
                   backtestComplete
                     ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/25'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                 }`}
               >
                 <Rocket className="w-4 h-4" />
@@ -1689,10 +1689,10 @@ const StrategyBuilder = () => {
               )}
             </div>
           ) : (
-            <div className="h-80 bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+            <div className="h-80 bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
               <div className="text-center">
                 <Wrench className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">Select a template or create your own</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">Select a template or create your own</p>
                 <p className="text-gray-400 text-sm mt-2">Click "New Strategy" to build from scratch</p>
               </div>
             </div>
@@ -1700,15 +1700,15 @@ const StrategyBuilder = () => {
         </div>
 
         {/* Backtest Preview */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">
+            <h3 className="font-semibold text-gray-900 dark:text-white">
               {backtestComplete ? 'Backtest Results' : 'Backtest Preview'}
             </h3>
             {backtestComplete && activeStrategy && (
               <button
                 onClick={() => setShowExpandedBacktest(true)}
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
               >
                 View Full Report
                 <ChevronRight className="w-3 h-3" />
@@ -1718,11 +1718,11 @@ const StrategyBuilder = () => {
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={backtestComplete ? backtestData : (activeStrategy ? generateBacktestData(activeStrategy) : [])}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #374151', backgroundColor: '#1f2937' }}
                   formatter={(value) => [`$${value}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" fill={backtestComplete ? '#22c55e' : '#6366f1'} radius={[4, 4, 0, 0]} />
@@ -1731,45 +1731,45 @@ const StrategyBuilder = () => {
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Win Rate</span>
-              <span className="font-medium text-gray-900">{template?.backtestStats?.winRate || template?.winRate || customStrategy.winRate || 74}%</span>
+              <span className="text-gray-500 dark:text-gray-400">Win Rate</span>
+              <span className="font-medium text-gray-900 dark:text-white">{template?.backtestStats?.winRate || template?.winRate || customStrategy.winRate || 74}%</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Total P&L (6mo)</span>
-              <span className={`font-medium ${(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className="text-gray-500 dark:text-gray-400">Total P&L (6mo)</span>
+              <span className={`font-medium ${(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                 {(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0) >= 0 ? '+' : ''}${(template?.backtestStats?.profitLoss || customStrategy?.backtestStats?.profitLoss || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Total Trades</span>
-              <span className="font-medium text-gray-900">{template?.backtestStats?.totalTrades || customStrategy?.backtestStats?.totalTrades || '-'}</span>
+              <span className="text-gray-500 dark:text-gray-400">Total Trades</span>
+              <span className="font-medium text-gray-900 dark:text-white">{template?.backtestStats?.totalTrades || customStrategy?.backtestStats?.totalTrades || '-'}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Avg Win / Loss</span>
-              <span className="font-medium text-gray-900">
-                <span className="text-green-600">${template?.backtestStats?.avgWin || customStrategy?.backtestStats?.avgWin || 0}</span>
+              <span className="text-gray-500 dark:text-gray-400">Avg Win / Loss</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                <span className="text-green-600 dark:text-green-400">${template?.backtestStats?.avgWin || customStrategy?.backtestStats?.avgWin || 0}</span>
                 {' / '}
-                <span className="text-red-600">${Math.abs(template?.backtestStats?.avgLoss || customStrategy?.backtestStats?.avgLoss || 0)}</span>
+                <span className="text-red-600 dark:text-red-400">${Math.abs(template?.backtestStats?.avgLoss || customStrategy?.backtestStats?.avgLoss || 0)}</span>
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Max Drawdown</span>
-              <span className="font-medium text-red-600">{template?.backtestStats?.maxDrawdown || customStrategy?.backtestStats?.maxDrawdown || template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
+              <span className="text-gray-500 dark:text-gray-400">Max Drawdown</span>
+              <span className="font-medium text-red-600 dark:text-red-400">{template?.backtestStats?.maxDrawdown || customStrategy?.backtestStats?.maxDrawdown || template?.maxDrawdown || customStrategy.maxDrawdown || 12}%</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Sharpe Ratio</span>
-              <span className="font-medium text-indigo-600">{template?.backtestStats?.sharpeRatio || customStrategy?.backtestStats?.sharpeRatio || '-'}</span>
+              <span className="text-gray-500 dark:text-gray-400">Sharpe Ratio</span>
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">{template?.backtestStats?.sharpeRatio || customStrategy?.backtestStats?.sharpeRatio || '-'}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Sortino Ratio</span>
-              <span className="font-medium text-indigo-600">{template?.backtestStats?.sortinoRatio || customStrategy?.backtestStats?.sortinoRatio || '-'}</span>
+              <span className="text-gray-500 dark:text-gray-400">Sortino Ratio</span>
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">{template?.backtestStats?.sortinoRatio || customStrategy?.backtestStats?.sortinoRatio || '-'}</span>
             </div>
           </div>
           {/* View Full Report Button */}
           {backtestComplete && activeStrategy && (
             <button
               onClick={() => setShowExpandedBacktest(true)}
-              className="w-full mt-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <Activity className="w-4 h-4" />
               View Full Backtest Report
