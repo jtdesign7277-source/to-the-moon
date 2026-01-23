@@ -181,7 +181,7 @@ const getInitialView = () => {
 const AppContent = () => {
   const [view, setView] = useState(getInitialView) // 'landing' | 'auth' | 'app' | 'admin' | 'legal'
   const [user, setUser] = useState(null)
-  const [currentPage, setCurrentPage] = useState('dashboard')
+  const [currentPage, setCurrentPage] = useState('alpha-lab')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [legalTab, setLegalTab] = useState('terms')
   const [profileOpen, setProfileOpen] = useState(false)
