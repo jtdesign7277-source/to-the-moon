@@ -103,7 +103,15 @@ const Sidebar = ({
           )}
 
           {/* Navigation Items */}
-          <nav className="flex-1 overflow-y-auto py-2 px-1.5">
+          <nav
+            className="flex-1 overflow-y-auto py-2 px-1.5"
+            onClick={(e) => {
+              // Close sidebar when clicking empty space (not on a button)
+              if (e.target === e.currentTarget && isExpanded) {
+                setIsExpanded(false)
+              }
+            }}
+          >
             {/* Main Nav */}
             <div className="space-y-0.5">
               {navItems.map((item) => {
@@ -118,6 +126,10 @@ const Sidebar = ({
                         return
                       }
                       onNavigate(item.id)
+                      // Close sidebar after navigation on mobile
+                      if (window.innerWidth < 1024) {
+                        setIsExpanded(false)
+                      }
                     }}
                     className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg transition-all ${
                       isActive
@@ -154,7 +166,13 @@ const Sidebar = ({
                     return (
                       <button
                         key={item.id}
-                        onClick={() => onNavigate(item.id)}
+                        onClick={() => {
+                          onNavigate(item.id)
+                          // Close sidebar after navigation on mobile
+                          if (window.innerWidth < 1024) {
+                            setIsExpanded(false)
+                          }
+                        }}
                         className={`w-full flex items-center gap-2 px-2 py-2 rounded-lg transition-all ${
                           isActive
                             ? 'bg-indigo-100 text-indigo-700'
@@ -171,6 +189,14 @@ const Sidebar = ({
                   })}
                 </div>
               </>
+            )}
+
+            {/* Empty space tap area - closes sidebar */}
+            {isExpanded && (
+              <div
+                className="flex-1 min-h-[100px]"
+                onClick={() => setIsExpanded(false)}
+              />
             )}
           </nav>
         </div>
