@@ -30,6 +30,9 @@ httpx==0.26.0
 # Kalshi Official SDK for live trading
 kalshi_python_sync>=0.1.0
 
+# Alpaca Stock Trading SDK
+alpaca-py>=0.21.0
+
 # OpenAI for AI Chat Assistant
 openai==1.12.0
 
