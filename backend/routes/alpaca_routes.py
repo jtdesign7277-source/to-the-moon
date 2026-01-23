@@ -22,7 +22,7 @@ except ImportError:
     ALPACA_AVAILABLE = False
     print("Warning: alpaca-py not installed. Run: pip install alpaca-py")
 
-alpaca_lab_bp = Blueprint('alpaca_lab', __name__, url_prefix='/api/alpaca')
+alpaca_lab_bp = Blueprint('alpaca_lab', __name__, url_prefix='/api/alpha-lab')
 
 ALPACA_API_KEY = os.environ.get('ALPACA_API_KEY', '')
 ALPACA_SECRET_KEY = os.environ.get('ALPACA_SECRET_KEY', '')

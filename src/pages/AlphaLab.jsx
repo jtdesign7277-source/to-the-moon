@@ -190,7 +190,7 @@ const AlphaLab = () => {
     if (!strategyText.trim()) return
     setIsParsing(true)
     try {
-      const response = await fetch(`${API_URL}/api/alpaca/parse-strategy`, {
+      const response = await fetch(`${API_URL}/api/alpha-lab/parse-strategy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ strategy: strategyText }),
@@ -232,7 +232,7 @@ const AlphaLab = () => {
       })
     }, 200)
     try {
-      const response = await fetch(`${API_URL}/api/alpaca/backtest`, {
+      const response = await fetch(`${API_URL}/api/alpha-lab/backtest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -285,7 +285,7 @@ const AlphaLab = () => {
   const deployStrategy = async () => {
     setIsDeploying(true)
     try {
-      const response = await fetch(`${API_URL}/api/alpaca/deploy`, {
+      const response = await fetch(`${API_URL}/api/alpha-lab/deploy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
