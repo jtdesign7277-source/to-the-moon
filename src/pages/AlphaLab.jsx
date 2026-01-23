@@ -533,17 +533,15 @@ const AlphaLab = () => {
 
             {/* Input Area */}
             <div className="p-4">
-              {strategy && (
-                <div className="mb-3">
-                  <input
-                    type="text"
-                    value={strategyName}
-                    onChange={(e) => setStrategyName(e.target.value)}
-                    placeholder="Strategy name (e.g., RSI Reversal)"
-                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              )}
+              <div className="mb-3">
+                <input
+                  type="text"
+                  value={strategyName}
+                  onChange={(e) => setStrategyName(e.target.value)}
+                  placeholder="Strategy name (e.g., RSI Reversal)"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
               <div className="relative">
                 <textarea
                   ref={inputRef}
