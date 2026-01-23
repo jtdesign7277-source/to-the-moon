@@ -57,3 +57,4 @@ htmlcov/
 *.tmp
 .cache/
 .vercel
+test_alpaca.py

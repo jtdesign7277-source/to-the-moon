@@ -120,6 +120,10 @@ app.register_blueprint(scanner_bp)
 from routes.alpaca import alpaca_bp
 app.register_blueprint(alpaca_bp, url_prefix='/api/alpaca')
 
+# Register Alpha Lab routes (AI strategy builder & backtester)
+from routes.alpaca_routes import register_alpaca_routes
+register_alpaca_routes(app)
+
 # JWT Configuration
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
 JWT_ALGORITHM = 'HS256'
