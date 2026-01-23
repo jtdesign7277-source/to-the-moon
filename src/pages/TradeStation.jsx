@@ -255,13 +255,11 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                  {isStrategiesFolderOpen ? (
-                    <FolderOpen className="w-5 h-5 text-indigo-600" />
-                  ) : (
-                    <Folder className="w-5 h-5 text-indigo-600" />
-                  )}
-                </div>
+                {isStrategiesFolderOpen ? (
+                  <FolderOpen className="w-5 h-5 text-indigo-500" />
+                ) : (
+                  <Folder className="w-5 h-5 text-indigo-500" />
+                )}
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">My Strategies</h3>
                   <p className="text-xs text-gray-500">{savedStrategies.length} saved</p>
@@ -330,13 +328,7 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                  {isActiveFolderOpen ? (
-                    <Activity className="w-5 h-5 text-emerald-600" />
-                  ) : (
-                    <Activity className="w-5 h-5 text-emerald-600" />
-                  )}
-                </div>
+                <Activity className="w-5 h-5 text-emerald-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">Active Strategies</h3>
                   <p className="text-xs text-gray-500">{deployedStrategies.length} running</p>
@@ -417,9 +409,7 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-amber-600" />
-                </div>
+                <DollarSign className="w-5 h-5 text-amber-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">Positions</h3>
                   <p className="text-xs text-gray-500">
@@ -604,13 +594,9 @@ const TradeStation = () => {
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      isComplete
-                        ? 'bg-emerald-100 text-emerald-600'
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      <challenge.icon className="w-5 h-5" />
-                    </div>
+                    <challenge.icon className={`w-5 h-5 shrink-0 mt-0.5 ${
+                      isComplete ? 'text-emerald-500' : 'text-gray-400'
+                    }`} />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-medium text-gray-900 text-sm">{challenge.title}</h4>
