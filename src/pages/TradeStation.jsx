@@ -246,10 +246,10 @@ const TradeStation = () => {
 
       {/* 3-Column Layout */}
       <div className="p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
 
           {/* Column 1: My Strategies */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button
               onClick={() => setIsStrategiesFolderOpen(!isStrategiesFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -321,10 +321,10 @@ const TradeStation = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Column 2: Active Strategies */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button
               onClick={() => setIsActiveFolderOpen(!isActiveFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -408,10 +408,10 @@ const TradeStation = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Column 3: Positions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <motion.div layout className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button
               onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -573,7 +573,7 @@ const TradeStation = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         </div>
       </div>
 
