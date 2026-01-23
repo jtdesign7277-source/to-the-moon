@@ -16,6 +16,7 @@ import jwt
 import bcrypt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 # Initialize Sentry for error tracking (before Flask app)
 import sentry_sdk
@@ -98,6 +99,10 @@ CORS(app,
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_placeholder')
 STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_placeholder')
+
+# Initialize Flask-JWT-Extended for routes using @jwt_required_custom
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
+jwt_manager = JWTManager(app)
 
 # Register live trading blueprint
 from routes.live_trading import live_trading_bp
