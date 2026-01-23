@@ -1,11 +1,16 @@
 """
 Authentication utilities for TO THE MOON.
 """
+import os
+import jwt
 import bcrypt
 from functools import wraps
 from flask import request, jsonify, g
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from models import User, Subscription
+
+# JWT Configuration - must match api_server.py
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
+JWT_ALGORITHM = 'HS256'
 
 
 def hash_password(password: str) -> str:
@@ -19,23 +24,43 @@ def verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
 
 
+def decode_jwt_token(token):
+    """Decode and validate a JWT token. Returns user_id or None."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload.get('user_id')
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+
 def jwt_required_custom(fn):
     """Custom JWT decorator that loads user into g.current_user."""
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        try:
-            verify_jwt_in_request()
-            user_id = get_jwt_identity()
-            user = User.query.get(user_id)
+        auth_header = request.headers.get('Authorization', '')
 
-            if not user:
-                return jsonify({'error': 'User not found'}), 401
+        if not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Missing or invalid authorization header'}), 401
 
-            g.current_user = user
-            return fn(*args, **kwargs)
+        token = auth_header[7:]  # Remove 'Bearer ' prefix
 
-        except Exception as e:
+        if not token:
+            return jsonify({'error': 'Missing token'}), 401
+
+        user_id = decode_jwt_token(token)
+
+        if not user_id:
             return jsonify({'error': 'Invalid or expired token'}), 401
+
+        user = User.query.get(user_id)
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 401
+
+        g.current_user = user
+        return fn(*args, **kwargs)
 
     return wrapper
 
