@@ -265,7 +265,7 @@ const AlphaLab = () => {
   const [inputText, setInputText] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isParsing, setIsParsing] = useState(false)
-  const [lunaMessage, setLunaMessage] = useState("Hi! I'm Luna. Tell me about your trading strategy in plain English, and I'll build it for you.")
+  const [lunaMessage, setLunaMessage] = useState("Hi! I'm Luna. Tell me about your trading strategy in plain English, and I'll build it for you. Tip: Use $ before ticker symbols (e.g., $TSLA, $META).")
 
   // Strategy state (editable)
   const [strategy, setStrategy] = useState(null)
@@ -488,7 +488,7 @@ const AlphaLab = () => {
     setSelectedPatterns([])
     setBacktestResults(null)
     setIsDeployed(false)
-    setLunaMessage("Hi! I'm Luna. Tell me about your trading strategy in plain English, and I'll build it for you.")
+    setLunaMessage("Hi! I'm Luna. Tell me about your trading strategy in plain English, and I'll build it for you. Tip: Use $ before ticker symbols (e.g., $TSLA, $META).")
   }
 
   return (
