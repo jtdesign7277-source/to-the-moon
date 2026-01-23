@@ -673,44 +673,71 @@ const TradeStation = () => {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-96 overflow-y-auto">
                     {savedStrategies.length === 0 ? (
-                      <div className="text-center py-6 text-gray-400 text-sm">
-                        No strategies yet
+                      <div className="p-8 text-center">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
+                          <Folder className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">No strategies yet</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Create one in Alpha Lab</p>
                       </div>
                     ) : (
-                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {savedStrategies.map(strategy => {
-                          const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
-                          return (
-                            <div
-                              key={strategy.id}
-                              onClick={async () => {
-                                if (!isDeployed) {
-                                  const result = await deployStrategy(strategy, tradingMode)
-                                  if (result && strategy.backtestResults?.totalReturn > 0) {
-                                    setCelebrationProfit(strategy.backtestResults.totalReturn)
-                                    setShowCelebration(true)
-                                  }
+                      savedStrategies.map(strategy => {
+                        const isDeployed = deployedStrategies.some(d => d.strategyId === strategy.id)
+                        return (
+                          <div
+                            key={strategy.id}
+                            onClick={async () => {
+                              if (!isDeployed) {
+                                const result = await deployStrategy(strategy, tradingMode)
+                                if (result && strategy.backtestResults?.totalReturn > 0) {
+                                  setCelebrationProfit(strategy.backtestResults.totalReturn)
+                                  setShowCelebration(true)
                                 }
-                              }}
-                              className={`flex items-center justify-between py-3 px-1 transition-colors ${
-                                isDeployed
-                                  ? 'opacity-50 cursor-default'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer active:bg-gray-100 dark:active:bg-gray-700'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="font-medium text-gray-900 dark:text-white text-sm truncate">{strategy.name}</span>
-                                <span className="text-xs text-gray-400 font-medium">{strategy.symbol || 'SPY'}</span>
+                              }
+                            }}
+                            className={`px-4 py-3 transition-colors ${
+                              isDeployed
+                                ? 'opacity-50 cursor-default'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex flex-col items-center">
+                                  <span className="text-lg">📊</span>
+                                  <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400">
+                                    {strategy.symbol || 'SPY'}
+                                  </span>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{strategy.name}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{strategy.description?.substring(0, 40) || 'Custom strategy'}...</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">{strategy.timeframe || '1d'}</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">{isDeployed ? 'Deployed' : 'Ready'}</span>
+                                  </div>
+                                </div>
                               </div>
-                              {!isDeployed && (
-                                <ChevronRight className="w-4 h-4 text-gray-300" />
-                              )}
+                              <div className="flex items-center gap-3 shrink-0">
+                                {strategy.backtestResults?.totalReturn !== undefined && (
+                                  <div className={`text-right px-2 py-1 rounded-lg ${
+                                    strategy.backtestResults.totalReturn >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                                  }`}>
+                                    <p className={`text-sm font-semibold ${strategy.backtestResults.totalReturn >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                      {strategy.backtestResults.totalReturn >= 0 ? '+' : ''}{strategy.backtestResults.totalReturn}%
+                                    </p>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400">backtest</p>
+                                  </div>
+                                )}
+                                {!isDeployed && <ChevronRight className="w-4 h-4 text-gray-300" />}
+                              </div>
                             </div>
-                          )
-                        })}
-                      </div>
+                          </div>
+                        )
+                      })
                     )}
                   </div>
                 </motion.div>
@@ -744,60 +771,86 @@ const TradeStation = () => {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-96 overflow-y-auto">
                     {displayDeployedStrategies.length === 0 ? (
-                      <div className="text-center py-6 text-gray-400 text-sm">
-                        No active strategies
+                      <div className="p-8 text-center">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
+                          <Activity className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">No active strategies</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Deploy a strategy to start</p>
                       </div>
                     ) : (
-                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {displayDeployedStrategies.map(deployment => {
-                          const pnl = hasRealData ? getStrategyPnL(deployment.id) : getMockStrategyPnL(deployment.id)
-                          const isMock = !hasRealData
-                          return (
-                            <div key={deployment.id} className="py-3 px-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
-                                  <span className="font-medium text-gray-900 dark:text-white text-sm truncate">{deployment.strategyName}</span>
-                                  <span className={`text-xs ${deployment.status === 'active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
-                                    {deployment.status === 'active' ? 'Scanning' : 'Paused'}
+                      displayDeployedStrategies.map(deployment => {
+                        const pnl = hasRealData ? getStrategyPnL(deployment.id) : getMockStrategyPnL(deployment.id)
+                        const isMock = !hasRealData
+                        return (
+                          <div key={deployment.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex flex-col items-center">
+                                  <span className="text-lg">⚡</span>
+                                  <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                    deployment.status === 'active'
+                                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                      : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                                  }`}>
+                                    {deployment.status === 'active' ? 'ON' : 'OFF'}
                                   </span>
-                                  {isMock && (
-                                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded">DEMO</span>
-                                  )}
                                 </div>
-                                <span className={`text-sm font-semibold ${pnl.totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                  {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
-                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{deployment.strategyName}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{deployment.symbol || 'Multi-symbol'}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className={`text-[10px] font-medium ${deployment.status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                                      {deployment.status === 'active' ? 'Scanning' : 'Paused'}
+                                    </span>
+                                    {isMock && (
+                                      <>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">DEMO</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                {deployment.status === 'active' ? (
+                              <div className="flex items-center gap-3 shrink-0">
+                                <div className={`text-right px-2 py-1 rounded-lg ${
+                                  pnl.totalPnL >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                                }`}>
+                                  <p className={`text-sm font-semibold ${pnl.totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                    {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {deployment.status === 'active' ? (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); !isMock && pauseStrategy(deployment.id) }}
+                                      className="px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 rounded-lg transition-colors"
+                                    >
+                                      Pause
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); !isMock && resumeStrategy(deployment.id) }}
+                                      className="px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                    >
+                                      Resume
+                                    </button>
+                                  )}
                                   <button
-                                    onClick={() => !isMock && pauseStrategy(deployment.id)}
-                                    className={`px-3 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
+                                    onClick={(e) => { e.stopPropagation(); !isMock && killStrategy(deployment.id) }}
+                                    className="px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg transition-colors"
                                   >
-                                    Pause
+                                    Kill
                                   </button>
-                                ) : (
-                                  <button
-                                    onClick={() => !isMock && resumeStrategy(deployment.id)}
-                                    className={`px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
-                                  >
-                                    Resume
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => !isMock && killStrategy(deployment.id)}
-                                  className={`px-3 py-1 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-md transition-colors ${isMock ? 'cursor-default' : ''}`}
-                                >
-                                  Kill
-                                </button>
+                                </div>
+                                <div className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
                               </div>
                             </div>
-                          )
-                        })}
-                      </div>
+                          </div>
+                        )
+                      })
                     )}
                   </div>
                 </motion.div>
@@ -842,24 +895,24 @@ const TradeStation = () => {
                   className="overflow-hidden"
                 >
                   {/* Open/Closed Tabs */}
-                  <div className="px-4 pb-2">
-                    <div className="flex gap-3">
+                  <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800">
+                    <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                       <button
                         onClick={() => setPositionsTab('open')}
-                        className={`text-xs font-medium transition-all ${
+                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                           positionsTab === 'open'
-                            ? 'text-gray-900 dark:text-white'
-                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         Open
                       </button>
                       <button
                         onClick={() => setPositionsTab('closed')}
-                        className={`text-xs font-medium transition-all ${
+                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                           positionsTab === 'closed'
-                            ? 'text-gray-900 dark:text-white'
-                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         Closed
@@ -867,103 +920,136 @@ const TradeStation = () => {
                     </div>
                   </div>
 
-                  <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-96 overflow-y-auto">
                     {positionsTab === 'open' ? (
                       // Open Positions
                       openTradesByStrategy.length === 0 ? (
-                        <div className="text-center py-6">
-                          <TrendingUp className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                          <p className="text-gray-500 text-sm">No open positions</p>
-                          <p className="text-gray-400 text-xs mt-1">Waiting for signals...</p>
+                        <div className="p-8 text-center">
+                          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <TrendingUp className="w-6 h-6 text-gray-400" />
+                          </div>
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No open positions</p>
+                          <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Waiting for signals...</p>
                         </div>
                       ) : (
                         openTradesByStrategy.map(group => (
-                          <div key={group.deployment.id} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase">{group.deployment.strategyName}</h4>
-                              <span className={`text-xs font-bold ${group.pnl.openPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                {group.pnl.openPnL >= 0 ? '+' : ''}${group.pnl.openPnL.toFixed(2)}
-                              </span>
-                            </div>
-                            {group.trades.map(trade => {
-                              const position = displayPositions.find(p => p.symbol === trade.symbol)
-                              const currentPnL = position
-                                ? (trade.side === 'buy'
-                                    ? (position.currentPrice - trade.entryPrice) * trade.quantity
-                                    : (trade.entryPrice - position.currentPrice) * trade.quantity)
-                                : 0
-                              return (
-                                <div key={trade.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.side === 'buy' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
+                          group.trades.map(trade => {
+                            const position = displayPositions.find(p => p.symbol === trade.symbol)
+                            const currentPnL = position
+                              ? (trade.side === 'buy'
+                                  ? (position.currentPrice - trade.entryPrice) * trade.quantity
+                                  : (trade.entryPrice - position.currentPrice) * trade.quantity)
+                              : 0
+                            return (
+                              <div key={trade.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <div className="flex items-center justify-between gap-4">
+                                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-lg">📈</span>
+                                      <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                        trade.side === 'buy'
+                                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                      }`}>
                                         {trade.side.toUpperCase()}
                                       </span>
-                                      <span className="font-semibold text-sm text-gray-900 dark:text-white">{trade.symbol}</span>
-                                      <span className="text-xs text-gray-400">x{trade.quantity}</span>
                                     </div>
-                                    <span className={`text-sm font-bold ${currentPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                                      {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
-                                    </span>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{trade.symbol}</p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">x{trade.quantity}</p>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">{group.deployment.strategyName}</span>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">Open</span>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
-                                    <span>Current: ${position?.currentPrice?.toFixed(2) || '-'}</span>
+                                  <div className="flex items-center gap-3 shrink-0">
+                                    <div className="text-right hidden sm:block">
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
+                                      <p className="text-xs text-gray-400 dark:text-gray-500">Current: ${position?.currentPrice?.toFixed(2) || '-'}</p>
+                                    </div>
+                                    <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
+                                      currentPnL >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                                    }`}>
+                                      <p className={`text-sm font-semibold ${currentPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
+                                      </p>
+                                    </div>
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                                   </div>
                                 </div>
-                              )
-                            })}
-                          </div>
+                              </div>
+                            )
+                          })
                         ))
                       )
                     ) : (
                       // Closed Positions
                       closedTradesByStrategy.length === 0 ? (
-                        <div className="text-center py-6">
-                          <TrendingDown className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                          <p className="text-gray-500 text-sm">No closed trades yet</p>
+                        <div className="p-8 text-center">
+                          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <TrendingDown className="w-6 h-6 text-gray-400" />
+                          </div>
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No closed trades yet</p>
+                          <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Completed trades appear here</p>
                         </div>
                       ) : (
                         closedTradesByStrategy.map(group => (
-                          <div key={group.deployment.id} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase">{group.deployment.strategyName}</h4>
-                              <span className={`text-xs font-bold ${group.pnl.closedPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                {group.pnl.closedPnL >= 0 ? '+' : ''}${group.pnl.closedPnL.toFixed(2)}
-                              </span>
-                            </div>
-                            {group.trades.map(trade => (
-                              <div key={trade.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${trade.pnl >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
+                          group.trades.map(trade => (
+                            <div key={trade.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                  <div className="flex flex-col items-center">
+                                    <span className="text-lg">{trade.pnl >= 0 ? '✅' : '❌'}</span>
+                                    <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                      trade.pnl >= 0
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                    }`}>
                                       {trade.pnl >= 0 ? 'WIN' : 'LOSS'}
                                     </span>
-                                    <span className="font-semibold text-sm text-gray-900 dark:text-white">{trade.symbol}</span>
                                   </div>
-                                  <span className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
-                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{trade.symbol}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Closed position</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">{group.deployment.strategyName}</span>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500">Closed</span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="flex items-center justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <span>Entry: ${trade.entryPrice.toFixed(2)}</span>
-                                  <span>Exit: ${trade.exitPrice?.toFixed(2)}</span>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <div className="text-right hidden sm:block">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500">Exit: ${trade.exitPrice?.toFixed(2)}</p>
+                                  </div>
+                                  <div className={`text-right min-w-[70px] px-2 py-1 rounded-lg ${
+                                    trade.pnl >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                                  }`}>
+                                    <p className={`text-sm font-semibold ${trade.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                      {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))
                         ))
                       )
                     )}
 
                     {/* Total P&L Summary */}
                     {(openTradesByStrategy.length > 0 || closedTradesByStrategy.length > 0) && (
-                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total P&L</span>
-                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                            {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
-                          </span>
+                          <div className={`px-3 py-1.5 rounded-lg ${totalPnL >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                            <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -978,18 +1064,24 @@ const TradeStation = () => {
       {/* Challenges & Tournaments Section */}
       <div className="p-4 space-y-6">
         {/* Challenges Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Daily Challenges
-            </h3>
-            <div className="flex items-center gap-1.5 text-gray-400 text-xs">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                <Target className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Daily Challenges</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{challenges.length} challenges available</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1.5 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium rounded-full">
               <Clock className="w-3.5 h-3.5" />
               Resets in 8h
-            </div>
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
             {challenges.map(challenge => {
               const isComplete = challenge.progress >= challenge.target
               const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
@@ -1049,51 +1141,69 @@ const TradeStation = () => {
         </div>
 
         {/* Tournaments Section */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">
-            Active Tournaments
-          </h3>
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                <Trophy className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Active Tournaments</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{tournaments.length} competitions</p>
+              </div>
+            </div>
+            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
+              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+              LIVE
+            </span>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {tournaments.map(tournament => (
               <div
                 key={tournament.id}
-                className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
+                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Trophy className="w-4 h-4 text-amber-500" />
-                      <h4 className="font-semibold text-gray-900 dark:text-white">{tournament.name}</h4>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex flex-col items-center">
+                      <span className="text-lg">🏆</span>
+                      <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                        tournament.joined
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                      }`}>
+                        {tournament.joined ? 'IN' : 'NEW'}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" />
-                        {tournament.participants}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Timer className="w-3.5 h-3.5" />
-                        {tournament.endsIn}
-                      </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{tournament.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Prize: ${tournament.prize.toLocaleString()}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">{tournament.participants} players</span>
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">{tournament.endsIn}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-emerald-500">
-                      ${tournament.prize.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Prize Pool</p>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className={`text-right px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/20`}>
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        ${tournament.prize.toLocaleString()}
+                      </p>
+                      <p className="text-[10px] text-green-500 dark:text-green-400">Prize Pool</p>
+                    </div>
+                    <button
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                        tournament.joined
+                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      }`}
+                    >
+                      {tournament.joined ? 'View' : 'Join'}
+                    </button>
                   </div>
                 </div>
-
-                <button
-                  className={`w-full py-2.5 font-medium text-sm rounded-xl transition-colors ${
-                    tournament.joined
-                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                      : 'bg-indigo-500 text-white hover:bg-indigo-600'
-                  }`}
-                >
-                  {tournament.joined ? 'View Leaderboard' : 'Join Tournament'}
-                </button>
               </div>
             ))}
           </div>
