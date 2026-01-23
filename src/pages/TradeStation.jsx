@@ -327,7 +327,7 @@ const TradeStation = () => {
                   </motion.div>
                 ) : (
                   <>
-                    {/* Strategy Selection */}
+                    {/* Strategy Selection - Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Select from Your Strategies
@@ -339,62 +339,79 @@ const TradeStation = () => {
                           <p className="text-xs text-gray-400 mt-1">Create a strategy in Alpha Lab first</p>
                         </div>
                       ) : (
-                        <div className="space-y-2">
-                          {savedStrategies.map(strategy => {
-                            const hasPositiveBacktest = strategy.backtestResults?.totalReturn > 0
-                            const alreadyListed = isStrategyListed(strategy.id)
-                            const isEligible = hasPositiveBacktest && !alreadyListed
-                            const backtestReturn = strategy.backtestResults?.totalReturn
+                        <>
+                          <div className="relative">
+                            <select
+                              value={selectedStrategyToList?.id || ''}
+                              onChange={(e) => {
+                                const strategy = savedStrategies.find(s => s.id === e.target.value)
+                                setSelectedStrategyToList(strategy || null)
+                              }}
+                              className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                            >
+                              <option value="">Choose a strategy...</option>
+                              {savedStrategies.map(strategy => {
+                                const hasPositiveBacktest = strategy.backtestResults?.totalReturn > 0
+                                const alreadyListed = isStrategyListed(strategy.id)
+                                const isEligible = hasPositiveBacktest && !alreadyListed
+                                const backtestReturn = strategy.backtestResults?.totalReturn
 
-                            return (
-                              <button
-                                key={strategy.id}
-                                onClick={() => isEligible && setSelectedStrategyToList(strategy)}
-                                disabled={!isEligible}
-                                className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
-                                  selectedStrategyToList?.id === strategy.id
-                                    ? 'border-indigo-500 bg-indigo-50'
-                                    : isEligible
-                                      ? 'border-gray-200 hover:border-indigo-300 bg-white cursor-pointer'
-                                      : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <p className="font-medium text-gray-900 truncate">{strategy.name}</p>
-                                      {alreadyListed && (
-                                        <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-[10px] font-semibold rounded">
-                                          LISTED
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-gray-500">{strategy.symbol || 'SPY'}</p>
-                                  </div>
-                                  <div className="text-right ml-3">
-                                    {backtestReturn !== undefined && backtestReturn !== null ? (
-                                      <>
-                                        <p className={`text-sm font-semibold ${
-                                          backtestReturn > 0 ? 'text-emerald-600' : 'text-rose-500'
-                                        }`}>
-                                          {backtestReturn > 0 ? '+' : ''}{backtestReturn.toFixed(1)}%
-                                        </p>
-                                        <p className="text-xs text-gray-400">backtest</p>
-                                      </>
-                                    ) : (
-                                      <span className="text-xs text-amber-600 font-medium">No backtest</span>
-                                    )}
-                                  </div>
+                                let statusText = ''
+                                if (alreadyListed) statusText = ' (Already Listed)'
+                                else if (!hasPositiveBacktest && backtestReturn !== undefined) statusText = ' (Negative backtest)'
+                                else if (backtestReturn === undefined) statusText = ' (No backtest)'
+
+                                return (
+                                  <option
+                                    key={strategy.id}
+                                    value={strategy.id}
+                                    disabled={!isEligible}
+                                  >
+                                    {strategy.name} - {strategy.symbol || 'SPY'}
+                                    {backtestReturn !== undefined ? ` (${backtestReturn > 0 ? '+' : ''}${backtestReturn.toFixed(1)}%)` : ''}
+                                    {statusText}
+                                  </option>
+                                )
+                              })}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
+
+                          {/* Selected Strategy Display Card */}
+                          {selectedStrategyToList && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mt-3 p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <BadgeCheck className="w-4 h-4 text-indigo-600" />
+                                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">Selected Strategy</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-gray-900">{selectedStrategyToList.name}</p>
+                                  <p className="text-sm text-gray-500">{selectedStrategyToList.symbol || 'SPY'}</p>
                                 </div>
-                                {!isEligible && !alreadyListed && (
-                                  <p className="text-xs text-amber-600 mt-1.5">
-                                    {!hasPositiveBacktest ? 'Needs positive backtest to list' : ''}
-                                  </p>
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
+                                <div className="text-right">
+                                  {selectedStrategyToList.backtestResults?.totalReturn !== undefined && (
+                                    <>
+                                      <p className={`text-lg font-bold ${
+                                        selectedStrategyToList.backtestResults.totalReturn > 0
+                                          ? 'text-emerald-600'
+                                          : 'text-rose-500'
+                                      }`}>
+                                        {selectedStrategyToList.backtestResults.totalReturn > 0 ? '+' : ''}
+                                        {selectedStrategyToList.backtestResults.totalReturn.toFixed(1)}%
+                                      </p>
+                                      <p className="text-xs text-gray-500">backtest return</p>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </>
                       )}
                       {savedStrategies.length > 0 && listableStrategies.length === 0 && (
                         <p className="text-xs text-gray-500 mt-2 text-center">
