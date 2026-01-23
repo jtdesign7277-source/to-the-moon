@@ -21,6 +21,7 @@ import {
   Brain,
   Sun,
   Moon,
+  Radio,
 } from 'lucide-react'
 
 // Context
@@ -56,6 +57,7 @@ import TradeHistory from './pages/TradeHistory'
 import TradeStation from './pages/TradeStation'
 import AlphaLab from './pages/AlphaLab'
 import Legal from './pages/Legal'
+import StockScanner from './pages/StockScanner'
 
 // Navigation configuration - Main nav items
 const NAV_ITEMS = [
@@ -85,6 +87,13 @@ const NAV_ITEMS = [
     label: 'Strategy Builder',
     shortLabel: 'Strategy',
     icon: Wrench,
+    requiresPro: false,
+  },
+  {
+    id: 'stock-scanner',
+    label: 'Stock Scanner',
+    shortLabel: 'Scanner',
+    icon: Radio,
     requiresPro: false,
   },
   {
@@ -150,6 +159,8 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
       return <TradeStation />
     case 'alpha-lab':
       return <AlphaLab />
+    case 'stock-scanner':
+      return <StockScanner />
     default:
       return <Dashboard onNavigate={onNavigate} />
   }
