@@ -530,11 +530,12 @@ const StockChart = ({ symbol, data, timeframe, onTimeframeChange }) => {
   useEffect(() => {
     if (seriesRef.current && data?.length > 0) {
       const chartData = data.map(bar => ({
-        time: new Date(bar.t || bar.time).getTime() / 1000,
-        open: parseFloat(bar.o || bar.open),
-        high: parseFloat(bar.h || bar.high),
-        low: parseFloat(bar.l || bar.low),
-        close: parseFloat(bar.c || bar.close),
+        // Backend returns 'timestamp', Alpaca raw returns 't'
+        time: new Date(bar.timestamp || bar.t || bar.time).getTime() / 1000,
+        open: parseFloat(bar.open || bar.o || 0),
+        high: parseFloat(bar.high || bar.h || 0),
+        low: parseFloat(bar.low || bar.l || 0),
+        close: parseFloat(bar.close || bar.c || 0),
       }))
       seriesRef.current.setData(chartData)
       chartRef.current?.timeScale().fitContent()
@@ -1131,7 +1132,7 @@ const Trading = () => {
         onTrade={() => {
           // Refresh positions after trade
           alpacaApi.getPositions().then(res => {
-            if (res.data) setPositions(res.data)
+            if (res.data) setPositions(res.data.positions || res.data || [])
           })
         }}
       />
