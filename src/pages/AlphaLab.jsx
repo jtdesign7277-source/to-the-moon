@@ -494,14 +494,25 @@ const AlphaLab = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
-          <Brain className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
+            <Brain className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder with Alpaca</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder with Alpaca</p>
-        </div>
+        {(strategy || inputText || backtestResults) && (
+          <button
+            onClick={resetAll}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            New Strategy
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
