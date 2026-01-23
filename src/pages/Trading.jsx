@@ -645,10 +645,13 @@ const Trading = () => {
         try {
           const response = await alpacaApi.getQuote(symbol)
           if (response.data) {
+            const bid = response.data.bid_price || response.data.bp || 0
+            const ask = response.data.ask_price || response.data.ap || 0
+            const price = ask || bid || response.data.price || 0
             newQuotes[symbol] = {
-              price: response.data.ap || response.data.price || 0,
-              bid: response.data.bp || 0,
-              ask: response.data.ap || 0,
+              price,
+              bid,
+              ask,
               // Note: Real change data would come from bars comparison
               change: 0,
               changePercent: 0,
@@ -682,7 +685,7 @@ const Trading = () => {
 
       const { tf, limit } = timeframeMap[chartTimeframe] || timeframeMap['1D']
 
-      const response = await alpacaApi.getBars(selectedSymbol, { timeframe: tf, limit })
+      const response = await alpacaApi.getBars(selectedSymbol, tf, limit)
       if (response.data?.bars || response.data) {
         setChartData(response.data.bars || response.data)
       }
