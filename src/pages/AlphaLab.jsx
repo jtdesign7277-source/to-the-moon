@@ -398,7 +398,23 @@ const AlphaLab = () => {
             </div>
 
             <div className="p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Strategy Description</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">Strategy Description</label>
+                {strategyText.trim() && (
+                  <button
+                    onClick={() => {
+                      setStrategyText('')
+                      setStrategyName('')
+                      setParsedStrategy(null)
+                      setBacktestResults(null)
+                    }}
+                    className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear all
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -408,21 +424,32 @@ const AlphaLab = () => {
 
 Example: Buy Tesla when RSI drops below 30 on the 15-minute chart. Sell when RSI hits 70 or after 5% profit. Use a 2% stop loss."
                   rows={6}
-                  className={`w-full px-4 py-3 border rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none ${
+                  className={`w-full px-4 py-3 pr-24 border rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none ${
                     isListening ? 'border-red-400 bg-red-50/30' : 'border-gray-200'
                   }`}
                 />
-                <button
-                  onClick={toggleVoiceInput}
-                  className={`absolute bottom-3 right-3 p-2.5 rounded-xl transition-all ${
-                    isListening
-                      ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  title={isListening ? 'Stop recording' : 'Voice input'}
-                >
-                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </button>
+                <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                  {strategyText.trim() && !isListening && (
+                    <button
+                      onClick={() => setStrategyText('')}
+                      className="p-2 bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500 rounded-lg transition-all"
+                      title="Clear text"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={toggleVoiceInput}
+                    className={`p-2.5 rounded-xl transition-all ${
+                      isListening
+                        ? 'bg-red-500 text-white animate-pulse'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    title={isListening ? 'Stop recording' : 'Voice input'}
+                  >
+                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               {isListening && (
                 <p className="mt-2 text-sm text-red-600 flex items-center gap-2">
