@@ -20,6 +20,7 @@ import {
   X,
   Rocket,
   Brain,
+  Radio,
 } from 'lucide-react'
 
 // Context
@@ -51,6 +52,7 @@ import StrategyDiscovery from './pages/StrategyDiscovery'
 import TradeHistory from './pages/TradeHistory'
 import TradeStation from './pages/TradeStation'
 import AlphaLab from './pages/AlphaLab'
+import AlphaHub from './pages/AlphaHub'
 import Legal from './pages/Legal'
 
 // Navigation configuration - Main nav items
@@ -95,6 +97,13 @@ const NAV_ITEMS = [
     label: 'Alpha Lab',
     shortLabel: 'Alpha',
     icon: Brain,
+    requiresPro: true,
+  },
+  {
+    id: 'alpha-hub',
+    label: 'Alpha Hub',
+    shortLabel: 'Hub',
+    icon: Radio,
     requiresPro: true,
   },
 ]
@@ -155,6 +164,8 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
       return <TradeStation />
     case 'alpha-lab':
       return <AlphaLab />
+    case 'alpha-hub':
+      return <AlphaHub />
     default:
       return <Dashboard onNavigate={onNavigate} />
   }
