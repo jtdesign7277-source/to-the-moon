@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
-import { createChart, ColorType, CrosshairMode } from 'lightweight-charts'
+import { createChart, ColorType, CrosshairMode, CandlestickSeries } from 'lightweight-charts'
 import {
   Search,
   TrendingUp,
@@ -494,8 +494,8 @@ const StockChart = ({ symbol, data, timeframe, onTimeframeChange }) => {
       handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
     })
 
-    // Add candlestick series
-    const series = chart.addCandlestickSeries({
+    // Add candlestick series (v5 API)
+    const series = chart.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
       downColor: '#ef4444',
       borderUpColor: '#22c55e',
