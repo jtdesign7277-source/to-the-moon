@@ -133,9 +133,7 @@ const TradeStation = () => {
   const [activeTab, setActiveTab] = useState('build')
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationProfit, setCelebrationProfit] = useState(0)
-  const [query, setQuery] = useState('')
-  const [isBuilding, setIsBuilding] = useState(false)
-  const [showShareSheet, setShowShareSheet] = useState(false)
+    const [showShareSheet, setShowShareSheet] = useState(false)
   const [copied, setCopied] = useState(false)
 
   // User stats
@@ -166,41 +164,7 @@ const TradeStation = () => {
     { id: 2, name: 'Momentum Masters', prize: 10000, participants: 567, endsIn: '6d 8h', joined: true },
   ]
 
-  // Quick actions for strategy building
-  const quickPrompts = [
-    'Buy when RSI < 30',
-    'Momentum breakout',
-    'Mean reversion',
-    'Trend following',
-  ]
-
-  const handleBuild = async () => {
-    if (!query.trim()) return
-    setIsBuilding(true)
-
-    // Simulate building
-    await new Promise(r => setTimeout(r, 1500))
-
-    const profit = Math.random() * 35 - 5
-    const newStrategy = {
-      id: Date.now(),
-      name: query.length > 20 ? query.slice(0, 20) + '...' : query,
-      ticker: ['SPY', 'QQQ', 'AAPL', 'TSLA'][Math.floor(Math.random() * 4)],
-      profit,
-      winRate: Math.floor(Math.random() * 30 + 50),
-      status: 'new'
-    }
-
-    setStrategies([newStrategy, ...strategies])
-    setIsBuilding(false)
-    setQuery('')
-
-    if (profit > 15) {
-      setCelebrationProfit(profit)
-      setShowCelebration(true)
-    }
-  }
-
+  
   const handleCopy = () => {
     navigator.clipboard.writeText('https://tothemoon.app/s/demo')
     setCopied(true)
@@ -341,60 +305,6 @@ const TradeStation = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
-              {/* Strategy Builder */}
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">AI Strategy Builder</h3>
-                    <p className="text-xs text-gray-500">Describe your strategy in plain English</p>
-                  </div>
-                </div>
-
-                <div className="relative mb-3">
-                  <textarea
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder="Example: Buy SPY when it drops 2% from daily high..."
-                    className="w-full h-20 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {quickPrompts.map((prompt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setQuery(prompt)}
-                      className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs font-medium rounded-lg transition-colors border border-gray-200"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleBuild}
-                  disabled={!query.trim() || isBuilding}
-                  className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-300 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
-                >
-                  {isBuilding ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <Zap className="w-5 h-5" />
-                    </motion.div>
-                  ) : (
-                    <>
-                      <Rocket className="w-5 h-5" />
-                      Build Strategy
-                    </>
-                  )}
-                </button>
-              </div>
-
               {/* Strategies List */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">

@@ -8,7 +8,6 @@ import {
   BookOpen,
   Compass,
   History,
-  Activity,
   User,
   Mail,
   Calendar,
@@ -20,7 +19,6 @@ import {
   X,
   Rocket,
   Brain,
-  Radio,
 } from 'lucide-react'
 
 // Context
@@ -43,7 +41,6 @@ import Dashboard from './pages/Dashboard'
 import Accounts from './pages/Accounts'
 import StrategyBuilder from './pages/StrategyBuilder'
 
-import ScannerDashboard from './components/Scanner/ScannerDashboard';
 import Leaderboard from './pages/Leaderboard'
 import Marketplace from './pages/Marketplace'
 import Admin from './pages/Admin'
@@ -52,7 +49,6 @@ import StrategyDiscovery from './pages/StrategyDiscovery'
 import TradeHistory from './pages/TradeHistory'
 import TradeStation from './pages/TradeStation'
 import AlphaLab from './pages/AlphaLab'
-import AlphaHub from './pages/AlphaHub'
 import Legal from './pages/Legal'
 
 // Navigation configuration - Main nav items
@@ -62,13 +58,6 @@ const NAV_ITEMS = [
     label: 'Dashboard',
     shortLabel: 'Dashboard',
     icon: LayoutDashboard,
-    requiresPro: false,
-  },
-  {
-    id: 'scanner',
-    label: 'Scanner',
-    shortLabel: 'Scanner',
-    icon: Activity,
     requiresPro: false,
   },
   {
@@ -97,13 +86,6 @@ const NAV_ITEMS = [
     label: 'Alpha Lab',
     shortLabel: 'Alpha',
     icon: Brain,
-    requiresPro: true,
-  },
-  {
-    id: 'alpha-hub',
-    label: 'Alpha Hub',
-    shortLabel: 'Hub',
-    icon: Radio,
     requiresPro: true,
   },
 ]
@@ -158,14 +140,10 @@ const PageRenderer = ({ currentPage, legalTab, onNavigate }) => {
       return <StrategyDiscovery />
     case 'legal':
       return <Legal initialTab={legalTab} />
-    case 'scanner':
-      return <ScannerDashboard />
     case 'trade-station':
       return <TradeStation />
     case 'alpha-lab':
       return <AlphaLab />
-    case 'alpha-hub':
-      return <AlphaHub />
     default:
       return <Dashboard onNavigate={onNavigate} />
   }
