@@ -239,15 +239,6 @@ const TradeStation = () => {
             </div>
             <div className="flex items-center gap-3">
               <StatPill icon={Star} value={stats.coins} color="indigo" />
-              {deployedStrategies.length > 0 && (
-                <button
-                  onClick={killAllStrategies}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium rounded-full transition-colors"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                  Kill All
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -304,7 +295,20 @@ const TradeStation = () => {
                             key={strategy.id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
+                            onClick={async () => {
+                              if (!isDeployed) {
+                                const result = await deployStrategy(strategy, tradingMode)
+                                if (result && strategy.backtestResults?.totalReturn > 0) {
+                                  setCelebrationProfit(strategy.backtestResults.totalReturn)
+                                  setShowCelebration(true)
+                                }
+                              }
+                            }}
+                            className={`p-3 rounded-xl border-2 transition-all ${
+                              isDeployed
+                                ? 'bg-emerald-50 border-emerald-200 cursor-default'
+                                : 'bg-gray-50 border-gray-100 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer hover:shadow-md'
+                            }`}
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1 min-w-0">
@@ -314,9 +318,9 @@ const TradeStation = () => {
                                     {strategy.symbol || 'SPY'}
                                   </span>
                                   {isDeployed && (
-                                    <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-600 text-xs font-medium rounded flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                      Live
+                                    <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-medium rounded flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                      ACTIVE
                                     </span>
                                   )}
                                 </div>
@@ -333,30 +337,22 @@ const TradeStation = () => {
                                   </div>
                                 )}
                               </div>
+                              {!isDeployed && (
+                                <div className="ml-2 flex-shrink-0">
+                                  <Play className="w-5 h-5 text-indigo-500" />
+                                </div>
+                              )}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                               {!isDeployed ? (
-                                <button
-                                  onClick={async () => {
-                                    const result = await deployStrategy(strategy, tradingMode)
-                                    if (result && strategy.backtestResults?.totalReturn > 0) {
-                                      setCelebrationProfit(strategy.backtestResults.totalReturn)
-                                      setShowCelebration(true)
-                                    }
-                                  }}
-                                  className="flex-1 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
-                                >
-                                  <Play className="w-3 h-3" />
-                                  Deploy
-                                </button>
+                                <div className="flex-1 py-1.5 bg-indigo-100 text-indigo-600 font-medium text-xs rounded-lg text-center">
+                                  Click to Activate
+                                </div>
                               ) : (
-                                <button
-                                  disabled
-                                  className="flex-1 py-1.5 bg-gray-100 text-gray-400 font-medium text-xs rounded-lg cursor-not-allowed flex items-center justify-center gap-1"
-                                >
+                                <div className="flex-1 py-1.5 bg-emerald-100 text-emerald-700 font-medium text-xs rounded-lg text-center flex items-center justify-center gap-1">
                                   <Check className="w-3 h-3" />
-                                  Active
-                                </button>
+                                  Running
+                                </div>
                               )}
                               <button
                                 onClick={() => setShowShareSheet(true)}
@@ -429,18 +425,18 @@ const TradeStation = () => {
                             key={deployment.id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100"
+                            className="p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border-2 border-emerald-200"
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <span className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+                                  <span className={`w-3 h-3 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
                                   <h4 className="font-semibold text-gray-900 text-sm truncate">{deployment.strategyName}</h4>
                                 </div>
                                 {deployment.status === 'active' && (
-                                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                    Scanning
+                                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-500 text-white text-xs font-medium rounded-full">
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                    SCANNING
                                   </span>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
@@ -451,32 +447,36 @@ const TradeStation = () => {
                                 {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
                               </div>
                             </div>
-                            <div className="flex gap-2">
+
+                            {/* Strategy Controls */}
+                            <div className="flex gap-2 mb-2">
                               {deployment.status === 'active' ? (
                                 <button
                                   onClick={() => pauseStrategy(deployment.id)}
-                                  className="flex-1 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                  className="flex-1 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-1.5"
                                 >
-                                  <Pause className="w-3 h-3" />
+                                  <Pause className="w-4 h-4" />
                                   Pause
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => resumeStrategy(deployment.id)}
-                                  className="flex-1 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                  className="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-1.5"
                                 >
-                                  <Play className="w-3 h-3" />
+                                  <Play className="w-4 h-4" />
                                   Resume
                                 </button>
                               )}
-                              <button
-                                onClick={() => killStrategy(deployment.id)}
-                                className="py-1.5 px-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
-                              >
-                                <AlertTriangle className="w-3 h-3" />
-                                Kill
-                              </button>
                             </div>
+
+                            {/* KILL SWITCH - Prominent */}
+                            <button
+                              onClick={() => killStrategy(deployment.id)}
+                              className="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+                            >
+                              <AlertTriangle className="w-4 h-4" />
+                              KILL STRATEGY
+                            </button>
                           </motion.div>
                         )
                       })
