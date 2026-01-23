@@ -157,10 +157,6 @@ const TradeStation = () => {
 
   // User stats
   const stats = {
-    level: 12,
-    xp: 2450,
-    xpToNext: 3000,
-    streak: 7,
     coins: 1250,
   }
 
@@ -254,34 +250,13 @@ const TradeStation = () => {
       {/* Header */}
       <div className="bg-white border-b border-gray-100">
         <div className="px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Trade Station</h1>
               <p className="text-gray-500 text-sm">Build, test, and deploy strategies</p>
             </div>
-            <div className="flex items-center gap-2">
-              <StatPill icon={Flame} value={stats.streak} color="amber" />
+            <div className="mr-4">
               <StatPill icon={Star} value={stats.coins} color="indigo" />
-            </div>
-          </div>
-
-          {/* Level Progress */}
-          <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl">
-            <ProgressRing progress={(stats.xp / stats.xpToNext) * 100} size={56}>
-              <span className="text-sm font-bold text-indigo-600">{stats.level}</span>
-            </ProgressRing>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-900">Level {stats.level}</span>
-                <span className="text-xs text-gray-500">{stats.xp}/{stats.xpToNext} XP</span>
-              </div>
-              <div className="h-2 bg-white rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(stats.xp / stats.xpToNext) * 100}%` }}
-                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                />
-              </div>
             </div>
           </div>
         </div>
