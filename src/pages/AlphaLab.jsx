@@ -295,22 +295,46 @@ const AlphaLab = () => {
   const deployStrategy = async () => {
     setIsDeploying(true)
     try {
-      const response = await fetch(`${API_URL}/api/alpha-lab/deploy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: strategyName || 'Alpha Lab Strategy',
-          symbol: parsedStrategy.symbol,
-          strategy: parsedStrategy,
-          capital: deploymentCapital,
-          mode: deploymentMode,
-        }),
-      })
-      const data = await response.json()
-      if (data.success) {
-        setIsDeployed(true)
-        setCurrentStep(4)
+      // First, save the strategy to the shared context
+      const strategyToSave = {
+        id: `strategy-${Date.now()}`,
+        name: strategyName || 'Alpha Lab Strategy',
+        symbol: parsedStrategy.symbol || 'SPY',
+        description: strategyText,
+        interpretation: parsedStrategy.interpretation || parsedStrategy.description,
+        strategy: parsedStrategy,
+        backtestResults: backtestResults,
+        capital: deploymentCapital,
+        timeframe: selectedTimeframe,
+        lookback: selectedLookback,
+        createdAt: new Date().toISOString(),
       }
+
+      // Save to shared context (this makes it appear in Trade Station "My Strategies")
+      const savedStrategy = saveToContext(strategyToSave)
+
+      // Deploy the strategy (this makes it appear in "Active Strategies" with scanning status)
+      await deployToContext(savedStrategy, deploymentMode)
+
+      // Also try backend API call (optional, for actual execution)
+      try {
+        await fetch(`${API_URL}/api/alpha-lab/deploy`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: strategyName || 'Alpha Lab Strategy',
+            symbol: parsedStrategy.symbol,
+            strategy: parsedStrategy,
+            capital: deploymentCapital,
+            mode: deploymentMode,
+          }),
+        })
+      } catch (apiError) {
+        console.log('Backend deploy API not available, running locally')
+      }
+
+      setIsDeployed(true)
+      setCurrentStep(4)
     } catch (error) {
       console.error('Error deploying strategy:', error)
       setIsDeployed(true)

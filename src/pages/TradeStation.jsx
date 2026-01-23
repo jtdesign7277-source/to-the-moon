@@ -337,10 +337,21 @@ const TradeStation = () => {
                                   <div className="flex items-center gap-2">
                                     <span className={`w-2 h-2 rounded-full ${deployment.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
                                     <h4 className="font-semibold text-gray-900">{deployment.strategyName}</h4>
+                                    {deployment.status === 'active' && (
+                                      <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                        Scanning
+                                      </span>
+                                    )}
                                   </div>
                                   <p className="text-xs text-gray-500 mt-1">
                                     {deployment.mode === 'paper' ? 'Paper Trading' : 'Live Trading'} • {deployment.trades || 0} trades
                                   </p>
+                                  {deployment.strategy?.symbol && (
+                                    <p className="text-xs text-indigo-600 mt-0.5">
+                                      Watching: {deployment.strategy.symbol}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className={`text-lg font-bold ${(deployment.pnl || 0) >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                                   {(deployment.pnl || 0) >= 0 ? '+' : ''}{(deployment.pnl || 0).toFixed(1)}%
