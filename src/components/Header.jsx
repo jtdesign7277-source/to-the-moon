@@ -386,14 +386,14 @@ const Header = ({
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 text-yellow-500 hover:text-yellow-400 transition-colors"
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? (
                 <Sun className="w-5 h-5" />
               ) : (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-5 h-5 text-gray-500 hover:text-gray-400" />
               )}
             </button>
 
@@ -401,7 +401,7 @@ const Header = ({
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors"
+                className="p-2 text-gray-500 hover:text-gray-400 relative transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />

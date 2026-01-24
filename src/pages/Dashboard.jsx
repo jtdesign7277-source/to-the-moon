@@ -837,9 +837,7 @@ const Dashboard = ({ onNavigate }) => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                <Zap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
+              <Zap className="w-6 h-6 text-indigo-500" />
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{activeStrategies.length} running now</p>
@@ -920,9 +918,7 @@ const Dashboard = ({ onNavigate }) => {
                           <p className="text-xs text-gray-500 dark:text-gray-400">{strategy.totalTrades || 0} trades</p>
                         </div>
                         
-                        <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                          <Play className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        </div>
+                        <Play className="w-5 h-5 text-green-500" />
                       </div>
                     </div>
                   </div>
@@ -936,15 +932,13 @@ const Dashboard = ({ onNavigate }) => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                <Rocket className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              </div>
+              <Rocket className="w-6 h-6 text-purple-500" />
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-white">Strategy Bets</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{strategyBets?.length || 0} live position{(strategyBets?.length || 0) !== 1 ? 's' : ''} from automated strategies</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+            <span className="flex items-center gap-1.5 text-purple-500 text-xs font-bold">
               <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
               AUTO
             </span>

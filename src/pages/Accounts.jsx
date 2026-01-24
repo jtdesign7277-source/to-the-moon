@@ -502,16 +502,14 @@ const Accounts = () => {
             {/* Card Header */}
             <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-                  <Wallet className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                </div>
+                <Wallet className="w-6 h-6 text-yellow-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">{paperAccount.name}</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{paperAccount.type}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                <span className="flex items-center gap-1.5 text-green-500 text-xs font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   {paperAccount.status}
                 </span>
@@ -574,9 +572,7 @@ const Accounts = () => {
           {paperPositions.length > 0 && (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <Briefcase className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </div>
+                <Briefcase className="w-6 h-6 text-blue-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Open Positions</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{paperPositions.length} active</p>
@@ -609,9 +605,7 @@ const Accounts = () => {
           {recentTrades.length > 0 && (
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                </div>
+                <TrendingUp className="w-6 h-6 text-indigo-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Recent Trades</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{recentTrades.length} trades</p>

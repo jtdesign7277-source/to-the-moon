@@ -77,19 +77,19 @@ const CelebrationOverlay = ({ show, profit, onComplete }) => {
   )
 }
 
-// Clean stat pill
+// Clean stat display - no background, just colored text
 const StatPill = ({ icon: Icon, label, value, color = 'indigo' }) => {
   const colors = {
-    indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-    amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-    emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-    rose: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
+    indigo: 'text-indigo-600 dark:text-indigo-400',
+    amber: 'text-amber-600 dark:text-amber-400',
+    emerald: 'text-emerald-600 dark:text-emerald-400',
+    rose: 'text-rose-600 dark:text-rose-400',
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${colors[color]}`}>
-      <Icon className="w-4 h-4" />
-      <span className="text-sm font-semibold">{value}</span>
+    <div className={`inline-flex items-center gap-2 ${colors[color]}`}>
+      <Icon className="w-5 h-5" />
+      <span className="text-sm font-bold">{value}</span>
       {label && <span className="text-sm opacity-70">{label}</span>}
     </div>
   )
@@ -652,13 +652,11 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                  {isStrategiesFolderOpen ? (
-                    <FolderOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  ) : (
-                    <Folder className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  )}
-                </div>
+                {isStrategiesFolderOpen ? (
+                  <FolderOpen className="w-6 h-6 text-indigo-500" />
+                ) : (
+                  <Folder className="w-6 h-6 text-indigo-500" />
+                )}
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">My Strategies</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{savedStrategies.length} saved</p>
@@ -752,9 +750,7 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
-                  <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
+                <Activity className="w-6 h-6 text-emerald-500" />
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Active Strategies</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{displayDeployedStrategies.length} running</p>
@@ -820,25 +816,25 @@ const TradeStation = () => {
                                     {pnl.totalPnL >= 0 ? '+' : ''}${pnl.totalPnL.toFixed(2)}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-3">
                                   {deployment.status === 'active' ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); !isMock && pauseStrategy(deployment.id) }}
-                                      className="px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 rounded-lg transition-colors"
+                                      className="text-xs font-bold text-yellow-500 hover:text-yellow-400 transition-colors"
                                     >
                                       Pause
                                     </button>
                                   ) : (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); !isMock && resumeStrategy(deployment.id) }}
-                                      className="px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                      className="text-xs font-bold text-green-500 hover:text-green-400 transition-colors"
                                     >
                                       Resume
                                     </button>
                                   )}
                                   <button
                                     onClick={(e) => { e.stopPropagation(); !isMock && killStrategy(deployment.id) }}
-                                    className="px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                                    className="text-xs font-bold text-red-500 hover:text-red-400 transition-colors"
                                   >
                                     Kill
                                   </button>
@@ -863,9 +859,7 @@ const TradeStation = () => {
               className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 rounded-xl">
-                  <DollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                </div>
+                <DollarSign className="w-6 h-6 text-amber-500" />
                 <div className="text-left">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">Positions</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1053,15 +1047,13 @@ const TradeStation = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
-                <Target className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-              </div>
+              <Target className="w-6 h-6 text-amber-500" />
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">Daily Challenges</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{challenges.length} challenges available</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium rounded-full">
+            <span className="flex items-center gap-1.5 text-amber-500 text-xs font-bold">
               <Clock className="w-3.5 h-3.5" />
               Resets in 8h
             </span>
@@ -1130,15 +1122,13 @@ const TradeStation = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                <Trophy className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              </div>
+              <Trophy className="w-6 h-6 text-purple-500" />
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">Active Tournaments</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{tournaments.length} competitions</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
+            <span className="flex items-center gap-1.5 text-purple-500 text-xs font-bold">
               <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
               LIVE
             </span>

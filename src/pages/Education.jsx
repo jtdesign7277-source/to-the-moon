@@ -40,9 +40,7 @@ const ExpandableSection = ({ title, icon: Icon, children, defaultOpen = false })
         className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-            <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          </div>
+          <Icon className="w-6 h-6 text-indigo-500" />
           <div className="text-left">
             <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
           </div>
@@ -500,9 +498,7 @@ if trend > min_edge:
             <div className="space-y-3">
               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
-                    <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                  </div>
+                  <Clock className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">Market Conditions Change</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -515,9 +511,7 @@ if trend > min_edge:
 
               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                    <Activity className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  </div>
+                  <Activity className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">Execution Slippage</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -530,9 +524,7 @@ if trend > min_edge:
 
               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                    <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  </div>
+                  <Zap className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">Strategy Crowding</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -545,9 +537,7 @@ if trend > min_edge:
 
               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
-                    <Target className="w-4 h-4 text-red-600 dark:text-red-400" />
-                  </div>
+                  <Target className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">Overfitting Risk</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -560,9 +550,7 @@ if trend > min_edge:
 
               <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                    <PieChart className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  </div>
+                  <PieChart className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-gray-900 dark:text-white">Sample Size Limitations</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
