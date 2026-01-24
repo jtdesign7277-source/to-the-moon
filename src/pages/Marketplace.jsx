@@ -163,23 +163,20 @@ const Marketplace = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
             >
-              {/* Card Header with Gradient */}
-              <div className={`h-28 flex items-center justify-center relative overflow-hidden ${
-                strategy.verified
-                  ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
-                  : 'bg-gradient-to-br from-emerald-500 to-teal-600'
-              }`}>
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJsLTItMmMwIDAtMiAyLTIgNHMyIDQgMiA0IDIgMiA0IDJsMiAyYzAgMCAyLTIgMi00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20" />
-                <Activity className="w-10 h-10 text-white/80 group-hover:scale-110 transition-transform" />
+              {/* Card Header */}
+              <div className="h-28 flex items-center justify-center relative overflow-hidden bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                <Activity className={`w-10 h-10 group-hover:scale-110 transition-transform ${
+                  strategy.verified ? 'text-indigo-500 dark:text-indigo-400' : 'text-emerald-500 dark:text-emerald-400'
+                }`} />
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   {strategy.verified && (
-                    <span className="px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-xs text-white font-medium flex items-center gap-1">
+                    <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
                       <BadgeCheck className="w-3 h-3" />
                       Verified
                     </span>
                   )}
                 </div>
-                <span className="absolute top-3 right-3 px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-xs text-white font-medium">
+                <span className="absolute top-3 right-3 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 font-medium">
                   {strategy.category}
                 </span>
               </div>
@@ -254,34 +251,38 @@ const Marketplace = () => {
               </div>
 
               {/* Header */}
-              <div className={`px-5 py-6 ${
-                selectedListing.verified
-                  ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
-                  : 'bg-gradient-to-br from-emerald-500 to-teal-600'
-              }`}>
+              <div className="px-5 py-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-white" />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      selectedListing.verified
+                        ? 'bg-indigo-100 dark:bg-indigo-900/30'
+                        : 'bg-emerald-100 dark:bg-emerald-900/30'
+                    }`}>
+                      <Activity className={`w-6 h-6 ${
+                        selectedListing.verified
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-emerald-600 dark:text-emerald-400'
+                      }`} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{selectedListing.name}</h3>
-                      <p className="text-white/70 text-sm">by {selectedListing.author}</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{selectedListing.name}</h3>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">by {selectedListing.author}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setSelectedListing(null)}
-                    className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
                   >
-                    <X className="w-5 h-5 text-white" />
+                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </button>
                 </div>
 
                 {/* Stats Row */}
-                <div className="flex items-center gap-4 mt-4 text-white/90 text-sm">
+                <div className="flex items-center gap-4 mt-4 text-gray-600 dark:text-gray-400 text-sm">
                   {selectedListing.rating > 0 && (
                     <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       {selectedListing.rating.toFixed(1)}
                     </span>
                   )}
@@ -289,7 +290,7 @@ const Marketplace = () => {
                     <Users className="w-4 h-4" />
                     {selectedListing.users} users
                   </span>
-                  <span className="font-semibold text-white">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                     {selectedListing.returns} returns
                   </span>
                 </div>
