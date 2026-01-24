@@ -36,7 +36,6 @@ import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import MobileNav from './components/MobileNav'
 import UpgradeModal from './components/UpgradeModal'
-import DevTools from './components/DevTools'
 import LunaChatWidget from './components/LunaChatWidget'
 import { ToastProvider } from './components/ui/Toast'
 
@@ -548,9 +547,6 @@ const AppContent = () => {
 
       {/* Luna AI Chat Widget */}
       <LunaChatWidget user={user} />
-
-      {/* Development Tools */}
-      <DevTools />
     </div>
   )
 }
