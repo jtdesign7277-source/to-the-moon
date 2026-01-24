@@ -1,5 +1,5 @@
 /**
- * TO THE MOON - Subscription Hook
+ * STRATIFY - Subscription Hook
  * Manages subscription status, Pro tier checks, and Stripe checkout.
  */
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';

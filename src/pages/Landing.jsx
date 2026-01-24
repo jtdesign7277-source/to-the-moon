@@ -144,11 +144,11 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
 
   const faqs = [
     {
-      question: 'Does To The Moon trade for me?',
+      question: 'Does Stratify trade for me?',
       answer: 'Yes! You can create automated trading strategies that execute trades on your behalf based on the rules you define. You maintain full control and can stop strategies at any time.',
     },
     {
-      question: 'How will To The Moon help me as a trader?',
+      question: 'How will Stratify help me as a trader?',
       answer: 'Our platform helps you discover your best trading setups through analytics, improve risk management with built-in tools, and automate your strategies to remove emotional trading decisions.',
     },
     {
@@ -169,7 +169,7 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <Rocket className="w-7 h-7 text-indigo-400" />
-              <span className="text-xl font-bold text-white">To The Moon</span>
+              <span className="text-xl font-bold text-white">Stratify</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-400 hover:text-white transition-colors text-sm">Features</a>
@@ -281,7 +281,7 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
                   </div>
                   <div className="flex-1 flex justify-center">
                     <div className="bg-white/5 rounded-lg px-4 py-1.5 text-sm text-gray-400">
-                      app.tothemoon.trading
+                      app.stratify.trading
                     </div>
                   </div>
                 </div>
@@ -320,7 +320,7 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-              How To The Moon Helps You
+              How Stratify Helps You
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
               Powerful tools designed to transform your prediction market trading
@@ -636,7 +636,7 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
                 Ready to trade smarter?
               </h2>
               <p className="text-gray-400 mb-8 max-w-xl mx-auto text-lg">
-                Join thousands of traders using To The Moon to automate their prediction market strategies.
+                Join thousands of traders using Stratify to automate their prediction market strategies.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -661,7 +661,7 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
             <div className="flex items-center gap-3">
               <Rocket className="w-7 h-7 text-indigo-400" />
               <div>
-                <span className="text-lg font-semibold text-white">To The Moon</span>
+                <span className="text-lg font-semibold text-white">Stratify</span>
                 <p className="text-xs text-gray-500">Automated prediction market trading</p>
               </div>
             </div>
@@ -670,11 +670,11 @@ export default function Landing({ onEnterApp, onGuestLogin, onLegal }) {
               <button onClick={() => onLegal?.('terms')} className="hover:text-white transition-colors">Terms of Service</button>
               <button onClick={() => onLegal?.('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
               <button onClick={() => onLegal?.('risk')} className="hover:text-white transition-colors">Risk Disclaimer</button>
-              <a href="mailto:support@tothemoon.trading" className="hover:text-white transition-colors">Contact</a>
+              <a href="mailto:support@stratify.trading" className="hover:text-white transition-colors">Contact</a>
             </div>
 
             <p className="text-sm text-gray-500">
-              © 2026 To The Moon. All rights reserved.
+              © 2026 Stratify. All rights reserved.
             </p>
           </div>
 

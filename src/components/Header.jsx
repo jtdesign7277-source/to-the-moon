@@ -118,7 +118,7 @@ const Header = ({
   const [suggestionSent, setSuggestionSent] = useState(false)
   const [activeTab, setActiveTab] = useState('profile') // 'profile', 'support', 'suggest'
   const [chatMessages, setChatMessages] = useState([
-    { role: 'assistant', content: "Hi! 👋 I'm Luna, your AI assistant. Ask me anything about To The Moon!" }
+    { role: 'assistant', content: "Hi! 👋 I'm Luna, your AI assistant. Ask me anything about Stratify!" }
   ])
   const [isAiTyping, setIsAiTyping] = useState(false)
   const [_talkToHuman, _setTalkToHuman] = useState(false)
@@ -190,9 +190,9 @@ const Header = ({
 
   const _handleSendHumanMessage = () => {
     if (!supportMessage.trim()) return
-    const subject = encodeURIComponent('Support Request - To The Moon')
+    const subject = encodeURIComponent('Support Request - Stratify')
     const body = encodeURIComponent(`From: ${user?.email}\n\nMessage:\n${supportMessage}`)
-    window.open(`mailto:support@tothemoon.app?subject=${subject}&body=${body}`)
+    window.open(`mailto:support@stratify.app?subject=${subject}&body=${body}`)
     setSupportMessage('')
     setChatMessages(prev => [...prev, { 
       role: 'assistant', 
@@ -203,9 +203,9 @@ const Header = ({
   const handleSendSuggestion = () => {
     if (!suggestionMessage.trim()) return
     // Send as email - opens mail client
-    const subject = encodeURIComponent('Feature Suggestion - To The Moon')
+    const subject = encodeURIComponent('Feature Suggestion - Stratify')
     const body = encodeURIComponent(`From: ${user?.email}\n\nSuggestion:\n${suggestionMessage}`)
-    window.open(`mailto:suggestions@tothemoon.app?subject=${subject}&body=${body}`)
+    window.open(`mailto:suggestions@stratify.app?subject=${subject}&body=${body}`)
     setSuggestionMessage('')
     setSuggestionSent(true)
     setTimeout(() => setSuggestionSent(false), 3000)
@@ -269,7 +269,7 @@ const Header = ({
             >
               <Rocket className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
               <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">
-                TO THE MOON
+                STRATIFY
               </span>
             </div>
           </div>
@@ -697,7 +697,7 @@ const Header = ({
                         </div>
 
                         <p className="text-sm text-gray-400 leading-relaxed">
-                          Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of To The Moon.
+                          Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of Stratify.
                         </p>
 
                         {suggestionSent && (
@@ -772,7 +772,7 @@ const Header = ({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2">
             <Rocket className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
-            <span className="font-bold text-lg text-gray-900 dark:text-white">TO THE MOON</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-white">STRATIFY</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}

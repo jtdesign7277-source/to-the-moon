@@ -516,7 +516,7 @@ const AppContent = () => {
         <footer className="hidden lg:block bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 mt-auto transition-colors duration-200">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} ToTheMoon. All rights reserved.
+              &copy; {new Date().getFullYear()} Stratify. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-sm">
               <button

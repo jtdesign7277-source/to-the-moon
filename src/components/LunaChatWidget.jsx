@@ -187,9 +187,9 @@ const LunaChatWidget = ({ user }) => {
 
   const handleSendHumanMessage = () => {
     if (!message.trim()) return
-    const subject = encodeURIComponent('Support Request - To The Moon')
+    const subject = encodeURIComponent('Support Request - Stratify')
     const body = encodeURIComponent(`From: ${user?.email || 'User'}\n\nMessage:\n${message}`)
-    window.open(`mailto:support@tothemoon.app?subject=${subject}&body=${body}`)
+    window.open(`mailto:support@stratify.app?subject=${subject}&body=${body}`)
     setMessage('')
     setChatMessages(prev => [...prev, { 
       role: 'assistant', 

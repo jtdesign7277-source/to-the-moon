@@ -47,8 +47,8 @@ const TermsOfService = () => (
         Last updated: January 2025
       </p>
       <p className="mt-4 text-gray-700">
-        Please read these Terms of Service ("Terms") carefully before using the ToTheMoon platform
-        ("Service") operated by ToTheMoon Inc. ("us", "we", or "our").
+        Please read these Terms of Service ("Terms") carefully before using the Stratify platform
+        ("Service") operated by Stratify Inc. ("us", "we", or "our").
       </p>
     </div>
 
@@ -65,7 +65,7 @@ const TermsOfService = () => (
 
     <Section title="2. Description of Service">
       <p>
-        ToTheMoon provides a platform for:
+        Stratify provides a platform for:
       </p>
       <ul className="list-disc pl-5 mt-2 space-y-1">
         <li>Connecting to prediction market platforms (Kalshi, Polymarket, Manifold Markets)</li>
@@ -137,7 +137,7 @@ const TermsOfService = () => (
     <Section title="7. Intellectual Property">
       <p>
         The Service and its original content, features, and functionality are and will remain the
-        exclusive property of ToTheMoon Inc. and its licensors. Our trademarks and trade dress may
+        exclusive property of Stratify Inc. and its licensors. Our trademarks and trade dress may
         not be used without our prior written consent.
       </p>
       <p className="mt-3">
@@ -165,7 +165,7 @@ const TermsOfService = () => (
 
     <Section title="9. Limitation of Liability">
       <p className="font-semibold">
-        TO THE MAXIMUM EXTENT PERMITTED BY LAW, TOTHEMOON INC. SHALL NOT BE LIABLE FOR ANY
+        TO THE MAXIMUM EXTENT PERMITTED BY LAW, STRATIFY INC. SHALL NOT BE LIABLE FOR ANY
         INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT
         LIMITATION, LOSS OF PROFITS, DATA, OR OTHER INTANGIBLE LOSSES.
       </p>
@@ -187,7 +187,7 @@ const TermsOfService = () => (
 
     <Section title="10. Indemnification">
       <p>
-        You agree to defend, indemnify, and hold harmless ToTheMoon Inc. and its officers, directors,
+        You agree to defend, indemnify, and hold harmless Stratify Inc. and its officers, directors,
         employees, and agents from any claims, damages, losses, liabilities, and expenses arising
         from your use of the Service or violation of these Terms.
       </p>
@@ -231,8 +231,8 @@ const TermsOfService = () => (
         If you have any questions about these Terms, please contact us at:
       </p>
       <p className="mt-2">
-        <strong>Email:</strong> legal@tothemoon.trading<br />
-        <strong>Address:</strong> ToTheMoon Inc., Delaware, USA
+        <strong>Email:</strong> legal@stratify.trading<br />
+        <strong>Address:</strong> Stratify Inc., Delaware, USA
       </p>
     </Section>
   </div>
@@ -246,7 +246,7 @@ const PrivacyPolicy = () => (
         Last updated: January 2025
       </p>
       <p className="mt-4 text-gray-700">
-        This Privacy Policy describes how ToTheMoon Inc. ("we", "us", or "our") collects, uses,
+        This Privacy Policy describes how Stratify Inc. ("we", "us", or "our") collects, uses,
         and shares information about you when you use our website and services.
       </p>
     </div>
@@ -335,7 +335,7 @@ const PrivacyPolicy = () => (
         <li><strong>Withdraw Consent:</strong> Withdraw consent where processing is based on consent</li>
       </ul>
       <p className="mt-3">
-        To exercise these rights, contact us at privacy@tothemoon.trading
+        To exercise these rights, contact us at privacy@stratify.trading
       </p>
     </Section>
 
@@ -402,8 +402,8 @@ const PrivacyPolicy = () => (
         If you have questions about this Privacy Policy, please contact us at:
       </p>
       <p className="mt-2">
-        <strong>Email:</strong> privacy@tothemoon.trading<br />
-        <strong>Address:</strong> ToTheMoon Inc., Delaware, USA
+        <strong>Email:</strong> privacy@stratify.trading<br />
+        <strong>Address:</strong> Stratify Inc., Delaware, USA
       </p>
     </Section>
   </div>
@@ -429,7 +429,7 @@ const RiskDisclaimer = () => (
 
     <Section title="1. No Investment Advice" defaultOpen={true}>
       <p>
-        ToTheMoon is a technology platform that provides tools for analyzing and executing trades
+        Stratify is a technology platform that provides tools for analyzing and executing trades
         on prediction markets. <strong>We do not provide investment advice, financial advice,
         trading advice, or any other sort of advice.</strong>
       </p>
@@ -519,7 +519,7 @@ const RiskDisclaimer = () => (
 
     <Section title="6. Third-Party Platform Risks">
       <p>
-        ToTheMoon connects to third-party prediction market platforms. We are not responsible for:
+        Stratify connects to third-party prediction market platforms. We are not responsible for:
       </p>
       <ul className="list-disc pl-5 mt-2 space-y-1">
         <li>The solvency or reliability of these platforms</li>
@@ -556,13 +556,13 @@ const RiskDisclaimer = () => (
 
     <Section title="9. Your Responsibility">
       <p>
-        By using ToTheMoon, you acknowledge that:
+        By using Stratify, you acknowledge that:
       </p>
       <ul className="list-disc pl-5 mt-2 space-y-1">
         <li>You are solely responsible for your trading decisions</li>
         <li>You have read and understood these risk disclosures</li>
         <li>You are financially able to bear potential losses</li>
-        <li>You will not hold ToTheMoon liable for any losses</li>
+        <li>You will not hold Stratify liable for any losses</li>
         <li>You understand prediction market trading may not be suitable for you</li>
       </ul>
     </Section>
@@ -582,12 +582,12 @@ const RiskDisclaimer = () => (
 
     <div className="mt-8 p-4 bg-gray-100 border border-gray-300 rounded-lg">
       <p className="text-sm text-gray-700">
-        <strong>By using ToTheMoon, you acknowledge that you have read, understood, and agree to
+        <strong>By using Stratify, you acknowledge that you have read, understood, and agree to
         this Risk Disclaimer.</strong> If you do not agree with any part of this disclaimer, you
         should not use our Service.
       </p>
       <p className="text-sm text-gray-600 mt-2">
-        Questions? Contact us at risk@tothemoon.trading
+        Questions? Contact us at risk@stratify.trading
       </p>
     </div>
   </div>
@@ -665,7 +665,7 @@ const Legal = ({ initialTab = 'terms', onBack }) => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
-            <p className="text-gray-600">ToTheMoon Legal Documents</p>
+            <p className="text-gray-600">Stratify Legal Documents</p>
           </div>
         </div>
       </div>
@@ -694,7 +694,7 @@ const Legal = ({ initialTab = 'terms', onBack }) => {
       <div className="mt-6 text-center text-sm text-gray-500">
         <p className="flex items-center justify-center gap-2">
           <Mail className="w-4 h-4" />
-          Questions? Contact legal@tothemoon.trading
+          Questions? Contact legal@stratify.trading
         </p>
         <p className="flex items-center justify-center gap-2 mt-1">
           <Calendar className="w-4 h-4" />

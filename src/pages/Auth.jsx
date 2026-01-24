@@ -326,7 +326,7 @@ export default function Auth({ onSuccess, onBack, onAdminAccess, initialMode }) 
             </div>
             <h1 className="text-2xl font-bold text-gray-900">
               {mode === 'login' && 'Welcome back'}
-              {mode === 'signup' && 'Welcome to ToTheMoon'}
+              {mode === 'signup' && 'Welcome to Stratify'}
               {mode === 'forgot' && 'Reset Password'}
               {mode === 'reset' && 'Set New Password'}
             </h1>

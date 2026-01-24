@@ -1,5 +1,5 @@
 /**
- * TO THE MOON - Stripe Integration
+ * STRATIFY - Stripe Integration
  * Handles Stripe.js loading and checkout session management.
  */
 import { subscriptionApi } from './api';

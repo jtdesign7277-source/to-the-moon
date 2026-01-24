@@ -1,5 +1,5 @@
 /**
- * TO THE MOON - API Client
+ * STRATIFY - API Client
  * Axios instance with auth headers, error handling, and token management.
  */
 import axios from 'axios';

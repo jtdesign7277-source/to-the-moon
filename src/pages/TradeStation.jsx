@@ -312,7 +312,7 @@ const TradeStation = () => {
   ]
 
   const handleCopy = () => {
-    navigator.clipboard.writeText('https://tothemoon.app/s/demo')
+    navigator.clipboard.writeText('https://stratify.app/s/demo')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -382,7 +382,7 @@ const TradeStation = () => {
               <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <input
                   type="text"
-                  value="https://tothemoon.app/s/demo"
+                  value="https://stratify.app/s/demo"
                   readOnly
                   className="flex-1 bg-transparent text-gray-600 dark:text-gray-300 text-sm outline-none"
                 />

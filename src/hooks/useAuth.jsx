@@ -1,5 +1,5 @@
 /**
- * TO THE MOON - Authentication Hook
+ * STRATIFY - Authentication Hook
  * Handles signup, login, logout, and user state.
  */
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
@@ -142,7 +142,7 @@ export function AuthProvider({ children }) {
   const loginAsGuest = () => {
     const guestUser = {
       id: 'guest-' + Date.now(),
-      email: 'guest@tothemoon.app',
+      email: 'guest@stratify.app',
       username: 'Guest User',
       is_pro: true, // Give guests pro access to test features
       is_guest: true,
