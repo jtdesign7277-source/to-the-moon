@@ -724,6 +724,18 @@ const Header = ({
                     )}
                   </div>
 
+                  {/* Support Button */}
+                  <div className="px-3 pb-2">
+                    <button
+                      onClick={() => { setProfileOpen(false); openLunaChat(); }}
+                      className="w-full py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-300 hover:text-white"
+                      style={{ backgroundColor: '#1f2937' }}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Support
+                    </button>
+                  </div>
+
                   {/* Sign Out Button */}
                   <div className="border-t border-gray-800 p-3">
                     <button
