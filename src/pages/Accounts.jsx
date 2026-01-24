@@ -747,20 +747,18 @@ const Accounts = () => {
               </div>
 
               {/* Total Balance Summary */}
-              <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/25">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-indigo-100 text-sm">Total Across All Platforms</p>
-                    <p className="text-3xl font-bold mt-1">{totalBalance}</p>
-                    <p className="text-sm text-indigo-200 mt-1">{accounts.length} platform{accounts.length !== 1 ? 's' : ''} connected</p>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Total Across All Platforms</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalBalance}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{accounts.length} platform{accounts.length !== 1 ? 's' : ''} connected</p>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="font-semibold">$0.00 (0.0%)</span>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      <span className="text-lg font-semibold">$0.00 (0.0%)</span>
-                    </div>
-                    <p className="text-indigo-200 text-sm mt-1">This month</p>
-                  </div>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">This month</p>
                 </div>
               </div>
             </>
