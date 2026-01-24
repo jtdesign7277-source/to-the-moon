@@ -7,7 +7,7 @@ import {
   TrendingUp, TrendingDown, Check, X, Clock, Calendar, DollarSign,
   Target, Filter, Search, ChevronDown, Download, BarChart3,
   ArrowUpRight, ArrowDownRight, Zap, RefreshCw, BookOpen, PieChart as PieChartIcon,
-  ChevronUp, Briefcase, FileText, HelpCircle, Settings, ArrowDown, ArrowUp, Menu
+  ChevronUp, Briefcase, FileText, HelpCircle, ArrowDown, ArrowUp
 } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
 import { trackPageView } from '../utils/analytics'
@@ -38,7 +38,6 @@ const TradeHistory = () => {
   const [chartPeriod, setChartPeriod] = useState('All')
   const [chartMode, setChartMode] = useState('value')
   const [sidebarExpanded, setSidebarExpanded] = useState(true)
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Merge global trade history with API trades
   const trades = useMemo(() => {
@@ -285,40 +284,24 @@ const TradeHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Mobile Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <button
-          onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-        >
-          {mobileSidebarOpen ? <X className="w-5 h-5 dark:text-gray-400" /> : <Menu className="w-5 h-5 dark:text-gray-400" />}
-        </button>
-        <h1 className="font-semibold text-gray-900 dark:text-white">Trade History</h1>
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-        </div>
+    <div className="space-y-6 pb-24">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade History</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your trading performance and analyze results</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Left Sidebar - Account Stats */}
-        <aside className={`
-          ${mobileSidebarOpen ? 'block' : 'hidden'} lg:block
-          w-full lg:w-72 xl:w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          h-fit shrink-0 self-start
-        `}>
+      {/* Main Layout */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left Sidebar - Trading Stats */}
+        <aside className="w-full lg:w-72 xl:w-80 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 h-fit shrink-0">
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Trading Stats</span>
-                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">
-                  <Settings className="w-3.5 h-3.5 text-gray-400" />
-                </button>
-              </div>
+              <span className="font-semibold text-gray-900 dark:text-white">Trading Stats</span>
               <button
                 onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                className="hidden lg:block p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
               >
                 {sidebarExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
               </button>
@@ -326,21 +309,21 @@ const TradeHistory = () => {
           </div>
 
           {/* Total P&L */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-baseline justify-between">
               <span className="text-sm text-gray-500 dark:text-gray-400">Total P&L</span>
-              <span className={`text-xl font-semibold tabular-nums ${stats.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                {stats.totalPnl >= 0 ? '+' : ''}{formatCurrency(stats.totalPnl)}
+              <span className={`text-xl font-bold tabular-nums ${stats.totalPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {stats.totalPnl >= 0 ? '+' : ''}${formatCurrency(stats.totalPnl)}
               </span>
             </div>
           </div>
 
           {/* Stats List */}
           {sidebarExpanded && (
-            <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
+            <div className="p-4 space-y-3">
               {sidebarStats.map((stat, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</span>
                   <span className={`text-sm tabular-nums font-medium ${
                     stat.color === 'green' ? 'text-green-600 dark:text-green-400' :
                     stat.color === 'red' ? 'text-red-600 dark:text-red-400' :
@@ -350,89 +333,65 @@ const TradeHistory = () => {
                   </span>
                 </div>
               ))}
+
+              {/* Best/Worst Trade */}
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Best Trade</span>
+                  <span className="text-sm tabular-nums font-medium text-green-600 dark:text-green-400">
+                    {stats.bestTrade ? `+$${formatCurrency(stats.bestTrade)}` : '—'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Worst Trade</span>
+                  <span className="text-sm tabular-nums font-medium text-red-600 dark:text-red-400">
+                    {stats.worstTrade ? `-$${formatCurrency(Math.abs(stats.worstTrade))}` : '—'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchTrades}
+                    className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </button>
+                  <button className="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
+                    <Download className="w-4 h-4" />
+                    Export
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-
-          {/* Best/Worst Trade */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Best Trade</span>
-              <span className="text-sm tabular-nums font-medium text-green-600 dark:text-green-400">
-                {stats.bestTrade ? `+${formatCurrency(stats.bestTrade)}` : '—'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Worst Trade</span>
-              <span className="text-sm tabular-nums font-medium text-red-600 dark:text-red-400">
-                {stats.worstTrade ? formatCurrency(stats.worstTrade) : '—'}
-              </span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="p-4 space-y-3">
-            <div className="flex gap-2">
-              <button
-                onClick={fetchTrades}
-                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
-              <button className="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
-                <Download className="w-4 h-4" />
-                Export
-              </button>
-            </div>
-          </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          {/* Page Header - Desktop */}
-          <div className="hidden lg:flex items-center justify-between px-6 py-5 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade History</h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your trading performance and analyze results</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-                tradingMode === 'live' ? 'text-green-700 dark:text-green-400' : 'text-yellow-700 dark:text-yellow-400'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                {tradingMode === 'live' ? 'Live' : 'Paper'}
-              </span>
-            </div>
-          </div>
-
+        <main className="flex-1 min-w-0 space-y-6">
           {/* Tab Navigation */}
-          <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center justify-between px-4 lg:px-6">
-              <nav className="flex gap-1 overflow-x-auto no-scrollbar py-1">
-                {mainTabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      activeTab === tab.id
-                        ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400'
-                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-              <span className={`hidden sm:flex lg:hidden items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-                tradingMode === 'live' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                {tradingMode === 'live' ? 'Live' : 'Paper'}
-              </span>
-            </div>
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <nav className="flex gap-1 overflow-x-auto no-scrollbar p-1">
+              {mainTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <div className="p-4 lg:p-6 space-y-6">
+          <div className="space-y-6">
             {/* Equity Curve Chart */}
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
               {/* Chart Header */}
