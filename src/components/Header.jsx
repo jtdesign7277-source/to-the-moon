@@ -358,7 +358,7 @@ const Header = ({
           </nav>
 
           {/* Right side controls */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-4 shrink-0">
             {/* Trading Mode Toggle */}
             <div className="hidden sm:flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
