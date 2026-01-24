@@ -161,16 +161,16 @@ const Marketplace = () => {
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-all group"
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border-2 border-purple-200 dark:border-purple-900/50 overflow-hidden hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-700 transition-all group"
             >
               {/* Card Header */}
               <div className="h-28 flex items-center justify-center relative overflow-hidden bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                 <Activity className={`w-10 h-10 group-hover:scale-110 transition-transform ${
-                  strategy.verified ? 'text-indigo-500 dark:text-indigo-400' : 'text-emerald-500 dark:text-emerald-400'
+                  strategy.verified ? 'text-purple-300 dark:text-purple-600' : 'text-emerald-300 dark:text-emerald-600'
                 }`} />
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   {strategy.verified && (
-                    <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
+                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-lg text-xs text-purple-400 dark:text-purple-500 font-medium flex items-center gap-1">
                       <BadgeCheck className="w-3 h-3" />
                       Verified
                     </span>
@@ -188,7 +188,7 @@ const Marketplace = () => {
                     <h3 className="font-semibold text-gray-900 dark:text-white">{strategy.name}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">by {strategy.author}</p>
                   </div>
-                  <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{strategy.price} coins</span>
+                  <span className="text-lg font-bold text-purple-400 dark:text-purple-500">{strategy.price} coins</span>
                 </div>
 
                 {/* Stats */}
@@ -211,7 +211,7 @@ const Marketplace = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <button className="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors active:scale-[0.98]">
+                  <button className="flex-1 px-4 py-2.5 bg-purple-500/80 text-white text-sm font-medium rounded-xl hover:bg-purple-600/80 transition-colors active:scale-[0.98]">
                     Purchase
                   </button>
                   <button
@@ -256,13 +256,13 @@ const Marketplace = () => {
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                       selectedListing.verified
-                        ? 'bg-indigo-100 dark:bg-indigo-900/30'
+                        ? 'bg-purple-100 dark:bg-purple-900/20'
                         : 'bg-emerald-100 dark:bg-emerald-900/30'
                     }`}>
                       <Activity className={`w-6 h-6 ${
                         selectedListing.verified
-                          ? 'text-indigo-600 dark:text-indigo-400'
-                          : 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-purple-400 dark:text-purple-500'
+                          : 'text-emerald-400 dark:text-emerald-500'
                       }`} />
                     </div>
                     <div>
@@ -301,7 +301,7 @@ const Marketplace = () => {
                 {/* Price */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">Price</span>
-                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedListing.price} coins</span>
+                  <span className="text-2xl font-bold text-purple-400 dark:text-purple-500">{selectedListing.price} coins</span>
                 </div>
 
                 {/* Description */}
@@ -322,11 +322,11 @@ const Marketplace = () => {
 
                 {/* Verified Badge */}
                 {selectedListing.verified && (
-                  <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-xl">
-                    <BadgeCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 rounded-xl">
+                    <BadgeCheck className="w-5 h-5 text-purple-400 dark:text-purple-500" />
                     <div>
-                      <p className="text-sm font-medium text-indigo-900 dark:text-indigo-300">Verified Strategy</p>
-                      <p className="text-xs text-indigo-600 dark:text-indigo-400">This strategy has been reviewed and verified by our team</p>
+                      <p className="text-sm font-medium text-purple-700 dark:text-purple-400">Verified Strategy</p>
+                      <p className="text-xs text-purple-500 dark:text-purple-500">This strategy has been reviewed and verified by our team</p>
                     </div>
                   </div>
                 )}
@@ -334,7 +334,7 @@ const Marketplace = () => {
 
               {/* Footer */}
               <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
-                <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+                <button className="w-full py-3.5 bg-purple-500/80 hover:bg-purple-600/80 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
                   Purchase for {selectedListing.price} Coins
                 </button>
