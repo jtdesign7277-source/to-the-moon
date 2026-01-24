@@ -1167,13 +1167,13 @@ const StrategyBuilder = () => {
 
       {/* Deployed Strategies */}
       {deployedStrategies.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Strategies</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Active Strategies</h2>
           <div className="space-y-3">
             {deployedStrategies.map((strategy) => {
               const activity = strategyActivity[strategy.id]
               return (
-                <div key={strategy.id} className="p-4 bg-gray-50 rounded-lg">
+                <div key={strategy.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       {/* Animated Scanner Indicator */}
@@ -1189,8 +1189,8 @@ const StrategyBuilder = () => {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{strategy.icon} {strategy.name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-white">{strategy.icon} {strategy.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           ${strategy.capital?.toLocaleString()} • {strategy.mode === 'paper' ? 'Paper Trading' : 'Live Trading'}
                         </p>
                       </div>
@@ -1478,7 +1478,7 @@ const StrategyBuilder = () => {
               <div className="grid sm:grid-cols-2 gap-6 mb-6">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-gray-500">Strategy Settings</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Strategy Settings</h3>
                     {template && (
                       <div className="flex items-center gap-2">
                         {isTemplateCustomized() && (
@@ -1491,7 +1491,7 @@ const StrategyBuilder = () => {
                           </button>
                         )}
                         {!isPro && (
-                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                          <span className="text-xs bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded font-medium">
                             PRO to edit
                           </span>
                         )}
@@ -1500,8 +1500,8 @@ const StrategyBuilder = () => {
                   </div>
                   <div className="space-y-3">
                     {/* Min Edge - Editable for templates */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
-                      <span className="text-sm text-gray-600">Min Edge Required</span>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Min Edge Required</span>
                       {template ? (
                         <div className="flex items-center gap-2">
                           <input
@@ -1513,24 +1513,24 @@ const StrategyBuilder = () => {
                             onChange={(e) => updateTemplateSetting('minEdge', parseFloat(e.target.value))}
                             onClick={(e) => !isPro && e.preventDefault()}
                             className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
-                              isPro 
-                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' 
-                                : 'border-gray-200 bg-gray-100 cursor-pointer'
+                              isPro
+                                ? 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                                : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-900 dark:text-white'
                             }`}
                             readOnly={!isPro}
                           />
-                          <span className="text-sm text-gray-500">%</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                         </div>
                       ) : (
-                        <span className="font-medium text-gray-900">{customStrategy.settings.minEdge}%</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{customStrategy.settings.minEdge}%</span>
                       )}
                     </div>
                     {/* Max Position - Editable for templates */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
-                      <span className="text-sm text-gray-600">Max Position Size</span>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Max Position Size</span>
                       {template ? (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">$</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">$</span>
                           <input
                             type="number"
                             step="50"
@@ -1540,20 +1540,20 @@ const StrategyBuilder = () => {
                             onChange={(e) => updateTemplateSetting('maxPosition', parseInt(e.target.value))}
                             onClick={(e) => !isPro && e.preventDefault()}
                             className={`w-20 px-2 py-1 text-right text-sm font-medium border rounded ${
-                              isPro 
-                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' 
-                                : 'border-gray-200 bg-gray-100 cursor-pointer'
+                              isPro
+                                ? 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                                : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-900 dark:text-white'
                             }`}
                             readOnly={!isPro}
                           />
                         </div>
                       ) : (
-                        <span className="font-medium text-gray-900">${customStrategy.settings.maxPosition}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">${customStrategy.settings.maxPosition}</span>
                       )}
                     </div>
                     {/* Stop Loss - Editable for templates */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
-                      <span className="text-sm text-gray-600">Stop Loss</span>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Stop Loss</span>
                       {template ? (
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-red-500">-</span>
@@ -1566,9 +1566,9 @@ const StrategyBuilder = () => {
                             onChange={(e) => updateTemplateSetting('stopLoss', parseInt(e.target.value))}
                             onClick={(e) => !isPro && e.preventDefault()}
                             className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
-                              isPro 
-                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-red-600' 
-                                : 'border-gray-200 bg-gray-100 cursor-pointer text-red-600'
+                              isPro
+                                ? 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-red-600 bg-white dark:bg-gray-700'
+                                : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 cursor-pointer text-red-600'
                             }`}
                             readOnly={!isPro}
                           />
@@ -1579,8 +1579,8 @@ const StrategyBuilder = () => {
                       )}
                     </div>
                     {/* Take Profit - Editable for templates */}
-                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 hover:bg-gray-100 transition-colors' : 'bg-gray-50'}`}>
-                      <span className="text-sm text-gray-600">Take Profit</span>
+                    <div className={`flex items-center justify-between p-3 rounded-lg ${template ? 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Take Profit</span>
                       {template ? (
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-green-500">+</span>
@@ -1593,9 +1593,9 @@ const StrategyBuilder = () => {
                             onChange={(e) => updateTemplateSetting('takeProfit', parseInt(e.target.value))}
                             onClick={(e) => !isPro && e.preventDefault()}
                             className={`w-16 px-2 py-1 text-right text-sm font-medium border rounded ${
-                              isPro 
-                                ? 'border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-green-600' 
-                                : 'border-gray-200 bg-gray-100 cursor-pointer text-green-600'
+                              isPro
+                                ? 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-green-600 bg-white dark:bg-gray-700'
+                                : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 cursor-pointer text-green-600'
                             }`}
                             readOnly={!isPro}
                           />
@@ -1609,9 +1609,9 @@ const StrategyBuilder = () => {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-gray-500">Target Markets</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Target Markets</h3>
                     {template && !isPro && (
-                      <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded font-medium">
                         PRO to edit
                       </span>
                     )}
@@ -1626,8 +1626,8 @@ const StrategyBuilder = () => {
                             onClick={() => toggleTemplateMarket(market)}
                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                               isSelected
-                                ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-500'
-                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                             } ${!isPro ? 'cursor-pointer' : ''}`}
                           >
                             {market}
@@ -1638,7 +1638,7 @@ const StrategyBuilder = () => {
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {customStrategy.markets.map(m => AVAILABLE_MARKETS.find(am => am.id === m)?.name).map((market) => (
-                        <span key={market} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                        <span key={market} className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium">
                           {market}
                         </span>
                       ))}
@@ -1647,12 +1647,12 @@ const StrategyBuilder = () => {
                 </div>
               </div>
               {!backtestComplete && (
-                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-yellow-800">Run Backtest First</p>
-                      <p className="text-xs text-yellow-600 mt-1">
+                      <p className="text-sm font-medium text-yellow-800 dark:text-yellow-400">Run Backtest First</p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
                         You must run a backtest before deploying this strategy.
                       </p>
                     </div>
@@ -1662,12 +1662,12 @@ const StrategyBuilder = () => {
 
               {/* Backtest Progress */}
               {isBacktesting && (
-                <div className="p-4 bg-indigo-50 rounded-lg mb-4">
+                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-indigo-200 dark:border-indigo-700 border-t-indigo-600 rounded-full animate-spin" />
                     <div>
-                      <p className="font-medium text-indigo-900">Running Backtest...</p>
-                      <p className="text-sm text-indigo-600">Analyzing 6 months of historical data</p>
+                      <p className="font-medium text-indigo-900 dark:text-indigo-300">Running Backtest...</p>
+                      <p className="text-sm text-indigo-600 dark:text-indigo-400">Analyzing 6 months of historical data</p>
                     </div>
                   </div>
                 </div>
@@ -1675,14 +1675,14 @@ const StrategyBuilder = () => {
 
               {/* Backtest Complete */}
               {backtestComplete && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                       <Check className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-green-900">Backtest Complete!</p>
-                      <p className="text-sm text-green-600">Strategy is ready to deploy</p>
+                      <p className="font-medium text-green-900 dark:text-green-300">Backtest Complete!</p>
+                      <p className="text-sm text-green-600 dark:text-green-400">Strategy is ready to deploy</p>
                     </div>
                   </div>
                 </div>
@@ -1782,14 +1782,14 @@ const StrategyBuilder = () => {
       {showExpandedBacktest && activeStrategy && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
           <div className="min-h-full flex items-start justify-center py-8">
-            <div className="bg-gray-50 rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-                <h2 className="text-lg font-semibold text-gray-900">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {template?.name || customStrategy?.name || 'Strategy'} - Full Backtest Report
                 </h2>
                 <button
                   onClick={() => setShowExpandedBacktest(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1815,12 +1815,12 @@ const StrategyBuilder = () => {
       {/* Deploy Modal */}
       {showDeployModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Deploy Strategy</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Deploy Strategy</h3>
               <button
                 onClick={() => setShowDeployModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1828,13 +1828,13 @@ const StrategyBuilder = () => {
 
             <div className="space-y-4">
               {/* Available Balance Display */}
-              <div className="p-3 bg-gray-50 rounded-xl">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Wallet className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Available Balance</span>
+                    <Wallet className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Available Balance</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
                     {isLoadingBalance ? '...' : `$${(deploySettings.mode === 'paper' ? availableBalance.paper : availableBalance.live).toLocaleString()}`}
                   </span>
                 </div>
@@ -1847,11 +1847,11 @@ const StrategyBuilder = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Allocate Capital
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
                   <input
                     type="number"
                     value={deploySettings.capital}
@@ -1869,8 +1869,8 @@ const StrategyBuilder = () => {
                     }}
                     min={10}
                     max={deploySettings.mode === 'paper' ? availableBalance.paper : availableBalance.live}
-                    className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                      capitalError ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                    className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${
+                      capitalError ? 'border-red-300 bg-red-50 dark:bg-red-900/30' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   />
                 </div>
@@ -1881,14 +1881,14 @@ const StrategyBuilder = () => {
                   </p>
                 )}
                 {!capitalError && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     This is the amount the strategy will use for trading
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Trading Mode
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -1900,12 +1900,12 @@ const StrategyBuilder = () => {
                     }}
                     className={`p-3 rounded-xl border-2 text-left transition-all ${
                       deploySettings.mode === 'paper'
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
-                    <p className="font-medium text-gray-900">Paper Trading</p>
-                    <p className="text-xs text-gray-500 mt-1">Practice with virtual money</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Paper Trading</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Practice with virtual money</p>
                   </button>
                   <button
                     onClick={() => {
@@ -1924,25 +1924,25 @@ const StrategyBuilder = () => {
                     }}
                     className={`p-3 rounded-xl border-2 text-left transition-all relative ${
                       deploySettings.mode === 'live'
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                     } ${!isPro ? 'opacity-75' : ''}`}
                   >
                     {!isPro && (
-                      <span className="absolute top-2 right-2 text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">PRO</span>
+                      <span className="absolute top-2 right-2 text-xs bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400 px-1.5 py-0.5 rounded font-medium">PRO</span>
                     )}
-                    <p className="font-medium text-gray-900">Live Trading</p>
-                    <p className="text-xs text-gray-500 mt-1">{isPro ? 'Real money execution' : '$9.99/mo - Real money'}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">Live Trading</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{isPro ? 'Real money execution' : '$9.99/mo - Real money'}</p>
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-xl">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">{template?.icon || '⚡'}</div>
                   <div>
-                    <p className="font-medium text-gray-900">{template?.name || customStrategy.name}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-white">{template?.name || customStrategy.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {template?.winRate || customStrategy.winRate}% win rate • +{template?.monthlyReturn || customStrategy.monthlyReturn}%/mo
                     </p>
                   </div>
@@ -1954,7 +1954,7 @@ const StrategyBuilder = () => {
                 disabled={!!capitalError || deploySettings.capital <= 0 || isLoadingBalance}
                 className={`w-full py-3 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
                   capitalError || deploySettings.capital <= 0 || isLoadingBalance
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                     : 'bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500'
                 }`}
               >
