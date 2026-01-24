@@ -540,7 +540,7 @@ const Header = ({
                   <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Enhanced Profile Dropdown - Always dark themed */}
+                {/* Profile Dropdown - Dark Theme */}
                 <div
                   className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen
@@ -612,8 +612,8 @@ const Header = ({
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
                             {/* First Name */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(79, 70, 229, 0.3)' }}>
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600/30">
                                 <User className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
@@ -624,8 +624,8 @@ const Header = ({
                               </div>
                             </div>
                             {/* Last Name */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(79, 70, 229, 0.3)' }}>
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600/30">
                                 <UserCircle className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
@@ -636,7 +636,7 @@ const Header = ({
                               </div>
                             </div>
                             {/* Email */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
                               <Mail className="w-5 h-5 text-purple-400" />
                               <div className="min-w-0 flex-1">
                                 <p className="text-xs text-gray-400">Email Address</p>
@@ -644,7 +644,7 @@ const Header = ({
                               </div>
                             </div>
                             {/* Member Since */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
                               <Calendar className="w-5 h-5 text-green-400" />
                               <div>
                                 <p className="text-xs text-gray-400">Member Since</p>
@@ -655,10 +655,7 @@ const Header = ({
                         </div>
 
                         {/* Subscription Status */}
-                        <div
-                          className="p-3 rounded-lg border border-indigo-800"
-                          style={{ background: isPro ? 'linear-gradient(to right, rgba(79, 70, 229, 0.3), rgba(124, 58, 237, 0.3))' : '#1f2937' }}
-                        >
+                        <div className={`p-3 rounded-lg border border-indigo-800 ${isPro ? 'bg-linear-to-r from-indigo-600/30 to-purple-600/30' : 'bg-[#1f2937]'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Crown className="w-4 h-4 text-indigo-400" />
@@ -728,8 +725,7 @@ const Header = ({
                   <div className="px-3 pb-2">
                     <button
                       onClick={() => { setProfileOpen(false); openLunaChat(); }}
-                      className="w-full py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-300 hover:text-white"
-                      style={{ backgroundColor: '#1f2937' }}
+                      className="w-full py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-300 hover:text-white bg-[#1f2937]"
                     >
                       <MessageCircle className="w-4 h-4" />
                       Support
