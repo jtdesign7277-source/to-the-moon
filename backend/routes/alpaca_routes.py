@@ -508,6 +508,45 @@ def get_positions():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+       # Public endpoint - no auth required
+@alpaca_lab_bp.route('/public/quotes', methods=['GET'])
+def get_public_quotes():
+    """Get stock quotes without authentication - for frontend display"""
+    symbols = request.args.get('symbols', 'NVDA,AAPL,TSLA,AMD,MSFT,META,GOOGL,AMZN')
+    symbol_list = [s.strip().upper() for s in symbols.split(',')]
+    
+    if not ALPACA_API_KEY or not ALPACA_SECRET_KEY:
+        return jsonify({'error': 'Alpaca API not configured'}), 500
+    
+    try:
+        import requests as req
+        headers = {
+            'APCA-API-KEY-ID': ALPACA_API_KEY,
+            'APCA-API-SECRET-KEY': ALPACA_SECRET_KEY
+        }
+        
+        # Get latest bars
+        url = f"https://data.alpaca.markets/v2/stocks/bars/latest?symbols={','.join(symbol_list)}"
+        response = req.get(url, headers=headers)
+        data = response.json()
+        
+        quotes = []
+        for symbol in symbol_list:
+            bar = data.get('bars', {}).get(symbol)
+            if bar:
+                price = bar['c']
+                open_price = bar['o']
+                change = ((price - open_price) / open_price) * 100
+                quotes.append({
+                    'symbol': symbol,
+                    'price': round(price, 2),
+                    'change': round(change, 2)
+                })
+        
+        return jsonify({'quotes': quotes})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500 
+
 
 def register_alpaca_routes(app):
     app.register_blueprint(alpaca_lab_bp)
