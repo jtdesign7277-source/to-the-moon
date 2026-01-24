@@ -1019,6 +1019,29 @@ const AlphaLab = () => {
             </div>
           )}
 
+          {/* How It Works Card */}
+          <div className="bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
+            <h3 className="text-lg font-bold mb-4">How It Works</h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                <p className="text-sm text-indigo-100">Describe your trading strategy in plain English</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                <p className="text-sm text-indigo-100">Luna converts it into executable code</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">3</div>
+                <p className="text-sm text-indigo-100">Backtest with historical data to validate</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">4</div>
+                <p className="text-sm text-indigo-100">Deploy to paper or live trading</p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

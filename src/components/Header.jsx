@@ -270,9 +270,7 @@ const Header = ({
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleNavigation('dashboard', false)}
             >
-              <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                <Rocket className="w-5 h-5 text-white" />
-              </div>
+              <Rocket className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
               <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">
                 TO THE MOON
               </span>
@@ -775,9 +773,7 @@ const Header = ({
         {/* Drawer Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Rocket className="w-5 h-5 text-white" />
-            </div>
+            <Rocket className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
             <span className="font-bold text-lg text-gray-900 dark:text-white">TO THE MOON</span>
           </div>
           <button

@@ -627,9 +627,7 @@ const TradeStation = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
-              <Rocket className="w-6 h-6 text-white" />
-            </div>
+            <Rocket className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade Station</h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm">Build, test, and deploy strategies</p>
