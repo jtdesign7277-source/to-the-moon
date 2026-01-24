@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTrading } from '../contexts/TradingContext'
 import { useApp } from '../hooks/useApp'
 import {
-  Brain,
   Mic,
   MicOff,
   Sparkles,
@@ -482,8 +481,7 @@ const AlphaLab = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Brain className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
+        <div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder with Alpaca</p>
