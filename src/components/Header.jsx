@@ -612,8 +612,8 @@ const Header = ({
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
                             {/* First Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(79, 70, 229, 0.3)' }}>
                                 <User className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
@@ -624,8 +624,8 @@ const Header = ({
                               </div>
                             </div>
                             {/* Last Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(79, 70, 229, 0.3)' }}>
                                 <UserCircle className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
@@ -636,7 +636,7 @@ const Header = ({
                               </div>
                             </div>
                             {/* Email */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
                               <Mail className="w-5 h-5 text-purple-400" />
                               <div className="min-w-0 flex-1">
                                 <p className="text-xs text-gray-400">Email Address</p>
@@ -644,7 +644,7 @@ const Header = ({
                               </div>
                             </div>
                             {/* Member Since */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg" style={{ backgroundColor: '#1f2937' }}>
                               <Calendar className="w-5 h-5 text-green-400" />
                               <div>
                                 <p className="text-xs text-gray-400">Member Since</p>
@@ -655,11 +655,14 @@ const Header = ({
                         </div>
 
                         {/* Subscription Status */}
-                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-800' : 'bg-gray-800'}`}>
+                        <div
+                          className="p-3 rounded-lg border border-indigo-800"
+                          style={{ background: isPro ? 'linear-gradient(to right, rgba(79, 70, 229, 0.3), rgba(124, 58, 237, 0.3))' : '#1f2937' }}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-400' : 'text-gray-400'}`} />
-                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-400' : 'text-gray-400'}`}>
+                              <Crown className="w-4 h-4 text-indigo-400" />
+                              <span className="text-sm font-medium text-indigo-400">
                                 {isPro ? 'Pro Member' : 'Free Plan'}
                               </span>
                             </div>
