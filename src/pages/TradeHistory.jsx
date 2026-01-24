@@ -305,7 +305,7 @@ const TradeHistory = () => {
         <aside className={`
           ${mobileSidebarOpen ? 'block' : 'hidden'} lg:block
           w-full lg:w-72 xl:w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          h-fit shrink-0 self-start lg:sticky lg:top-16
+          h-fit shrink-0 self-start
         `}>
           {/* Sidebar Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
@@ -389,6 +389,22 @@ const TradeHistory = () => {
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
+          {/* Page Header - Desktop */}
+          <div className="hidden lg:flex items-center justify-between px-6 py-5 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade History</h1>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Track your trading performance and analyze results</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                tradingMode === 'live' ? 'text-green-700 dark:text-green-400' : 'text-yellow-700 dark:text-yellow-400'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                {tradingMode === 'live' ? 'Live' : 'Paper'}
+              </span>
+            </div>
+          </div>
+
           {/* Tab Navigation */}
           <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between px-4 lg:px-6">
@@ -407,7 +423,7 @@ const TradeHistory = () => {
                   </button>
                 ))}
               </nav>
-              <span className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+              <span className={`hidden sm:flex lg:hidden items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
                 tradingMode === 'live' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}`} />
