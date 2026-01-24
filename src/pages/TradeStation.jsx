@@ -624,23 +624,25 @@ const TradeStation = () => {
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 transition-colors duration-200">
-        <div className="px-4 py-6">
-          <div className="flex items-center justify-between">
+      {/* Page Content */}
+      <div className="p-4 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trade Station</h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm">Build, test, and deploy strategies</p>
             </div>
-            <div className="flex items-center gap-3">
-              <StatPill icon={Star} value={stats.coins} color="indigo" />
-            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <StatPill icon={Star} value={stats.coins} color="amber" />
           </div>
         </div>
-      </div>
 
-      {/* 3-Column Layout */}
-      <div className="p-4">
+        {/* 3-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
 
           {/* Column 1: My Strategies */}
