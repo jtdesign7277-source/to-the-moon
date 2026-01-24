@@ -858,15 +858,15 @@ const TradeStation = () => {
           <motion.div layout className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-200">
             <button
               onClick={() => setIsPositionsFolderOpen(!isPositionsFolderOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 rounded-xl">
                   <DollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Positions</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Positions</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {hasRealData
                       ? `${strategyTrades.filter(t => t.status === 'open').length} open, ${strategyTrades.filter(t => t.status === 'closed').length} closed`
                       : `${mockOpenTrades.length} open, ${mockClosedTrades.length} closed`
@@ -874,8 +874,8 @@ const TradeStation = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${totalPnL >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+              <div className="flex items-center gap-3">
+                <span className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
                 </span>
                 <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isPositionsFolderOpen ? 'rotate-180' : ''}`} />
@@ -937,40 +937,38 @@ const TradeStation = () => {
                                   : (trade.entryPrice - position.currentPrice) * trade.quantity)
                               : 0
                             return (
-                              <div key={trade.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                              <div key={trade.id} className="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                                    <div className="flex flex-col items-center">
-                                      <span className="text-lg">📈</span>
-                                      <span className={`text-[10px] font-bold ${
+                                    <div className="flex flex-col items-center gap-1">
+                                      <span className="text-xl">📈</span>
+                                      <span className={`text-xs font-bold ${
                                         trade.side === 'buy'
-                                          ? 'text-green-700 dark:text-green-400'
-                                          : 'text-red-700 dark:text-red-400'
+                                          ? 'text-green-500'
+                                          : 'text-red-500'
                                       }`}>
                                         {trade.side.toUpperCase()}
                                       </span>
                                     </div>
                                     <div className="min-w-0">
-                                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{trade.symbol}</p>
-                                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">x{trade.quantity}</p>
-                                      <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">{group.deployment.strategyName}</span>
-                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
-                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">Open</span>
+                                      <p className="text-lg font-bold text-gray-900 dark:text-white">{trade.symbol}</p>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">x{trade.quantity}</p>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-sm text-green-500 font-medium">{group.deployment.strategyName}</span>
+                                        <span className="text-sm text-gray-400 dark:text-gray-500">•</span>
+                                        <span className="text-sm text-gray-400 dark:text-gray-500">Open</span>
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-3 shrink-0">
-                                    <div className="text-right hidden sm:block">
-                                      <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
-                                      <p className="text-xs text-gray-400 dark:text-gray-500">Current: ${position?.currentPrice?.toFixed(2) || '-'}</p>
+                                  <div className="flex items-center gap-4 shrink-0">
+                                    <div className="text-right">
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
+                                      <p className="text-sm text-gray-400 dark:text-gray-500">Current: ${position?.currentPrice?.toFixed(2) || '-'}</p>
                                     </div>
-                                    <div className="text-right min-w-[70px]">
-                                      <p className={`text-sm font-semibold ${currentPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                        {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
-                                      </p>
-                                    </div>
-                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                    <p className={`text-xl font-bold ${currentPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                      {currentPnL >= 0 ? '+' : ''}${currentPnL.toFixed(2)}
+                                    </p>
+                                    <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
                                   </div>
                                 </div>
                               </div>
@@ -991,39 +989,35 @@ const TradeStation = () => {
                       ) : (
                         closedTradesByStrategy.map(group => (
                           group.trades.map(trade => (
-                            <div key={trade.id} className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <div key={trade.id} className="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <div className="flex flex-col items-center">
-                                    <span className="text-lg">{trade.pnl >= 0 ? '✅' : '❌'}</span>
-                                    <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                                      trade.pnl >= 0
-                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                  <div className="flex flex-col items-center gap-1">
+                                    <span className="text-xl">{trade.pnl >= 0 ? '📈' : '📉'}</span>
+                                    <span className={`text-xs font-bold ${
+                                      trade.pnl >= 0 ? 'text-green-500' : 'text-red-500'
                                     }`}>
                                       {trade.pnl >= 0 ? 'WIN' : 'LOSS'}
                                     </span>
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{trade.symbol}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Closed position</p>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">{group.deployment.strategyName}</span>
-                                      <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
-                                      <span className="text-[10px] text-gray-400 dark:text-gray-500">Closed</span>
+                                    <p className="text-lg font-bold text-gray-900 dark:text-white">{trade.symbol}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Closed position</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-sm text-green-500 font-medium">{group.deployment.strategyName}</span>
+                                      <span className="text-sm text-gray-400 dark:text-gray-500">•</span>
+                                      <span className="text-sm text-gray-400 dark:text-gray-500">Closed</span>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 shrink-0">
-                                  <div className="text-right hidden sm:block">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
-                                    <p className="text-xs text-gray-400 dark:text-gray-500">Exit: ${trade.exitPrice?.toFixed(2)}</p>
+                                <div className="flex items-center gap-4 shrink-0">
+                                  <div className="text-right">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Entry: ${trade.entryPrice.toFixed(2)}</p>
+                                    <p className="text-sm text-gray-400 dark:text-gray-500">Exit: ${trade.exitPrice?.toFixed(2)}</p>
                                   </div>
-                                  <div className="text-right min-w-[70px]">
-                                    <p className={`text-sm font-semibold ${trade.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                      {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
-                                    </p>
-                                  </div>
+                                  <p className={`text-xl font-bold ${trade.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl?.toFixed(2)}
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -1034,10 +1028,10 @@ const TradeStation = () => {
 
                     {/* Total P&L Summary */}
                     {(openTradesByStrategy.length > 0 || closedTradesByStrategy.length > 0) && (
-                      <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                      <div className="px-4 py-4 border-t border-gray-100 dark:border-gray-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total P&L</span>
-                          <span className={`text-lg font-bold ${totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          <span className="text-base font-medium text-gray-700 dark:text-gray-300">Total P&L</span>
+                          <span className={`text-xl font-bold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
                           </span>
                         </div>

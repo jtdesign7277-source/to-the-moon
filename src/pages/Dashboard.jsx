@@ -972,49 +972,44 @@ const Dashboard = ({ onNavigate }) => {
                 return (
                   <div
                     key={bet.id}
-                    className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-4">
                       {/* Left: Strategy & Market Info */}
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="flex flex-col items-center">
-                          <span className="text-lg">{bet.strategyIcon || '⚡'}</span>
-                          <span className={`text-[10px] font-bold ${
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-xl">{bet.strategyIcon || '⚡'}</span>
+                          <span className={`text-xs font-bold ${
                             bet.position === 'YES'
-                              ? 'text-green-700 dark:text-green-400'
-                              : 'text-red-700 dark:text-red-400'
+                              ? 'text-green-500'
+                              : 'text-red-500'
                           }`}>
                             {bet.position}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{bet.ticker}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{bet.event}</p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">{bet.strategy}</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500">{bet.platform}</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500">•</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500">{timeLabel}</span>
+                          <p className="text-lg font-bold text-gray-900 dark:text-white truncate">{bet.ticker}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{bet.event}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm text-green-500 font-medium">{bet.strategy}</span>
+                            <span className="text-sm text-gray-400 dark:text-gray-500">•</span>
+                            <span className="text-sm text-gray-400 dark:text-gray-500">{bet.platform}</span>
+                            <span className="text-sm text-gray-400 dark:text-gray-500">•</span>
+                            <span className="text-sm text-gray-400 dark:text-gray-500">{timeLabel}</span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Right: Trade Details & P&L */}
                       <div className="flex items-center gap-4 shrink-0">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{bet.contracts} @ ${bet.entryPrice?.toFixed(2)}</p>
+                          <p className="text-sm text-gray-400 dark:text-gray-500">→ ${bet.currentPrice?.toFixed(2) || bet.entryPrice?.toFixed(2)}</p>
                         </div>
-                        <div className="text-right min-w-[70px]">
-                          <p className={`text-sm font-semibold ${isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
-                          </p>
-                          <p className={`text-[10px] ${isProfit ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
-                            {isProfit ? '+' : ''}{(bet.profitPercent || 0).toFixed(1)}%
-                          </p>
-                        </div>
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Live" />
+                        <p className={`text-xl font-bold ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+                          {isProfit ? '+' : ''}${(bet.profit || 0).toFixed(2)}
+                        </p>
+                        <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" title="Live" />
                       </div>
                     </div>
                   </div>
