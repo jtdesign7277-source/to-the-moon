@@ -1969,28 +1969,28 @@ const StrategyBuilder = () => {
       {/* New Strategy Builder Modal */}
       {showNewStrategyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {editingStrategyId ? 'Edit Strategy' : 'Create New Strategy'}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1">Step {builderStep} of 5</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Step {builderStep} of 5</p>
                 </div>
                 <button
                   onClick={() => {
                     setShowNewStrategyModal(false)
                     setEditingStrategyId(null)
                   }}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               {/* Progress bar */}
-              <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="mt-4 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-600 transition-all duration-300"
                   style={{ width: `${(builderStep / 5) * 100}%` }}
@@ -2004,7 +2004,7 @@ const StrategyBuilder = () => {
               {builderStep === 1 && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Strategy Name
                     </label>
                     <input
@@ -2012,11 +2012,11 @@ const StrategyBuilder = () => {
                       value={customStrategy.name}
                       onChange={(e) => setCustomStrategy({ ...customStrategy, name: e.target.value })}
                       placeholder="My Awesome Strategy"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                       Strategy Type
                     </label>
                     <div className="grid grid-cols-2 gap-3">
@@ -2026,13 +2026,13 @@ const StrategyBuilder = () => {
                           onClick={() => setCustomStrategy({ ...customStrategy, type: type.id })}
                           className={`p-4 rounded-xl border-2 text-left transition-all ${
                             customStrategy.type === type.id
-                              ? 'border-indigo-500 bg-indigo-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
                           <span className="text-2xl">{type.icon}</span>
-                          <p className="font-medium text-gray-900 mt-2">{type.name}</p>
-                          <p className="text-xs text-gray-500 mt-1">{type.description}</p>
+                          <p className="font-medium text-gray-900 dark:text-white mt-2">{type.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{type.description}</p>
                         </button>
                       ))}
                     </div>
@@ -2043,7 +2043,7 @@ const StrategyBuilder = () => {
               {/* Step 2: Markets */}
               {builderStep === 2 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Select Markets to Trade
                   </label>
                   <div className="grid grid-cols-3 gap-4">
@@ -2053,14 +2053,14 @@ const StrategyBuilder = () => {
                         onClick={() => toggleMarket(market.id)}
                         className={`p-4 rounded-xl border-2 text-center transition-all ${
                           customStrategy.markets.includes(market.id)
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         }`}
                       >
                         <span className="text-3xl">{market.icon}</span>
-                        <p className="font-medium text-gray-900 mt-2">{market.name}</p>
+                        <p className="font-medium text-gray-900 dark:text-white mt-2">{market.name}</p>
                         {customStrategy.markets.includes(market.id) && (
-                          <Check className="w-5 h-5 text-indigo-600 mx-auto mt-2" />
+                          <Check className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mx-auto mt-2" />
                         )}
                       </button>
                     ))}
@@ -2071,7 +2071,7 @@ const StrategyBuilder = () => {
               {/* Step 3: Entry Conditions */}
               {builderStep === 3 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     When should the bot enter a trade?
                   </label>
                   <div className="space-y-3">
@@ -2081,16 +2081,16 @@ const StrategyBuilder = () => {
                         onClick={() => toggleCondition('entry', condition.id)}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
                           customStrategy.entryConditions.includes(condition.id)
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         }`}
                       >
                         <div>
-                          <p className="font-medium text-gray-900">{condition.name}</p>
-                          <p className="text-sm text-gray-500">{condition.description}</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{condition.name}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{condition.description}</p>
                         </div>
                         {customStrategy.entryConditions.includes(condition.id) && (
-                          <Check className="w-5 h-5 text-indigo-600" />
+                          <Check className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                         )}
                       </button>
                     ))}
@@ -2103,10 +2103,10 @@ const StrategyBuilder = () => {
                 <div className="space-y-6">
                   {/* Basic Exit Conditions with Customizable Values */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Exit Conditions
                     </label>
-                    <p className="text-xs text-gray-500 mb-3">Select conditions and customize their values</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Select conditions and customize their values</p>
                     <div className="space-y-3">
                       {ADVANCED_EXIT_CONDITIONS.map((condition) => {
                         const isEnabled = customStrategy.advancedExitConditions?.[condition.id]?.enabled
@@ -2117,8 +2117,8 @@ const StrategyBuilder = () => {
                             key={condition.id}
                             className={`p-4 rounded-xl border-2 transition-all ${
                               isEnabled
-                                ? 'border-indigo-500 bg-indigo-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                             }`}
                           >
                             <div className="flex items-start justify-between">
@@ -2128,8 +2128,8 @@ const StrategyBuilder = () => {
                               >
                                 <span className="text-xl mt-0.5">{condition.icon}</span>
                                 <div>
-                                  <p className="font-medium text-gray-900">{condition.name}</p>
-                                  <p className="text-sm text-gray-500">{condition.description}</p>
+                                  <p className="font-medium text-gray-900 dark:text-white">{condition.name}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{condition.description}</p>
                                 </div>
                               </button>
                               {isEnabled && (
@@ -2140,7 +2140,7 @@ const StrategyBuilder = () => {
                             {/* Value Input - only show when enabled */}
                             {isEnabled && condition.hasValue && (
                               <div className="mt-3 ml-9">
-                                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
                                   {condition.valueLabel}
                                 </label>
                                 {condition.options ? (
@@ -2148,7 +2148,7 @@ const StrategyBuilder = () => {
                                     value={currentValue}
                                     onChange={(e) => updateAdvancedExitValue(condition.id, e.target.value)}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                   >
                                     {condition.options.map(opt => (
                                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -2164,9 +2164,9 @@ const StrategyBuilder = () => {
                                       min={condition.min}
                                       max={condition.max}
                                       step={condition.valueType === 'percent' ? 0.5 : 1}
-                                      className="w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                      className="w-24 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                     />
-                                    <span className="text-sm text-gray-500">{condition.valueSuffix}</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">{condition.valueSuffix}</span>
                                   </div>
                                 )}
                               </div>
@@ -2178,18 +2178,18 @@ const StrategyBuilder = () => {
                   </div>
 
                   {/* Conditional Rules Section */}
-                  <div className="border-t border-gray-200 pt-6">
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                           <GitBranch className="w-4 h-4" />
                           Conditional Rules (If-Then)
                         </label>
-                        <p className="text-xs text-gray-500 mt-0.5">Create advanced logic: "If X happens, then do Y"</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create advanced logic: "If X happens, then do Y"</p>
                       </div>
                       <button
                         onClick={addConditionalRule}
-                        className="px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 text-sm bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/70 transition-colors flex items-center gap-1"
                       >
                         <Plus className="w-4 h-4" />
                         Add Rule
@@ -2206,7 +2206,7 @@ const StrategyBuilder = () => {
                           return (
                             <div
                               key={rule.id}
-                              className="p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200"
+                              className="p-4 bg-linear-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl border border-purple-200 dark:border-purple-800"
                             >
                               <div className="flex items-center justify-between mb-3">
                                 <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
@@ -2214,7 +2214,7 @@ const StrategyBuilder = () => {
                                 </span>
                                 <button
                                   onClick={() => removeConditionalRule(rule.id)}
-                                  className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                  className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -2226,7 +2226,7 @@ const StrategyBuilder = () => {
                                 <select
                                   value={rule.trigger}
                                   onChange={(e) => updateConditionalRule(rule.id, 'trigger', e.target.value)}
-                                  className="flex-1 min-w-35 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                  className="flex-1 min-w-35 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 >
                                   {RULE_TRIGGERS.map(t => (
                                     <option key={t.id} value={t.id}>{t.icon} {t.label}</option>
@@ -2239,11 +2239,11 @@ const StrategyBuilder = () => {
                                       type="number"
                                       value={rule.triggerValue}
                                       onChange={(e) => updateConditionalRule(rule.id, 'triggerValue', Number(e.target.value))}
-                                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                      className="w-20 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                       min={0}
                                       max={100}
                                     />
-                                    <span className="text-sm text-gray-500">%</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                                   </div>
                                 )}
 
@@ -2251,7 +2251,7 @@ const StrategyBuilder = () => {
                                   <select
                                     value={rule.triggerValue}
                                     onChange={(e) => updateConditionalRule(rule.id, 'triggerValue', Number(e.target.value))}
-                                    className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    className="w-28 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                   >
                                     {DURATION_OPTIONS.map(opt => (
                                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -2267,11 +2267,11 @@ const StrategyBuilder = () => {
 
                               {/* THEN Section */}
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-semibold text-indigo-700 bg-indigo-100 px-2 py-1 rounded">THEN</span>
+                                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-1 rounded">THEN</span>
                                 <select
                                   value={rule.action}
                                   onChange={(e) => updateConditionalRule(rule.id, 'action', e.target.value)}
-                                  className="flex-1 min-w-40 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  className="flex-1 min-w-40 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                   {RULE_ACTIONS.map(a => (
                                     <option key={a.id} value={a.id}>{a.icon} {a.label}</option>
@@ -2284,11 +2284,11 @@ const StrategyBuilder = () => {
                                       type="number"
                                       value={rule.actionValue}
                                       onChange={(e) => updateConditionalRule(rule.id, 'actionValue', Number(e.target.value))}
-                                      className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                      className="w-20 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                       min={0}
                                       max={100}
                                     />
-                                    <span className="text-sm text-gray-500">%</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">%</span>
                                   </div>
                                 )}
 
@@ -2296,7 +2296,7 @@ const StrategyBuilder = () => {
                                   <select
                                     value={rule.actionValue}
                                     onChange={(e) => updateConditionalRule(rule.id, 'actionValue', Number(e.target.value))}
-                                    className="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-28 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                   >
                                     {DURATION_OPTIONS.map(opt => (
                                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -2309,10 +2309,10 @@ const StrategyBuilder = () => {
                         })}
                       </div>
                     ) : (
-                      <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl text-center">
-                        <GitBranch className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">No conditional rules yet</p>
-                        <p className="text-xs text-gray-400 mt-1">
+                      <div className="p-6 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-center">
+                        <GitBranch className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No conditional rules yet</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           Example: "If profit reaches 17%, then activate trailing stop of 2%"
                         </p>
                       </div>
@@ -2320,9 +2320,9 @@ const StrategyBuilder = () => {
 
                     {/* Rule Examples */}
                     {customStrategy.conditionalRules?.length === 0 && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                        <p className="text-xs font-medium text-gray-600 mb-2">Example strategies you can create:</p>
-                        <ul className="text-xs text-gray-500 space-y-1">
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Example strategies you can create:</p>
+                        <ul className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                           <li>• If profit reaches 17% → Set stop loss at 10% (lock in gains)</li>
                           <li>• If profit reaches 20% → Activate trailing stop of 2%</li>
                           <li>• If price sideways for 60min after profit goal → Exit position</li>
@@ -2338,7 +2338,7 @@ const StrategyBuilder = () => {
               {builderStep === 5 && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Minimum Edge Required (%)
                     </label>
                     <input
@@ -2348,16 +2348,16 @@ const StrategyBuilder = () => {
                         ...customStrategy,
                         settings: { ...customStrategy.settings, minEdge: Number(e.target.value) }
                       })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       min={0.5}
                       max={20}
                       step={0.5}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Only enter trades with at least this much edge</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Only enter trades with at least this much edge</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Max Position Size ($)
                     </label>
                     <input
@@ -2367,16 +2367,16 @@ const StrategyBuilder = () => {
                         ...customStrategy,
                         settings: { ...customStrategy.settings, maxPosition: Number(e.target.value) }
                       })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       min={10}
                       max={10000}
                       step={10}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Maximum amount to risk per trade</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum amount to risk per trade</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Max Concurrent Positions
                     </label>
                     <input
@@ -2386,15 +2386,15 @@ const StrategyBuilder = () => {
                         ...customStrategy,
                         settings: { ...customStrategy.settings, maxConcurrent: Number(e.target.value) }
                       })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       min={1}
                       max={20}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Maximum number of open positions at once</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum number of open positions at once</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Daily Loss Limit ($)
                     </label>
                     <input
@@ -2404,17 +2404,17 @@ const StrategyBuilder = () => {
                         ...customStrategy,
                         settings: { ...customStrategy.settings, dailyLossLimit: Number(e.target.value) }
                       })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       min={50}
                       max={10000}
                       step={50}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Stop trading for the day if losses exceed this amount</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Stop trading for the day if losses exceed this amount</p>
                   </div>
 
                   {/* Summary of Exit Conditions */}
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Exit Conditions Summary</h4>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Exit Conditions Summary</h4>
                     <div className="space-y-2">
                       {Object.entries(customStrategy.advancedExitConditions || {})
                         .filter(([_, config]) => config.enabled)
@@ -2427,13 +2427,13 @@ const StrategyBuilder = () => {
                           return (
                             <div key={condId} className="flex items-center gap-2 text-sm">
                               <span>{cond.icon}</span>
-                              <span className="text-gray-600">{cond.name}:</span>
-                              <span className="font-medium text-gray-900">{displayValue}</span>
+                              <span className="text-gray-600 dark:text-gray-400">{cond.name}:</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{displayValue}</span>
                             </div>
                           )
                         })}
                       {customStrategy.conditionalRules?.length > 0 && (
-                        <div className="pt-2 mt-2 border-t border-gray-200">
+                        <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
                           <span className="text-xs font-medium text-purple-600">
                             + {customStrategy.conditionalRules.length} conditional rule{customStrategy.conditionalRules.length !== 1 ? 's' : ''}
                           </span>
@@ -2446,10 +2446,10 @@ const StrategyBuilder = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-gray-100 flex justify-between">
+            <div className="p-6 border-t border-gray-100 dark:border-gray-800 flex justify-between">
               <button
                 onClick={() => setBuilderStep(Math.max(1, builderStep - 1))}
-                className={`px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ${
+                className={`px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ${
                   builderStep === 1 ? 'invisible' : ''
                 }`}
               >
@@ -2462,7 +2462,7 @@ const StrategyBuilder = () => {
                   className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                     canProceed()
                       ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   Next
