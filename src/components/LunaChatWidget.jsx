@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, MessageCircle, Sparkles, ArrowRight, Paperclip, Smile, Mic, UserCircle, Mail, Bot, Sun, Moon } from 'lucide-react'
+import { X, Send, MessageCircle, Sparkles, ArrowRight, Paperclip, Smile, Mic, UserCircle, Mail, Bot } from 'lucide-react'
 import api from '../utils/api'
 import { useApp } from '../hooks/useApp'
-import { useTheme } from '../contexts/ThemeContext'
 
 // Luna Avatar - Elegant constellation of stars with slow rotation
 const LunaAvatar = ({ size = 'md', className = '' }) => {
@@ -86,8 +85,7 @@ const LunaAvatar = ({ size = 'md', className = '' }) => {
 }
 
 const LunaChatWidget = ({ user }) => {
-  const { showLunaChat, closeLunaChat, openLunaChat } = useApp()
-  const { isDark, toggleTheme } = useTheme()
+  const { showLunaChat, closeLunaChat } = useApp()
   const [message, setMessage] = useState('')
   const [talkToHuman, setTalkToHuman] = useState(false)
   const [chatMessages, setChatMessages] = useState([
@@ -381,32 +379,6 @@ const LunaChatWidget = ({ user }) => {
         </div>
       )}
 
-      {/* Floating buttons - Theme toggle + Luna */}
-      {!showLunaChat && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:scale-105 transition-transform"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDark ? (
-              <Sun className="w-5 h-5 text-yellow-500" />
-            ) : (
-              <Moon className="w-5 h-5 text-gray-500" />
-            )}
-          </button>
-
-          {/* Luna Button */}
-          <button
-            onClick={openLunaChat}
-            className="w-14 h-14 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:scale-105 transition-transform"
-            aria-label="Open Luna chat"
-          >
-            <LunaAvatar size="sm" />
-          </button>
-        </div>
-      )}
     </>
   )
 }

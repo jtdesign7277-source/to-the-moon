@@ -540,9 +540,9 @@ const Header = ({
                   <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Enhanced Profile Dropdown */}
+                {/* Enhanced Profile Dropdown - Always dark themed */}
                 <div
-                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen
                       ? 'opacity-100 scale-100 translate-y-0'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -561,9 +561,9 @@ const Header = ({
                         <p className="text-white font-semibold truncate">{user.username || user.email?.split('@')[0]}</p>
                         <p className="text-indigo-200 text-sm truncate">{user.email}</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => setProfileOpen(false)}
-                        className="p-1 text-white/60 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
+                        className="p-1.5 text-white/70 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -571,13 +571,13 @@ const Header = ({
                   </div>
 
                   {/* Tab Navigation */}
-                  <div className="flex border-b border-gray-100 dark:border-gray-800">
+                  <div className="flex border-b border-gray-800">
                     <button
                       onClick={() => setActiveTab('profile')}
                       className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
                         activeTab === 'profile'
-                          ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                          ? 'text-indigo-400 border-b-2 border-indigo-400 bg-indigo-900/20'
+                          : 'text-gray-400 hover:text-gray-300'
                       }`}
                     >
                       <User className="w-3.5 h-3.5 mx-auto mb-1" />
@@ -585,7 +585,7 @@ const Header = ({
                     </button>
                     <button
                       onClick={() => { setProfileOpen(false); openLunaChat(); }}
-                      className="flex-1 px-4 py-2.5 text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                      className="flex-1 px-4 py-2.5 text-xs font-medium transition-colors text-gray-400 hover:text-gray-300"
                     >
                       <MessageCircle className="w-3.5 h-3.5 mx-auto mb-1" />
                       Support
@@ -594,8 +594,8 @@ const Header = ({
                       onClick={() => setActiveTab('suggest')}
                       className={`flex-1 px-4 py-2.5 text-xs font-medium transition-colors ${
                         activeTab === 'suggest'
-                          ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                          ? 'text-indigo-400 border-b-2 border-indigo-400 bg-indigo-900/20'
+                          : 'text-gray-400 hover:text-gray-300'
                       }`}
                     >
                       <Lightbulb className="w-3.5 h-3.5 mx-auto mb-1" />
@@ -612,61 +612,61 @@ const Header = ({
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
                             {/* First Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-                                <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                                <User className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">First Name</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                <p className="text-xs text-gray-400">First Name</p>
+                                <p className="text-sm font-medium text-white">
                                   {user.first_name || (user.username?.includes(' ') ? user.username.split(' ')[0] : user.username) || 'Not set'}
                                 </p>
                               </div>
                             </div>
                             {/* Last Name */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-                                <UserCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                              <div className="w-8 h-8 bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                                <UserCircle className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Last Name</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                <p className="text-xs text-gray-400">Last Name</p>
+                                <p className="text-sm font-medium text-white">
                                   {user.last_name || (user.username?.includes(' ') ? user.username.split(' ').slice(1).join(' ') : '—')}
                                 </p>
                               </div>
                             </div>
                             {/* Email */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <Mail className="w-5 h-5 text-purple-500" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                              <Mail className="w-5 h-5 text-purple-400" />
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
+                                <p className="text-xs text-gray-400">Email Address</p>
+                                <p className="text-sm font-medium text-white truncate">{user.email}</p>
                               </div>
                             </div>
                             {/* Member Since */}
-                            <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <Calendar className="w-5 h-5 text-green-500" />
+                            <div className="flex items-center gap-3 p-2.5 bg-gray-800 rounded-lg">
+                              <Calendar className="w-5 h-5 text-green-400" />
                               <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Member Since</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">{getMemberSince()}</p>
+                                <p className="text-xs text-gray-400">Member Since</p>
+                                <p className="text-sm font-medium text-white">{getMemberSince()}</p>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Subscription Status */}
-                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        <div className={`p-3 rounded-lg ${isPro ? 'bg-linear-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-800' : 'bg-gray-800'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`} />
-                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-400' : 'text-gray-400'}`} />
+                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-400' : 'text-gray-400'}`}>
                                 {isPro ? 'Pro Member' : 'Free Plan'}
                               </span>
                             </div>
                             {!isPro && (
                               <button
                                 onClick={() => { setProfileOpen(false); openUpgradeModal(); }}
-                                className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                                className="text-xs font-medium text-indigo-400 hover:text-indigo-300"
                               >
                                 Upgrade →
                               </button>
@@ -691,13 +691,13 @@ const Header = ({
                             </div>
                           </div>
                         </div>
-                        
-                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+
+                        <p className="text-sm text-gray-400 leading-relaxed">
                           Have an idea for a feature you'd like to see? We'd love to hear it! Your feedback helps shape the future of To The Moon.
                         </p>
 
                         {suggestionSent && (
-                          <div className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm p-3 rounded-xl text-center font-medium">
+                          <div className="bg-green-900/30 text-green-400 text-sm p-3 rounded-xl text-center font-medium">
                             ✓ Opening email client...
                           </div>
                         )}
@@ -706,13 +706,13 @@ const Header = ({
                           value={suggestionMessage}
                           onChange={(e) => setSuggestionMessage(e.target.value)}
                           placeholder="Describe your feature idea in detail..."
-                          className="w-full h-64 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-linear-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 dark:text-white dark:placeholder-gray-500"
+                          className="w-full h-64 px-4 py-3 text-sm border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none shadow-sm bg-gray-800 text-white placeholder-gray-500"
                         />
-                        
+
                         <button
                           onClick={handleSendSuggestion}
                           disabled={!suggestionMessage.trim()}
-                          className="w-full py-3 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-300 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                          className="w-full py-3 bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-600 disabled:to-gray-600 text-white text-sm font-medium rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                         >
                           <Send className="w-4 h-4" />
                           Submit Suggestion
@@ -722,10 +722,10 @@ const Header = ({
                   </div>
 
                   {/* Sign Out Button */}
-                  <div className="border-t border-gray-100 dark:border-gray-800 p-3">
+                  <div className="border-t border-gray-800 p-3">
                     <button
                       onClick={() => { setProfileOpen(false); onLogout(); }}
-                      className="w-full py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      className="w-full py-2.5 text-red-400 hover:bg-red-900/20 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
