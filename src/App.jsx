@@ -358,30 +358,26 @@ const AppContent = () => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-2.5 border-2 rounded-lg transition-colors shadow-md ${
-              isDark
-                ? 'bg-gray-800 border-yellow-500 text-yellow-400 hover:bg-gray-700'
-                : 'bg-yellow-100 border-yellow-400 text-yellow-600 hover:bg-yellow-200'
-            }`}
+            className="p-2 transition-colors"
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             title={isDark ? 'Click for light mode' : 'Click for dark mode'}
           >
             {isDark ? (
-              <Sun className="w-5 h-5" />
+              <Sun className="w-5 h-5 text-yellow-500 hover:text-yellow-400" />
             ) : (
-              <Moon className="w-5 h-5" />
+              <Moon className="w-5 h-5 text-gray-500 hover:text-gray-400" />
             )}
           </button>
           {/* Crown / PRO Badge */}
           {isPro ? (
-            <span className="px-2.5 py-1 bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm">
+            <span className="text-indigo-500 text-xs font-bold flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
               PRO
             </span>
           ) : (
             <button
               onClick={openUpgradeModal}
-              className="px-2.5 py-1 bg-white border-2 border-indigo-500 text-indigo-600 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm hover:bg-indigo-50 transition-all"
+              className="text-indigo-500 hover:text-indigo-400 text-xs font-bold flex items-center gap-1.5 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
               Upgrade
@@ -392,9 +388,9 @@ const AppContent = () => {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-1.5 p-1.5 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 p-1 transition-colors"
               >
-                <div className="w-6 h-6 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                <div className="w-7 h-7 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs">
                   {(user.first_name?.[0] || user.username?.[0] || user.email?.[0] || 'U').toUpperCase()}
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
