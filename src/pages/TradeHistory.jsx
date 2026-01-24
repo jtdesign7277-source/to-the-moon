@@ -305,7 +305,7 @@ const TradeHistory = () => {
         <aside className={`
           ${mobileSidebarOpen ? 'block' : 'hidden'} lg:block
           w-full lg:w-72 xl:w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          lg:min-h-[calc(100vh-64px)] shrink-0
+          h-fit shrink-0 self-start lg:sticky lg:top-16
         `}>
           {/* Sidebar Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">

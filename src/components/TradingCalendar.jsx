@@ -55,21 +55,21 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={goToPreviousMonth} className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 active:scale-95">
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <button onClick={goToPreviousMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 active:scale-95">
+              <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <button onClick={goToNextMonth} className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 active:scale-95">
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+            <button onClick={goToNextMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 active:scale-95">
+              <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <h2 className="text-xl font-semibold text-gray-900">{monthYear}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{monthYear}</h2>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={goToToday} className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">Today</button>
-            <div className="p-2 bg-gray-50 rounded-xl"><Calendar className="w-5 h-5 text-gray-400" /></div>
+            <button onClick={goToToday} className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200">Today</button>
+            <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl"><Calendar className="w-5 h-5 text-gray-400" /></div>
           </div>
         </div>
       </div>
@@ -89,19 +89,19 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
             
             const { day, hasTrades, isProfit, isLoss, pnl, trades: tradeCount, isToday } = dayData
             
-            let bgClass = 'bg-gray-50 hover:bg-gray-100'
+            let bgClass = 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
             let borderClass = 'border-transparent'
             let textClass = 'text-gray-400'
-            
+
             if (hasTrades) {
               if (isProfit) {
-                bgClass = 'bg-emerald-50 hover:bg-emerald-100'
-                borderClass = 'border-emerald-400'
-                textClass = 'text-emerald-700'
+                bgClass = 'bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
+                borderClass = 'border-emerald-400 dark:border-emerald-500'
+                textClass = 'text-emerald-700 dark:text-emerald-400'
               } else if (isLoss) {
-                bgClass = 'bg-red-50 hover:bg-red-100'
-                borderClass = 'border-red-400'
-                textClass = 'text-red-700'
+                bgClass = 'bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50'
+                borderClass = 'border-red-400 dark:border-red-500'
+                textClass = 'text-red-700 dark:text-red-400'
               }
             }
             
@@ -113,12 +113,12 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
               >
                 <div className="flex items-start justify-between">
                   {hasTrades && (
-                    <div className={`p-1.5 sm:p-2 rounded-lg ${isProfit ? 'bg-emerald-200/60' : 'bg-red-200/60'}`}>
-                      <FileText className={`w-5 h-5 sm:w-6 sm:h-6 ${isProfit ? 'text-emerald-600' : 'text-red-600'}`} />
+                    <div className={`p-1.5 sm:p-2 rounded-lg ${isProfit ? 'bg-emerald-200/60 dark:bg-emerald-800/40' : 'bg-red-200/60 dark:bg-red-800/40'}`}>
+                      <FileText className={`w-5 h-5 sm:w-6 sm:h-6 ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`} />
                     </div>
                   )}
                   {!hasTrades && <div className="w-8 h-8 sm:w-10 sm:h-10" />}
-                  <span className={`text-sm sm:text-base font-bold ${hasTrades ? (isProfit ? 'text-emerald-800' : 'text-red-800') : 'text-gray-500'}`}>{day}</span>
+                  <span className={`text-sm sm:text-base font-bold ${hasTrades ? (isProfit ? 'text-emerald-800 dark:text-emerald-300' : 'text-red-800 dark:text-red-300') : 'text-gray-500 dark:text-gray-400'}`}>{day}</span>
                 </div>
                 
                 {hasTrades && (
@@ -129,7 +129,7 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
                 
                 {hasTrades && (
                   <div className="flex justify-end">
-                    <span className={`text-xs sm:text-sm font-semibold px-1.5 py-0.5 rounded-md ${isProfit ? 'bg-emerald-200/80 text-emerald-700' : 'bg-red-200/80 text-red-700'}`}>{tradeCount} trade{tradeCount !== 1 ? 's' : ''}</span>
+                    <span className={`text-xs sm:text-sm font-semibold px-1.5 py-0.5 rounded-md ${isProfit ? 'bg-emerald-200/80 dark:bg-emerald-800/60 text-emerald-700 dark:text-emerald-300' : 'bg-red-200/80 dark:bg-red-800/60 text-red-700 dark:text-red-300'}`}>{tradeCount} trade{tradeCount !== 1 ? 's' : ''}</span>
                   </div>
                 )}
               </div>
@@ -138,16 +138,16 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
         </div>
       </div>
       
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-400 border-2 border-emerald-500" />
-              <span className="text-sm text-gray-600">Profit Day</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Profit Day</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-400 border-2 border-red-500" />
-              <span className="text-sm text-gray-600">Loss Day</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Loss Day</span>
             </div>
           </div>
           {(() => {
@@ -159,16 +159,16 @@ const TradingCalendar = ({ trades = [], onDayClick }) => {
             return (
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Monthly P&L</p>
-                  <p className={`text-sm font-bold ${totalPnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{formatPnl(totalPnl)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Monthly P&L</p>
+                  <p className={`text-sm font-bold ${totalPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{formatPnl(totalPnl)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Win Rate</p>
-                  <p className="text-sm font-bold text-gray-900">{profitDays + lossDays > 0 ? `${Math.round((profitDays / (profitDays + lossDays)) * 100)}%` : '—'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Win Rate</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{profitDays + lossDays > 0 ? `${Math.round((profitDays / (profitDays + lossDays)) * 100)}%` : '—'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Trades</p>
-                  <p className="text-sm font-bold text-gray-900">{totalTrades}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Trades</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{totalTrades}</p>
                 </div>
               </div>
             )

@@ -52,7 +52,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
             key={star}
             onClick={() => onChange?.(star)}
             className={`${sizeClass} ${
-              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'
             } hover:text-yellow-400 transition-colors`}
           >
             <Star className={sizeClass} fill={star <= rating ? 'currentColor' : 'none'} />
@@ -88,7 +88,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
         <div className="flex flex-wrap gap-4 items-center">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
@@ -98,7 +98,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
               placeholder="Search trades..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
             />
           </div>
 
@@ -108,7 +108,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
             <select
               value={filterTag || ''}
               onChange={(e) => setFilterTag(e.target.value || null)}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 dark:text-white"
             >
               <option value="">All Tags</option>
               {SETUP_TAGS.map(tag => (
@@ -121,7 +121,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
           <select
             value={filterRating || ''}
             onChange={(e) => setFilterRating(e.target.value ? Number(e.target.value) : null)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 dark:text-white"
           >
             <option value="">All Ratings</option>
             {[5, 4, 3, 2, 1].map(r => (
@@ -137,7 +137,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
                 setFilterRating(null)
                 setSearchQuery('')
               }}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
             >
               Clear Filters
             </button>
@@ -148,10 +148,10 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
       {/* Trade List */}
       <div className="space-y-3">
         {filteredTrades.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
-            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="font-medium text-gray-900">No Trades Found</h3>
-            <p className="text-sm text-gray-500 mt-1">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-8 text-center shadow-sm border border-gray-100 dark:border-gray-800">
+            <MessageSquare className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <h3 className="font-medium text-gray-900 dark:text-white">No Trades Found</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {trades.length === 0 ? 'Complete some trades to start journaling' : 'Try adjusting your filters'}
             </p>
           </div>
@@ -164,22 +164,22 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
             return (
               <div
                 key={trade.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden"
               >
                 {/* Trade Header */}
                 <div
-                  className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => setExpandedTrade(isExpanded ? null : trade.id)}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`w-2 h-2 rounded-full ${isProfit ? 'bg-green-500' : 'bg-red-500'}`} />
-                        <h4 className="font-medium text-gray-900 truncate">
+                        <h4 className="font-medium text-gray-900 dark:text-white truncate">
                           {trade.market || trade.title || 'Unknown Market'}
                         </h4>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <span>{trade.platform || 'Kalshi'}</span>
                         <span>•</span>
                         <span>{trade.position || 'YES'} @ {trade.price || 0}¢</span>
@@ -201,10 +201,10 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className={`font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                        <p className={`font-bold ${isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {isProfit ? '+' : ''}${pnl.toFixed(2)}
                         </p>
-                        <p className="text-xs text-gray-500">{trade.contracts || 1} contracts</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{trade.contracts || 1} contracts</p>
                       </div>
                       {isExpanded ? (
                         <ChevronUp className="w-5 h-5 text-gray-400" />
@@ -217,10 +217,10 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="border-t border-gray-100 p-4 bg-gray-50 space-y-4">
+                  <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-800/50 space-y-4">
                     {/* Rating Section */}
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
                         Execution Rating
                       </label>
                       <StarRating
@@ -232,7 +232,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
 
                     {/* Tags Section */}
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
                         Setup Tags
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -249,7 +249,7 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
 
                     {/* Notes Section */}
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 block">
                         Notes
                       </label>
                       {editingNote === trade.id ? (
@@ -258,13 +258,13 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
                             value={noteText}
                             onChange={(e) => setNoteText(e.target.value)}
                             placeholder="What was your thesis? What went right/wrong? What would you do differently?"
-                            className="w-full p-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white dark:bg-gray-900 dark:text-white dark:placeholder-gray-500"
                             rows={4}
                           />
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => setEditingNote(null)}
-                              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                             >
                               Cancel
                             </button>
@@ -283,12 +283,12 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
                             setEditingNote(trade.id)
                             setNoteText(trade.notes || '')
                           }}
-                          className="p-3 bg-white border border-gray-200 rounded-lg text-sm cursor-pointer hover:border-indigo-300 transition-colors min-h-[60px]"
+                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors min-h-[60px]"
                         >
                           {trade.notes ? (
-                            <p className="text-gray-700 whitespace-pre-wrap">{trade.notes}</p>
+                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{trade.notes}</p>
                           ) : (
-                            <p className="text-gray-400 flex items-center gap-2">
+                            <p className="text-gray-400 dark:text-gray-500 flex items-center gap-2">
                               <Edit2 className="w-4 h-4" />
                               Click to add notes...
                             </p>
@@ -298,23 +298,23 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
                     </div>
 
                     {/* Trade Details */}
-                    <div className="pt-2 border-t border-gray-200">
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                         <div>
-                          <span className="text-gray-500">Entry</span>
-                          <p className="font-medium">{trade.price || 0}¢</p>
+                          <span className="text-gray-500 dark:text-gray-400">Entry</span>
+                          <p className="font-medium dark:text-white">{trade.price || 0}¢</p>
                         </div>
                         <div>
-                          <span className="text-gray-500">Exit</span>
-                          <p className="font-medium">{trade.settledPrice || (isProfit ? 100 : 0)}¢</p>
+                          <span className="text-gray-500 dark:text-gray-400">Exit</span>
+                          <p className="font-medium dark:text-white">{trade.settledPrice || (isProfit ? 100 : 0)}¢</p>
                         </div>
                         <div>
-                          <span className="text-gray-500">Position</span>
-                          <p className="font-medium">{trade.position || 'YES'}</p>
+                          <span className="text-gray-500 dark:text-gray-400">Position</span>
+                          <p className="font-medium dark:text-white">{trade.position || 'YES'}</p>
                         </div>
                         <div>
-                          <span className="text-gray-500">Strategy</span>
-                          <p className="font-medium">{trade.strategy || 'Manual'}</p>
+                          <span className="text-gray-500 dark:text-gray-400">Strategy</span>
+                          <p className="font-medium dark:text-white">{trade.strategy || 'Manual'}</p>
                         </div>
                       </div>
                     </div>

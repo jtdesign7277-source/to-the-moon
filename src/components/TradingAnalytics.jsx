@@ -132,15 +132,15 @@ const TradingAnalytics = ({ trades = [] }) => {
   }, [trades])
 
   const StatCard = ({ title, value, subtitle, icon: Icon, color = 'indigo' }) => (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-gray-500 mb-1">{title}</p>
-          <p className={`text-xl font-bold text-${color}-600`}>{value}</p>
-          {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{title}</p>
+          <p className={`text-xl font-bold text-${color}-600 dark:text-${color}-400`}>{value}</p>
+          {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
         </div>
-        <div className={`p-2 bg-${color}-50 rounded-lg`}>
-          <Icon className={`w-4 h-4 text-${color}-600`} />
+        <div className={`p-2 bg-${color}-50 dark:bg-${color}-900/30 rounded-lg`}>
+          <Icon className={`w-4 h-4 text-${color}-600 dark:text-${color}-400`} />
         </div>
       </div>
     </div>
@@ -148,10 +148,10 @@ const TradingAnalytics = ({ trades = [] }) => {
 
   if (trades.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-        <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <h3 className="font-medium text-gray-900">No Trade Data Yet</h3>
-        <p className="text-sm text-gray-500 mt-1">Complete some trades to see your analytics</p>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 text-center">
+        <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+        <h3 className="font-medium text-gray-900 dark:text-white">No Trade Data Yet</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Complete some trades to see your analytics</p>
       </div>
     )
   }
@@ -193,10 +193,10 @@ const TradingAnalytics = ({ trades = [] }) => {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* P&L by Day of Week */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 text-indigo-600" />
-            <h3 className="font-semibold text-gray-900">P&L by Day of Week</h3>
+            <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">P&L by Day of Week</h3>
           </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -217,22 +217,22 @@ const TradingAnalytics = ({ trades = [] }) => {
             </ResponsiveContainer>
           </div>
           {analytics.bestDay && (
-            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-sm">
-              <span className="text-gray-500">
-                Best: <span className="font-medium text-green-600">{analytics.bestDay.fullName}</span>
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">
+                Best: <span className="font-medium text-green-600 dark:text-green-400">{analytics.bestDay.fullName}</span>
               </span>
-              <span className="text-gray-500">
-                Worst: <span className="font-medium text-red-600">{analytics.worstDay?.fullName}</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                Worst: <span className="font-medium text-red-600 dark:text-red-400">{analytics.worstDay?.fullName}</span>
               </span>
             </div>
           )}
         </div>
 
         {/* P&L by Hour */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-indigo-600" />
-            <h3 className="font-semibold text-gray-900">P&L by Time of Day</h3>
+            <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">P&L by Time of Day</h3>
           </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -259,23 +259,23 @@ const TradingAnalytics = ({ trades = [] }) => {
       {/* Platform & Strategy Breakdown */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* By Platform */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-4">Performance by Platform</h3>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Performance by Platform</h3>
           <div className="space-y-3">
             {analytics.byPlatform.map((platform) => {
               const winRate = platform.trades > 0 ? (platform.wins / platform.trades) * 100 : 0
               return (
-                <div key={platform.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={platform.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-3">
                     <span className="text-lg">
                       {platform.name === 'Kalshi' ? '🎲' : platform.name === 'Polymarket' ? '🔮' : '📊'}
                     </span>
                     <div>
-                      <p className="font-medium text-gray-900">{platform.name}</p>
-                      <p className="text-xs text-gray-500">{platform.trades} trades • {winRate.toFixed(0)}% win rate</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{platform.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{platform.trades} trades • {winRate.toFixed(0)}% win rate</p>
                     </div>
                   </div>
-                  <p className={`font-semibold ${platform.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`font-semibold ${platform.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {platform.pnl >= 0 ? '+' : ''}${platform.pnl.toFixed(2)}
                   </p>
                 </div>
@@ -285,25 +285,25 @@ const TradingAnalytics = ({ trades = [] }) => {
         </div>
 
         {/* By Strategy */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-4">Performance by Strategy</h3>
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Performance by Strategy</h3>
           <div className="space-y-3">
             {analytics.byStrategy.slice(0, 5).map((strategy) => {
               const winRate = strategy.trades > 0 ? (strategy.wins / strategy.trades) * 100 : 0
               return (
-                <div key={strategy.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={strategy.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{strategy.name}</p>
-                    <p className="text-xs text-gray-500">{strategy.trades} trades • {winRate.toFixed(0)}% win rate</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{strategy.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{strategy.trades} trades • {winRate.toFixed(0)}% win rate</p>
                   </div>
-                  <p className={`font-semibold ${strategy.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`font-semibold ${strategy.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {strategy.pnl >= 0 ? '+' : ''}${strategy.pnl.toFixed(2)}
                   </p>
                 </div>
               )
             })}
             {analytics.byStrategy.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">No strategy data yet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No strategy data yet</p>
             )}
           </div>
         </div>
