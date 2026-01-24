@@ -606,25 +606,11 @@ const Dashboard = ({ onNavigate }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            {hasData ? "Here's your trading overview." : "Welcome! Connect an account to start trading."}
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className={`text-sm font-bold flex items-center gap-2 ${
-            tradingMode === 'live'
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-yellow-600 dark:text-yellow-400'
-          }`}>
-            <span className={`w-2 h-2 rounded-full animate-pulse ${
-              tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'
-            }`} />
-            {tradingMode === 'live' ? 'Live Trading' : 'Paper Trading'}
-          </span>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          {hasData ? "Here's your trading overview." : "Welcome! Connect an account to start trading."}
+        </p>
       </div>
 
       {/* Pro Upgrade Banner */}
