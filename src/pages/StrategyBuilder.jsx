@@ -1151,18 +1151,18 @@ const StrategyBuilder = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+      <div>
+        <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Strategy Builder Pro</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Create, backtest, and deploy custom trading strategies.</p>
+          <button
+            onClick={openNewStrategy}
+            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:text-indigo-500 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Strategy
+          </button>
         </div>
-        <button
-          onClick={openNewStrategy}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25"
-        >
-          <Plus className="w-4 h-4" />
-          New Strategy
-        </button>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Create, backtest, and deploy custom trading strategies.</p>
       </div>
 
       {/* Deployed Strategies */}
