@@ -650,9 +650,9 @@ const Accounts = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-400">{platform.type}</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 mt-3">
+                    <div className="flex flex-wrap gap-2 mt-3">
                       {platform.features.slice(0, 2).map((feature, i) => (
-                        <span key={i} className={`px-2 py-0.5 text-xs rounded ${colors.bg} ${colors.text}`}>
+                        <span key={i} className={`text-xs font-medium ${colors.text}`}>
                           {feature}
                         </span>
                       ))}
@@ -718,7 +718,7 @@ const Accounts = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded flex items-center gap-1">
+                            <span className="text-green-600 dark:text-green-400 text-xs font-bold flex items-center gap-1">
                               <Check className="w-3 h-3" />
                               Live
                             </span>
@@ -820,7 +820,7 @@ const Accounts = () => {
                         </div>
                         {isConnected ? (
                           <div className="text-right">
-                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded">
+                            <span className="text-green-600 dark:text-green-400 text-xs font-bold">
                               Connected
                             </span>
                             <p className="text-lg font-bold text-gray-900 dark:text-white mt-2">{connectedAccount?.balance}</p>
@@ -834,9 +834,9 @@ const Accounts = () => {
                       {!isConnected && (
                         <>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">{platform.description}</p>
-                          <div className="flex flex-wrap gap-1.5 mt-3">
+                          <div className="flex flex-wrap gap-2 mt-3">
                             {platform.features.map((feature, i) => (
-                              <span key={i} className={`px-2 py-0.5 text-xs rounded ${colors.bg} ${colors.text}`}>
+                              <span key={i} className={`text-xs font-medium ${colors.text}`}>
                                 {feature}
                               </span>
                             ))}
