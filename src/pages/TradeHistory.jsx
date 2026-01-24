@@ -567,17 +567,17 @@ const TradeHistory = () => {
                         <button
                           key={f.key}
                           onClick={() => setFilter(f.key)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                          className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
                             filter === f.key
-                              ? f.color === 'green' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' :
-                                f.color === 'red' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400' :
-                                f.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' :
-                                'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400'
-                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                              ? f.color === 'green' ? 'text-green-600 dark:text-green-400 font-bold' :
+                                f.color === 'red' ? 'text-red-600 dark:text-red-400 font-bold' :
+                                f.color === 'amber' ? 'text-amber-600 dark:text-amber-400 font-bold' :
+                                'text-indigo-600 dark:text-indigo-400 font-bold'
+                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                           }`}
                         >
                           {f.label}
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${filter === f.key ? 'bg-white/50 dark:bg-black/20' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                          <span className={`text-xs ${filter === f.key ? 'opacity-70' : 'opacity-50'}`}>
                             {f.count}
                           </span>
                         </button>
@@ -637,18 +637,18 @@ const TradeHistory = () => {
                                 <p className="text-sm font-medium text-gray-900 dark:text-white max-w-xs truncate">{trade.pair}</p>
                               </td>
                               <td className="px-4 py-4 text-sm">
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                  trade.platform?.toLowerCase() === 'kalshi' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400' :
-                                  trade.platform?.toLowerCase() === 'polymarket' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400' :
-                                  trade.platform?.toLowerCase() === 'manifold' ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400' :
-                                  'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                <span className={`text-xs font-bold ${
+                                  trade.platform?.toLowerCase() === 'kalshi' ? 'text-blue-600 dark:text-blue-400' :
+                                  trade.platform?.toLowerCase() === 'polymarket' ? 'text-purple-600 dark:text-purple-400' :
+                                  trade.platform?.toLowerCase() === 'manifold' ? 'text-orange-600 dark:text-orange-400' :
+                                  'text-gray-600 dark:text-gray-400'
                                 }`}>
                                   {trade.platform || 'Unknown'}
                                 </span>
                               </td>
                               <td className="px-4 py-4 text-sm">
-                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                                  trade.type === 'YES' || trade.type === 'Long' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
+                                <span className={`inline-flex items-center gap-1 text-xs font-bold ${
+                                  trade.type === 'YES' || trade.type === 'Long' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                                 }`}>
                                   {trade.type === 'YES' || trade.type === 'Long' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                   {trade.type}
@@ -662,10 +662,10 @@ const TradeHistory = () => {
                                 {trade.pnl}
                               </td>
                               <td className="px-4 py-4 text-sm">
-                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                                  trade.status === 'Won' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' :
-                                  trade.status === 'Open' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' :
-                                  'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
+                                <span className={`inline-flex items-center gap-1 text-xs font-bold ${
+                                  trade.status === 'Won' ? 'text-green-600 dark:text-green-400' :
+                                  trade.status === 'Open' ? 'text-amber-600 dark:text-amber-400' :
+                                  'text-red-600 dark:text-red-400'
                                 }`}>
                                   {trade.status === 'Won' ? <Check className="w-3 h-3" /> :
                                    trade.status === 'Open' ? <Clock className="w-3 h-3" /> :

@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Star, Tag, MessageSquare, ChevronDown, ChevronUp, X, Edit2, Check, Filter, Search } from 'lucide-react'
 
 const SETUP_TAGS = [
-  { id: 'momentum', label: 'Momentum', color: 'bg-blue-100 text-blue-700' },
-  { id: 'arbitrage', label: 'Arbitrage', color: 'bg-purple-100 text-purple-700' },
-  { id: 'scalp', label: 'Scalp', color: 'bg-orange-100 text-orange-700' },
-  { id: 'swing', label: 'Swing', color: 'bg-teal-100 text-teal-700' },
-  { id: 'news', label: 'News', color: 'bg-pink-100 text-pink-700' },
-  { id: 'reversal', label: 'Reversal', color: 'bg-yellow-100 text-yellow-700' },
-  { id: 'breakout', label: 'Breakout', color: 'bg-indigo-100 text-indigo-700' },
-  { id: 'value', label: 'Value', color: 'bg-green-100 text-green-700' },
+  { id: 'momentum', label: 'Momentum', color: 'text-blue-600 dark:text-blue-400' },
+  { id: 'arbitrage', label: 'Arbitrage', color: 'text-purple-600 dark:text-purple-400' },
+  { id: 'scalp', label: 'Scalp', color: 'text-orange-600 dark:text-orange-400' },
+  { id: 'swing', label: 'Swing', color: 'text-teal-600 dark:text-teal-400' },
+  { id: 'news', label: 'News', color: 'text-pink-600 dark:text-pink-400' },
+  { id: 'reversal', label: 'Reversal', color: 'text-yellow-600 dark:text-yellow-400' },
+  { id: 'breakout', label: 'Breakout', color: 'text-indigo-600 dark:text-indigo-400' },
+  { id: 'value', label: 'Value', color: 'text-green-600 dark:text-green-400' },
 ]
 
 const TradeJournal = ({ trades = [], onUpdateTrade }) => {
@@ -63,12 +63,12 @@ const TradeJournal = ({ trades = [], onUpdateTrade }) => {
   }
 
   const TagBadge = ({ tag, selected, onClick }) => {
-    const tagInfo = SETUP_TAGS.find(t => t.id === tag) || { label: tag, color: 'bg-gray-100 text-gray-700' }
+    const tagInfo = SETUP_TAGS.find(t => t.id === tag) || { label: tag, color: 'text-gray-600 dark:text-gray-400' }
     return (
       <button
         onClick={onClick}
-        className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagInfo.color} ${
-          selected ? 'ring-2 ring-offset-1 ring-indigo-400' : ''
+        className={`text-xs font-bold transition-all ${tagInfo.color} ${
+          selected ? 'underline underline-offset-2' : ''
         }`}
       >
         {tagInfo.label}

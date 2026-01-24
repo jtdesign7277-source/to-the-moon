@@ -1168,15 +1168,15 @@ const Dashboard = ({ onNavigate }) => {
                 {/* Compact single row */}
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-bold text-gray-900 dark:text-white text-xs">{bet.ticker}</span>
-                  <span className={`px-1 py-0.5 text-[9px] font-semibold rounded ${
-                    bet.platform === 'Kalshi' ? 'bg-blue-100 text-blue-700' :
-                    bet.platform === 'Polymarket' ? 'bg-purple-100 text-purple-700' :
-                    'bg-orange-100 text-orange-700'
+                  <span className={`text-[9px] font-bold ${
+                    bet.platform === 'Kalshi' ? 'text-blue-600 dark:text-blue-400' :
+                    bet.platform === 'Polymarket' ? 'text-purple-600 dark:text-purple-400' :
+                    'text-orange-600 dark:text-orange-400'
                   }`}>
                     {bet.platform}
                   </span>
-                  <span className={`px-1 py-0.5 text-[9px] font-bold rounded ${
-                    bet.position === 'YES' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  <span className={`text-[9px] font-bold ${
+                    bet.position === 'YES' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}>
                     {bet.position}
                   </span>

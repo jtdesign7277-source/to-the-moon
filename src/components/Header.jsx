@@ -423,9 +423,7 @@ const Header = ({
                     {/* Market Settled */}
                     <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full shrink-0">
-                          <CheckCircle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                        </div>
+                        <CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">Market settled</span>
@@ -498,9 +496,7 @@ const Header = ({
                     {/* Position Update */}
                     <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full shrink-0">
-                          <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        </div>
+                        <Clock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">Position expiring soon</span>
@@ -660,9 +656,7 @@ const Header = ({
                             </div>
                             {/* Email */}
                             <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                              </div>
+                              <Mail className="w-5 h-5 text-purple-500" />
                               <div className="min-w-0 flex-1">
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
@@ -670,9 +664,7 @@ const Header = ({
                             </div>
                             {/* Member Since */}
                             <div className="flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
-                              </div>
+                              <Calendar className="w-5 h-5 text-green-500" />
                               <div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Member Since</p>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white">{getMemberSince()}</p>
@@ -923,7 +915,7 @@ const Header = ({
                   </button>
                   <button
                     onClick={() => { setMobileMenuOpen(false); setProfileOpen(true); setActiveTab('suggest'); }}
-                    className="flex items-center justify-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-xl text-amber-700 dark:text-amber-400 text-sm font-medium transition-colors"
+                    className="flex items-center justify-center gap-2 p-3 text-amber-600 dark:text-amber-400 hover:text-amber-500 dark:hover:text-amber-300 text-sm font-medium transition-colors"
                   >
                     <Lightbulb className="w-4 h-4" />
                     Suggest

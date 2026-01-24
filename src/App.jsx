@@ -461,9 +461,7 @@ const AppContent = () => {
 
                   {/* Email */}
                   <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Mail className="w-3.5 h-3.5 text-purple-600" />
-                    </div>
+                    <Mail className="w-5 h-5 text-purple-500" />
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-500 uppercase tracking-wide">Email</p>
                       <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>

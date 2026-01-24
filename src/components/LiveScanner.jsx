@@ -365,10 +365,10 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
                 e.stopPropagation()
                 setIsPaused(!isPaused)
               }}
-              className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                isPaused 
-                  ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`text-xs font-bold transition-colors ${
+                isPaused
+                  ? 'text-amber-500 hover:text-amber-400'
+                  : 'text-gray-500 hover:text-gray-400'
               }`}
             >
               {isPaused ? 'Resume' : 'Pause'}
@@ -424,10 +424,10 @@ const LiveScanner = ({ maxEvents = 50, scanInterval = 3000, onTradeComplete, tra
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                            event.platform === 'Kalshi' ? 'bg-blue-100 text-blue-700' :
-                            event.platform === 'Polymarket' ? 'bg-purple-100 text-purple-700' :
-                            'bg-orange-100 text-orange-700'
+                          <span className={`text-xs font-bold ${
+                            event.platform === 'Kalshi' ? 'text-blue-600 dark:text-blue-400' :
+                            event.platform === 'Polymarket' ? 'text-purple-600 dark:text-purple-400' :
+                            'text-orange-600 dark:text-orange-400'
                           }`}>
                             {event.platform}
                           </span>

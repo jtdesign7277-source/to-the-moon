@@ -55,18 +55,18 @@ const RadarScanner = ({ isActive }) => (
 // Status badge component
 const StatusBadge = ({ status }) => {
   const configs = {
-    won: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: CheckCircle, label: 'Won' },
-    lost: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: 'Lost' },
-    'in-play': { bg: 'bg-amber-100', text: 'text-amber-700', icon: MinusCircle, label: 'In Play' },
-    active: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: Play, label: 'Active' },
-    paused: { bg: 'bg-amber-100', text: 'text-amber-700', icon: Pause, label: 'Paused' },
-    stopped: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Square, label: 'Stopped' },
+    won: { text: 'text-emerald-600 dark:text-emerald-400', icon: CheckCircle, label: 'Won' },
+    lost: { text: 'text-red-600 dark:text-red-400', icon: XCircle, label: 'Lost' },
+    'in-play': { text: 'text-amber-600 dark:text-amber-400', icon: MinusCircle, label: 'In Play' },
+    active: { text: 'text-emerald-600 dark:text-emerald-400', icon: Play, label: 'Active' },
+    paused: { text: 'text-amber-600 dark:text-amber-400', icon: Pause, label: 'Paused' },
+    stopped: { text: 'text-gray-600 dark:text-gray-400', icon: Square, label: 'Stopped' },
   }
   const config = configs[status] || configs.active
   const Icon = config.icon
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-bold ${config.text}`}>
       <Icon className="w-3 h-3" />
       {config.label}
     </span>
@@ -148,7 +148,7 @@ const StrategyCard = ({ strategy, onPause, onStop, onResume }) => {
         {strategy.status === 'active' ? (
           <button
             onClick={() => onPause(strategy.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-2 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium"
+            className="flex-1 flex items-center justify-center gap-1 py-2 text-amber-500 hover:text-amber-400 text-sm font-bold transition-colors"
           >
             <Pause className="w-4 h-4" />
             Pause
@@ -156,7 +156,7 @@ const StrategyCard = ({ strategy, onPause, onStop, onResume }) => {
         ) : (
           <button
             onClick={() => onResume(strategy.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium"
+            className="flex-1 flex items-center justify-center gap-1 py-2 text-emerald-500 hover:text-emerald-400 text-sm font-bold transition-colors"
           >
             <Play className="w-4 h-4" />
             Resume
@@ -190,15 +190,13 @@ const TradeRow = ({ trade }) => {
       className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100"
     >
       {/* Status indicator */}
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-        isWin ? 'bg-emerald-100' : isLoss ? 'bg-red-100' : 'bg-amber-100'
-      }`}>
+      <div className="w-10 h-10 flex items-center justify-center">
         {isWin ? (
-          <ArrowUpRight className="w-5 h-5 text-emerald-600" />
+          <ArrowUpRight className="w-6 h-6 text-emerald-500" />
         ) : isLoss ? (
-          <ArrowDownRight className="w-5 h-5 text-red-600" />
+          <ArrowDownRight className="w-6 h-6 text-red-500" />
         ) : (
-          <Activity className="w-5 h-5 text-amber-600" />
+          <Activity className="w-6 h-6 text-amber-500" />
         )}
       </div>
 
@@ -582,15 +580,13 @@ export default function AlphaHub() {
             { symbol: 'AAPL', signal: 'HOLD', reason: 'Waiting for MA crossover', time: '1h ago', strategy: 'MA Crossover Strategy' },
           ].map((signal, i) => (
             <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                signal.signal === 'BUY' ? 'bg-emerald-100' : signal.signal === 'SELL' ? 'bg-red-100' : 'bg-gray-100'
-              }`}>
+              <div className="w-8 h-8 flex items-center justify-center">
                 {signal.signal === 'BUY' ? (
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
                 ) : signal.signal === 'SELL' ? (
-                  <TrendingDown className="w-4 h-4 text-red-600" />
+                  <TrendingDown className="w-5 h-5 text-red-500" />
                 ) : (
-                  <Activity className="w-4 h-4 text-gray-600" />
+                  <Activity className="w-5 h-5 text-gray-500" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

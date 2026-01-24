@@ -222,17 +222,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 // Metric Card
 const MetricCard = ({ icon: Icon, label, value, color = 'indigo', positive }) => {
   const colorStyles = {
-    indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-    green: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-    red: 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
-    yellow: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
+    indigo: 'text-indigo-600 dark:text-indigo-400',
+    green: 'text-emerald-600 dark:text-emerald-400',
+    red: 'text-rose-600 dark:text-rose-400',
+    yellow: 'text-amber-600 dark:text-amber-400',
   }
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
       <div className="flex items-start justify-between">
-        <div className={`p-2 rounded-lg ${colorStyles[color]}`}>
-          <Icon className="w-4 h-4" />
-        </div>
+        <Icon className={`w-5 h-5 ${colorStyles[color]}`} />
         {positive !== undefined && (
           <span className={`text-xs font-medium flex items-center gap-0.5 ${positive ? 'text-emerald-600' : 'text-rose-600'}`}>
             {positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -701,8 +699,8 @@ const AlphaLab = () => {
                           onClick={() => toggleSignal(signal.id)}
                           className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
                             selectedSignals.includes(signal.id)
-                              ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300'
-                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-amber-300 dark:hover:border-amber-600'
+                              ? 'border-amber-400 dark:border-amber-500 text-amber-600 dark:text-amber-400 font-bold'
+                              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-amber-300 dark:hover:border-amber-600'
                           }`}
                         >
                           {signal.label}
@@ -729,8 +727,8 @@ const AlphaLab = () => {
                           onClick={() => togglePattern(pattern.id)}
                           className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
                             selectedPatterns.includes(pattern.id)
-                              ? 'bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
-                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-600'
+                              ? 'border-purple-400 dark:border-purple-500 text-purple-600 dark:text-purple-400 font-bold'
+                              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-600'
                           }`}
                         >
                           {pattern.label}
@@ -1011,9 +1009,7 @@ const AlphaLab = () => {
                   </>
                 ) : (
                   <div className="text-center py-4">
-                    <div className="w-16 h-16 mx-auto bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
-                      <Check className="w-8 h-8 text-emerald-600" />
-                    </div>
+                    <Check className="w-12 h-12 mx-auto text-emerald-500 mb-4" />
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Strategy Deployed!</h4>
                     <p className="text-sm text-gray-500 mb-4">Running in {deploymentMode} mode</p>
                     <Button onClick={resetAll} variant="ghost" size="sm">

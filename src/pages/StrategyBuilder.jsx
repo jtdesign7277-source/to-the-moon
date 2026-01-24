@@ -192,15 +192,15 @@ const generateBacktestData = (config) => {
 const getDifficultyStyle = (difficulty) => {
   switch (difficulty) {
     case 'Beginner':
-      return 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
+      return 'text-green-600 dark:text-green-400'
     case 'Intermediate':
-      return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-400'
+      return 'text-yellow-600 dark:text-yellow-400'
     case 'Advanced':
-      return 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400'
+      return 'text-orange-600 dark:text-orange-400'
     case 'Expert':
-      return 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
+      return 'text-red-600 dark:text-red-400'
     default:
-      return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+      return 'text-gray-600 dark:text-gray-400'
   }
 }
 
@@ -1405,7 +1405,7 @@ const StrategyBuilder = () => {
             >
               <div className="flex items-start justify-between">
                 <span className="text-2xl">{t.icon}</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${getDifficultyStyle(t.difficulty)}`}>
+                <span className={`text-xs font-bold ${getDifficultyStyle(t.difficulty)}`}>
                   {t.difficulty}
                 </span>
               </div>
@@ -2209,7 +2209,7 @@ const StrategyBuilder = () => {
                               className="p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200"
                             >
                               <div className="flex items-center justify-between mb-3">
-                                <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                                <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
                                   Rule {index + 1}
                                 </span>
                                 <button
@@ -2222,7 +2222,7 @@ const StrategyBuilder = () => {
 
                               {/* IF Section */}
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded">IF</span>
+                                <span className="text-sm font-bold text-purple-600 dark:text-purple-400">IF</span>
                                 <select
                                   value={rule.trigger}
                                   onChange={(e) => updateConditionalRule(rule.id, 'trigger', e.target.value)}

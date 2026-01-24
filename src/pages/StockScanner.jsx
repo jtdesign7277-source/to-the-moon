@@ -175,15 +175,15 @@ const StockRow = ({ stock, isWatched, onToggleWatch, isNew }) => {
               e.stopPropagation()
               onToggleWatch(stock.symbol)
             }}
-            className={`p-1.5 rounded-lg transition-colors ${
-              isWatched 
-                ? 'bg-amber-100 text-amber-600' 
-                : 'bg-gray-100 text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+            className={`p-1.5 transition-colors ${
+              isWatched
+                ? 'text-amber-500'
+                : 'text-gray-400 hover:text-amber-500'
             }`}
           >
             {isWatched ? <Star className="w-4 h-4 fill-current" /> : <StarOff className="w-4 h-4" />}
           </button>
-          <button className="p-1.5 rounded-lg bg-gray-100 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+          <button className="p-1.5 text-gray-400 hover:text-indigo-500 transition-colors">
             <Eye className="w-4 h-4" />
           </button>
         </div>
@@ -195,18 +195,18 @@ const StockRow = ({ stock, isWatched, onToggleWatch, isNew }) => {
 // Filter pill component
 const FilterPill = ({ active, onClick, children, icon: Icon, color = 'gray' }) => {
   const colorMap = {
-    gray: active ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-    indigo: active ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100',
-    purple: active ? 'bg-purple-600 text-white' : 'bg-purple-50 text-purple-600 hover:bg-purple-100',
-    emerald: active ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
-    amber: active ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-600 hover:bg-amber-100',
-    rose: active ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-600 hover:bg-rose-100',
+    gray: active ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+    indigo: active ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-500 hover:text-indigo-500',
+    purple: active ? 'text-purple-600 dark:text-purple-400 font-bold' : 'text-gray-500 hover:text-purple-500',
+    emerald: active ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-500 hover:text-emerald-500',
+    amber: active ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-gray-500 hover:text-amber-500',
+    rose: active ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-gray-500 hover:text-rose-500',
   }
-  
+
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${colorMap[color]}`}
+      className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${colorMap[color]}`}
     >
       {Icon && <Icon className="w-3.5 h-3.5" />}
       {children}
@@ -374,10 +374,10 @@ const StockScanner = () => {
             {/* Pause/Play */}
             <button
               onClick={() => setIsPaused(!isPaused)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                isPaused 
-                  ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`text-sm font-bold transition-colors flex items-center gap-1.5 ${
+                isPaused
+                  ? 'text-amber-500 hover:text-amber-400'
+                  : 'text-gray-500 hover:text-gray-400'
               }`}
             >
               {isPaused ? (

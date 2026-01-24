@@ -74,25 +74,25 @@ const SORT_OPTIONS = [
 // Get difficulty badge style
 const getDifficultyStyle = (difficulty) => {
   const styles = {
-    'Beginner': 'bg-green-100 text-green-700 border-green-200',
-    'Intermediate': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    'Advanced': 'bg-orange-100 text-orange-700 border-orange-200',
-    'Expert': 'bg-red-100 text-red-700 border-red-200',
+    'Beginner': 'text-green-600 dark:text-green-400',
+    'Intermediate': 'text-yellow-600 dark:text-yellow-400',
+    'Advanced': 'text-orange-600 dark:text-orange-400',
+    'Expert': 'text-red-600 dark:text-red-400',
   }
-  return styles[difficulty] || 'bg-gray-100 text-gray-700 border-gray-200'
+  return styles[difficulty] || 'text-gray-600 dark:text-gray-400'
 }
 
 // Get risk level style
 const getRiskStyle = (risk) => {
   const styles = {
-    'very-low': 'bg-emerald-100 text-emerald-700',
-    'low': 'bg-green-100 text-green-700',
-    'low-medium': 'bg-teal-100 text-teal-700',
-    'medium': 'bg-yellow-100 text-yellow-700',
-    'medium-high': 'bg-orange-100 text-orange-700',
-    'high': 'bg-red-100 text-red-700',
+    'very-low': 'text-emerald-600 dark:text-emerald-400',
+    'low': 'text-green-600 dark:text-green-400',
+    'low-medium': 'text-teal-600 dark:text-teal-400',
+    'medium': 'text-yellow-600 dark:text-yellow-400',
+    'medium-high': 'text-orange-600 dark:text-orange-400',
+    'high': 'text-red-600 dark:text-red-400',
   }
-  return styles[risk] || 'bg-gray-100 text-gray-700'
+  return styles[risk] || 'text-gray-600 dark:text-gray-400'
 }
 
 // Strategy card component
@@ -120,10 +120,11 @@ const StrategyCard = ({ strategy, rank, onCompare, isComparing, onFork, onView }
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">{strategy.name}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getDifficultyStyle(strategy.difficulty)}`}>
+                <span className={`text-xs font-bold ${getDifficultyStyle(strategy.difficulty)}`}>
                   {strategy.difficulty}
                 </span>
-                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getRiskStyle(strategy.riskLevel)}`}>
+                <span className="text-gray-300 dark:text-gray-600">|</span>
+                <span className={`text-xs font-bold ${getRiskStyle(strategy.riskLevel)}`}>
                   {strategy.riskLevel.replace('-', ' ')}
                 </span>
               </div>
@@ -131,10 +132,10 @@ const StrategyCard = ({ strategy, rank, onCompare, isComparing, onFork, onView }
           </div>
           <button
             onClick={() => onCompare(strategy.id)}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 transition-colors ${
               isComparing
-                ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
             }`}
             title={isComparing ? 'Remove from comparison' : 'Add to comparison'}
           >
