@@ -354,7 +354,7 @@ const AppContent = () => {
       {/* Main Content Area - Dynamic margin based on sidebar state */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 ${sidebarExpanded ? 'lg:ml-56' : 'lg:ml-12'}`}>
         {/* Top Right Header Bar */}
-        <div className="fixed top-3 right-4 z-50 flex items-center gap-2">
+        <div className="fixed top-3 right-4 z-50 flex items-center gap-4">
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}

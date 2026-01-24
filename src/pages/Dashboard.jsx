@@ -613,11 +613,11 @@ const Dashboard = ({ onNavigate }) => {
             {hasData ? "Here's your trading overview." : "Welcome! Connect an account to start trading."}
           </p>
         </div>
-        <div className="flex items-center gap-3 mr-40">
-          <span className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 ${
+        <div className="flex items-center gap-4">
+          <span className={`text-sm font-bold flex items-center gap-2 ${
             tradingMode === 'live'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-yellow-100 text-yellow-700'
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-yellow-600 dark:text-yellow-400'
           }`}>
             <span className={`w-2 h-2 rounded-full animate-pulse ${
               tradingMode === 'live' ? 'bg-green-500' : 'bg-yellow-500'
