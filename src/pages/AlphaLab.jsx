@@ -483,7 +483,7 @@ const AlphaLab = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Sparkles className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
+          <Brain className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder with Alpaca</p>
@@ -508,7 +508,7 @@ const AlphaLab = () => {
             {/* Luna Message */}
             <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-start gap-3">
-                <Brain className="w-6 h-6 text-indigo-500" />
+                <Sparkles className="w-6 h-6 text-indigo-500" />
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900 dark:text-white">Luna</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{lunaMessage}</p>

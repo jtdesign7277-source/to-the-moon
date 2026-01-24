@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity, CheckCircle, XCircle, Banknote, Clock, History, Sun, Moon } from 'lucide-react'
+import { Menu, X, Rocket, Bell, Crown, Lock, LogOut, User, ChevronDown, Trophy, ShoppingCart, BookOpen, Compass, Mail, Calendar, Send, Lightbulb, MessageCircle, Bot, UserCircle, Activity, CheckCircle, XCircle, Banknote, Clock, History } from 'lucide-react'
 import { useApp } from '../hooks/useApp'
-import { useTheme } from '../contexts/ThemeContext'
 import api from '../utils/api'
 
 // Luna Avatar - Elegant constellation of stars with slow rotation
@@ -111,8 +110,6 @@ const Header = ({
     openUpgradeModal,
     openLunaChat,
   } = useApp()
-
-  const { isDark, toggleTheme } = useTheme()
 
   const [exploreOpen, setExploreOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -380,20 +377,6 @@ const Header = ({
                 Live
               </button>
             </div>
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-yellow-500 hover:text-yellow-400 transition-colors"
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-500 hover:text-gray-400" />
-              )}
-            </button>
 
             {/* Notifications */}
             <div className="relative" ref={notificationsRef}>
