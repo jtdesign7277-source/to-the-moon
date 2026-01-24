@@ -483,9 +483,7 @@ const AlphaLab = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/25">
-            <Brain className="w-6 h-6 text-white" />
-          </div>
+          <Sparkles className="w-7 h-7 text-indigo-500 dark:text-indigo-400" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alpha Lab</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm">AI-powered strategy builder with Alpaca</p>
@@ -1021,30 +1019,6 @@ const AlphaLab = () => {
             </div>
           )}
 
-          {/* How It Works */}
-          {!strategy && (
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
-              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                How It Works
-              </h3>
-              <div className="space-y-4">
-                {[
-                  { step: '1', text: 'Describe your strategy to Luna' },
-                  { step: '2', text: 'Click any field to customize' },
-                  { step: '3', text: 'Backtest with Alpaca data' },
-                  { step: '4', text: 'Deploy to paper or live' },
-                ].map(({ step, text }) => (
-                  <div key={step} className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-bold">
-                      {step}
-                    </div>
-                    <p className="text-sm text-white/90">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
