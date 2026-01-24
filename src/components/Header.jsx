@@ -542,7 +542,7 @@ const Header = ({
 
                 {/* Profile Dropdown - Dark Theme */}
                 <div
-                  className={`absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
+                  className={`dark absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 ${(activeTab === 'support' || activeTab === 'suggest') ? 'sm:w-96' : ''} max-w-88 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden z-50 transform origin-top-right transition-all duration-200 ease-out ${
                     profileOpen
                       ? 'opacity-100 scale-100 translate-y-0'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -612,61 +612,65 @@ const Header = ({
                           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Account Information</p>
                           <div className="space-y-3">
                             {/* First Name */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600/30">
-                                <User className="w-4 h-4 text-indigo-400" />
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-gray-800">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50">
+                                <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-400">First Name</p>
-                                <p className="text-sm font-medium text-white">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">First Name</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
                                   {user.first_name || (user.username?.includes(' ') ? user.username.split(' ')[0] : user.username) || 'Not set'}
                                 </p>
                               </div>
                             </div>
                             {/* Last Name */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600/30">
-                                <UserCircle className="w-4 h-4 text-indigo-400" />
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-gray-800">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50">
+                                <UserCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-400">Last Name</p>
-                                <p className="text-sm font-medium text-white">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Last Name</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
                                   {user.last_name || (user.username?.includes(' ') ? user.username.split(' ').slice(1).join(' ') : '—')}
                                 </p>
                               </div>
                             </div>
                             {/* Email */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
-                              <Mail className="w-5 h-5 text-purple-400" />
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-gray-800">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-purple-100 dark:bg-purple-900/50">
+                                <Mail className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                              </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs text-gray-400">Email Address</p>
-                                <p className="text-sm font-medium text-white truncate">{user.email}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Email Address</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
                               </div>
                             </div>
                             {/* Member Since */}
-                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-[#1f2937]">
-                              <Calendar className="w-5 h-5 text-green-400" />
+                            <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-gray-800">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-green-100 dark:bg-green-900/50">
+                                <Calendar className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              </div>
                               <div>
-                                <p className="text-xs text-gray-400">Member Since</p>
-                                <p className="text-sm font-medium text-white">{getMemberSince()}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Member Since</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">{getMemberSince()}</p>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Subscription Status */}
-                        <div className={`p-3 rounded-lg border border-indigo-800 ${isPro ? 'bg-linear-to-r from-indigo-600/30 to-purple-600/30' : 'bg-[#1f2937]'}`}>
+                        <div className={`p-3 rounded-lg border border-indigo-200 dark:border-indigo-800 ${isPro ? 'bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30' : 'bg-gray-50 dark:bg-gray-800'}`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Crown className="w-4 h-4 text-indigo-400" />
-                              <span className="text-sm font-medium text-indigo-400">
+                              <Crown className={`w-4 h-4 ${isPro ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`} />
+                              <span className={`text-sm font-medium ${isPro ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}`}>
                                 {isPro ? 'Pro Member' : 'Free Plan'}
                               </span>
                             </div>
                             {!isPro && (
                               <button
                                 onClick={() => { setProfileOpen(false); openUpgradeModal(); }}
-                                className="text-xs font-medium text-indigo-400 hover:text-indigo-300"
+                                className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
                               >
                                 Upgrade →
                               </button>
@@ -725,7 +729,7 @@ const Header = ({
                   <div className="px-3 pb-2">
                     <button
                       onClick={() => { setProfileOpen(false); openLunaChat(); }}
-                      className="w-full py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-300 hover:text-white bg-[#1f2937]"
+                      className="w-full py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <MessageCircle className="w-4 h-4" />
                       Support
